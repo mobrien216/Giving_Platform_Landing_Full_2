@@ -1,0 +1,10 @@
+# Keep LF line endings in the repository and on checkout, on every OS.
+# scripts/build-pages.js rejects CRLF, and --check compares bytes exactly.
+* text=auto eol=lf
+
+# Binary assets: never touch line endings
+*.woff2 binary
+*.woff  binary
+*.png   binary
+*.jpg   binary
+*.ico   binary

@@ -1,0 +1,18 @@
+# OS clutter
+Thumbs.db
+desktop.ini
+.DS_Store
+
+# Editors and local tooling
+.vscode/
+.idea/
+.claude/
+*.swp
+
+# Node (no dependencies today, but just in case)
+node_modules/
+npm-debug.log*
+
+# Scratch files
+*.tmp
+*.bak

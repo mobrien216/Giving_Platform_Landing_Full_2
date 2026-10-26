@@ -1,0 +1,11 @@
+/* tcf-v3-tools.css — Component Library 3.0 bridge for the Impact Map and Impact Calculator tools */
+:root{
+  --radius:4px; --radius-sm:4px; --radius-md:4px; --radius-pill:4px;
+  --cream:var(--white); --green-2:var(--green); --midgreen:var(--mid); --gray:var(--mid); --tan:var(--gray3); --ink:var(--green);
+  --tcf-green-dark:var(--green); --tcf-green-light:var(--mid); --tcf-orange:var(--orange); --tcf-aqua:var(--aqua); --tcf-blue:var(--blue); --tcf-pink:var(--pink);
+  --ink-soft:var(--mid); --paper:var(--white); --paper-tint:var(--gray2); --line:var(--gray3);
+  --font-display:var(--head); --font-sub:var(--head); --font-body:var(--body);
+  --shadow:var(--shadow-o); --shadow-sm:none; --shadow-md:var(--shadow-o);
+}
+body{font-family:var(--body);color:var(--green);}
+h1,h2,h3,h4{font-family:var(--head);font-weight:700;}

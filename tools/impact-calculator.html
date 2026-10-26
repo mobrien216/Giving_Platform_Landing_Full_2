@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Impact Calc — The Cleveland Foundation</title>
+
+<link rel="preload" href="../assets/fonts/paralucent-bold.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="../assets/fonts/source-sans-pro-regular.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="../assets/css/tcf-v3.css">
+<link rel="stylesheet" href="../assets/tools/calc/calc.css">
+<link rel="stylesheet" href="../assets/css/tcf-v3-tools.css">
+<link rel="icon" href="../assets/img/favicon.svg">
+</head>
+<body>
+
+<header class="app-bar">
+  <div class="wrap">
+    <h1>Impact Calc</h1>
+    <p>See how your giving grows over time — because dollars that grow mean more people in Cleveland benefit, now and for generations to come.</p>
+  </div>
+</header>
+
+<main class="calc-wrap">
+  <div class="wrap">
+    <div class="calc-grid">
+
+      <!-- INPUT PANEL (left column) -->
+      <div class="left-col">
+        <section class="panel panel-blue">
+          <p class="eyebrow">Your gift</p>
+          <h2 class="panel-title">Build your scenario</h2>
+
+          <div class="field">
+            <div class="toggle" role="group" aria-label="Gift frequency">
+              <button type="button" id="btnMonthly" class="active" aria-pressed="true">Monthly</button>
+              <button type="button" id="btnOnetime" aria-pressed="false">One-time</button>
+            </div>
+          </div>
+
+          <div class="field">
+            <div class="field-label"><span>Gift amount</span></div>
+            <div class="amount-input">
+              <span class="prefix">$</span>
+              <input type="number" id="giftAmount" value="50" min="1" step="1" aria-label="Gift amount in dollars">
+              <span class="suffix" id="amountSuffix">/ month</span>
+            </div>
+            <div class="preset-row">
+              <button type="button" class="preset-btn" data-amount="25">$25</button>
+              <button type="button" class="preset-btn active" data-amount="50">$50</button>
+              <button type="button" class="preset-btn" data-amount="100">$100</button>
+              <button type="button" class="preset-btn" data-amount="250">$250</button>
+              <button type="button" class="preset-btn" data-amount="500">$500</button>
+            </div>
+          </div>
+
+          <div class="field">
+            <div class="field-label"><span>Time horizon</span><span class="value text-blue" id="yearsValue">5 years</span></div>
+            <input type="range" id="years" aria-label="Time horizon in years" min="1" max="30" step="1" value="5">
+            <div class="range-ticks" id="yearTicks"></div>
+          </div>
+
+          <div class="field">
+            <div class="field-label"><span>Expected annual return</span><span class="value text-blue" id="returnValue">8.5%</span></div>
+            <input type="range" id="returnRate" aria-label="Expected annual return" min="7" max="12" step="0.5" value="8.5">
+            <div class="range-endpoints"><span>7%</span><span>12%</span></div>
+            <p class="field-caption">Compounded monthly</p>
+          </div>
+
+          <div class="field hidden" id="collectiveField">
+            <div class="field-label"><span class="text-aqua">Giving alongside others?</span></div>
+            <div class="peers-input">
+              <input type="number" id="peers" aria-label="Number of people giving" value="80" min="1" step="1">
+              <span class="suffix" style="color:var(--ink-soft); font-size:13px;">people, including you</span>
+            </div>
+            <p class="field-caption">See how much more this grows into when others join you.</p>
+          </div>
+        </section>
+
+        <button type="button" class="perpetuity-cta" id="perpetuityToggle" aria-expanded="false" aria-controls="perpetuitySection">
+          <span>Make this an endowment</span>
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+        </button>
+      </div>
+
+      <!-- RESULTS (right column) -->
+      <section class="results-col">
+        <div class="result-cards solo">
+          <div class="result-card light" id="individualCard">
+            <p class="eyebrow">Your impact</p>
+            <h3 id="individualTitle">If you give for 5 years</h3>
+            <div class="stat-row">
+              <p class="stat-label">You'll contribute</p>
+              <p class="stat-value" id="individualContributed">$3,000</p>
+            </div>
+            <div class="stat-row">
+              <p class="stat-label">Grows to</p>
+              <p class="stat-value grow" id="individualFV">$3,722</p>
+            </div>
+            <p class="field-caption">That growth isn't just a bigger number — it's more people in Cleveland who get help, today and for years after.</p>
+          </div>
+
+          <div class="result-card dark hidden" id="collectiveCard">
+            <p class="eyebrow on-dark">Collective impact</p>
+            <h3 id="collectiveTitle">With 80 people giving like you</h3>
+            <div class="stat-row">
+              <p class="stat-label">Contributed together</p>
+              <p class="stat-value" id="collectiveContributed">$240,000</p>
+            </div>
+            <div class="stat-row">
+              <p class="stat-label">Grows to</p>
+              <p class="stat-value grow" id="collectiveFV">$297,770</p>
+            </div>
+          </div>
+        </div>
+
+        <button type="button" class="perpetuity-cta" id="collectiveToggle" aria-expanded="false" aria-controls="collectiveField">
+          <span>Add others giving alongside you</span>
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+        </button>
+
+        <div class="growth-chart-panel">
+          <div class="growth-chart-head">
+            <h3>Your growth over time</h3>
+            <div class="chart-legend">
+              <span class="item"><span class="swatch" style="background:var(--tcf-green-dark)"></span>You contributed</span>
+              <span class="item"><span class="swatch" style="background:var(--tcf-green-light)"></span>Investment growth</span>
+            </div>
+          </div>
+          <p class="field-caption">The longer your gift has to grow, the more it can do — that growth is what turns today's gift into impact for Cleveland now, and for generations still to come.</p>
+          <div class="chart-wrap" id="growthChartWrap"></div>
+        </div>
+      </section>
+
+    </div>
+  </div>
+</main>
+
+<!-- HIDDEN / BELOW-THE-FOLD: perpetuity feature -->
+<section class="perpetuity-section hidden" id="perpetuitySection">
+  <div class="perpetuity-panel">
+    <div class="perpetuity-banner">
+      <div>
+        <span class="forever-pill">● Forever</span>
+        <h2>Fund this into perpetuity</h2>
+        <p>If this gift became an endowed fund granting a share of its value to the community every year, it would keep growing and keep giving — helping more Clevelanders now, and generations of Clevelanders after. Here's how the dollars could work over 30 years.</p>
+      </div>
+    </div>
+    <div class="perpetuity-body">
+      <div class="payout-field">
+        <div class="field-label"><span>Annual payout rate</span><span class="value text-pink" id="payoutValue">5.0%</span></div>
+        <input type="range" id="payoutRate" aria-label="Annual payout rate" min="3" max="7" step="0.5" value="5">
+        <div class="range-endpoints"><span>3% (more growth)</span><span>7% (more grants)</span></div>
+        <p class="field-caption">Share of the fund granted out to the community each year</p>
+      </div>
+
+      <div class="chart-legend">
+        <span class="item"><span class="swatch" style="background:var(--tcf-green-dark)"></span>Fund balance, still growing</span>
+        <span class="item"><span class="swatch" style="background:var(--tcf-aqua)"></span>Grants given to the community</span>
+        <span class="item"><span class="swatch line"></span>Total contributed</span>
+      </div>
+      <div class="chart-wrap" id="chartWrap"></div>
+
+      <div class="impact-total">
+        <div class="headline">
+          <p class="lbl">Total impact after 30 years</p>
+          <p class="num" id="totalImpact30">$1,162,911</p>
+        </div>
+        <div class="breakdown" id="impactBreakdown">
+          <strong id="grantsBreak" class="text-aqua">$573,792</strong> granted out to the community, plus <strong id="balanceBreak" class="text-green">$589,119</strong> still working in the fund<span id="peersBreakWrap"> — based on <span id="peersBreak">80</span> people giving</span>.
+        </div>
+      </div>
+
+      <p class="disclaimer">This is a planning estimate built on the assumptions above — it isn't a guarantee, official projection, or financial advice. Actual investment returns and payout decisions will vary. To talk through setting up an endowed fund, connect with the Cleveland Foundation's gift planning team.</p>
+    </div>
+  </div>
+</section>
+
+<script src="../assets/tools/calc/calc.js"></script>
+
+</body>
+</html>

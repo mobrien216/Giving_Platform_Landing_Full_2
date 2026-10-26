@@ -1,0 +1,69 @@
+/* ============================================================
+   tcf-v3-giving.css — Component Library 3.0 bridge for the Community and Advisor apps
+   Load AFTER giving.css (and advisor.css). Migrates the --tcf-*, --surface and --font-head
+   names to the standard tokens (style guide p.103) and restyles shared components.
+   ============================================================ */
+:root{
+  /* --tcf-* set */
+  --tcf-primary:var(--green); --tcf-secondary:var(--white); --tcf-orange:var(--orange); --tcf-mid-green:var(--mid);
+  --tcf-red:var(--red); --tcf-aqua:var(--aqua); --tcf-blue:var(--blue); --tcf-pink:var(--pink);
+  --tcf-gray:var(--gray2); --tcf-light-orange:var(--gray3);
+  --bg:var(--white); --surface:var(--white); --surface-2:var(--gray2);
+  --ink-soft:var(--mid); --ink-faint:var(--mid); --border:var(--gray3); --border-strong:var(--gray3);
+  --font-head:var(--head); --font-body:var(--body);
+  --radius-sm:4px; --radius:4px; --radius-lg:4px;
+  --shadow-sm:none; --shadow:none; --shadow-lg:var(--shadow-o);
+  /* portal-style set */
+  --forest:var(--green); --pine:var(--green); --moss:var(--mid);
+  --ember:var(--orange); --ember-deep:var(--red); --olive:var(--mid); --magenta:var(--pink); --magenta-lt:var(--pink);
+  --parchment:var(--white); --paper:var(--white); --well:var(--gray2);
+  --ink:var(--green); --ink-2:var(--mid); --ink-3:var(--mid); --line:var(--gray3); --line-2:var(--gray3);
+  --p-well:var(--red); --p-org:var(--mid); --p-new:var(--aqua); --p-pros:var(--orange); --p-neigh:var(--pink); --p-region:var(--blue);
+  --f-display:var(--head); --f-ui:var(--body); --f-ledger:var(--body);
+  --r-sm:4px; --r:4px; --r-lg:4px; --sh-1:none; --sh-2:none; --sh-3:var(--shadow-o);
+}
+body{font-family:var(--body);color:var(--green);background:var(--white);}
+h1,h2,h3,h4{font-family:var(--head);font-weight:700;}
+.gate-guilloche{display:none!important;}
+
+/* actions: Green primary, White primary on Green, no Orange fills behind text */
+.btn{border-radius:var(--r);font-family:var(--body);font-weight:700;letter-spacing:0;box-shadow:none;}
+.btn-accent,.btn-primary,.tb-cta-give,#view-giftplanner .gp-btn-primary{background:var(--green)!important;border-color:var(--green)!important;color:var(--white)!important;box-shadow:none!important;}
+.btn-accent:hover,.btn-primary:hover,.tb-cta-give:hover,#view-giftplanner .gp-btn-primary:hover{background:var(--mid)!important;border-color:var(--mid)!important;}
+:is(.hero,.panel-dark,.pcard-hero,.tile-balance,.fund-card,.intro) .btn-accent,
+body.hero-view:not(.scrolled) .tb-cta-give{background:var(--white)!important;border-color:var(--white)!important;color:var(--green)!important;}
+.btn-ghost,.btn-quiet{background:transparent;border:1.5px solid var(--green);color:var(--green);}
+:is(.hero,.panel-dark,.pcard-hero) :is(.btn-ghost,.btn-onhero),.btn-onhero{background:transparent!important;border:1.5px solid var(--white)!important;color:var(--white)!important;}
+.tb-cta-grow{border-radius:var(--r);}
+.chip{border-radius:var(--r);font-family:var(--body);font-weight:600;letter-spacing:0;text-transform:none;}
+
+/* counts and new-item flags: Red badge, White number */
+.dr-item .count,.icon-btn .dot,.tb-btn .dot{background:var(--red);color:var(--white);}
+.garden-new-tag{background:var(--green);color:var(--white);}
+
+/* marks and tiles that used Orange behind text */
+.topbar-brand .logo,.drawer-brand .logo,.nf-composer .nf-comp-icon,.step-item.active .step-circle{background:var(--green);color:var(--white);}
+.drawer-user .avatar,.dr-user .avatar,.row .org-mark,.org-mark.alt-2{background:var(--mid);color:var(--white);}
+.tile-gift{background:var(--green);color:var(--white);}
+.pipeline-step.entered{background:var(--gray2);color:var(--green);}
+
+/* small Orange or Aqua text on light grounds → Mid-Green labels; on Green → White */
+.eyebrow,.pcard-hero .eyebrow,.badge-entered,.story-row .tag,.step-item.active .step-label,.modal-head .kind,
+.badge-card .badge-desc,.gm-story-box .gm-label,.ipin-integration,.panel-story .ps-kicker,
+#view-estate .ec-gtag,#view-giftplanner .app-header .gp-eyebrow,#view-giftplanner .headline-card .card-eyebrow{color:var(--mid)!important;}
+.hw-event-year,#view-giftplanner .line-item.total .li-value{color:var(--green)!important;}
+.nf-post-badge.news{color:var(--green);}
+.nf-post-actions button.liked{color:var(--red);}
+:is(.hero,.tile-balance,.fund-card) :is(.h-delta,.tile-delta,.delta),.panel-dark .p-count,.tk-item .amt{color:var(--white)!important;}
+
+/* welcome animation (Giving Portal animatic v5): plays in a frame, lifts when it signals it's done */
+.intro{background:var(--green);}
+.intro.play{animation:introLift .55s cubic-bezier(.65,0,.3,1) 9s forwards;}      /* fallback if the frame never reports back */
+.intro-frame{position:absolute;inset:0;width:100%;height:100%;border:0;display:block;background:var(--green);}
+.intro-skip{z-index:10;font-family:var(--body);font-size:12px;font-weight:700;letter-spacing:.08em;color:var(--white);
+  background:var(--green);border:1.5px solid rgba(255,255,255,.6);border-radius:var(--r);padding:10px 14px;min-height:40px;}
+.intro-skip:hover{background:var(--mid);color:var(--white);}
+
+/* icon tiles (G2): on an Orange or Aqua tile the icon is Green; nothing White sits on Orange */
+.panel .t-icon svg,.tile .t-icon svg{stroke:currentColor;}
+.nf-composer .nf-comp-icon{background:var(--green)!important;color:var(--white);}

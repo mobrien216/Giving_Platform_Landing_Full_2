@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Cleveland Foundation — 2025 Community Impact Map</title>
+<link rel="preload" href="../assets/fonts/paralucent-bold.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="../assets/fonts/source-sans-pro-regular.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="../assets/css/tcf-v3.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet.markercluster/1.5.3/MarkerCluster.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet.markercluster/1.5.3/MarkerCluster.Default.css">
+<link rel="stylesheet" href="../assets/tools/map/map.css">
+<link rel="stylesheet" href="../assets/css/tcf-v3-tools.css">
+<link rel="icon" href="../assets/img/favicon.svg">
+</head>
+<body>
+
+<div class="hero">
+  <div class="dotfield" id="dotfield"></div>
+  <div class="wrap">
+    <div class="brandmark">
+      <svg width="20" height="20" viewBox="0 0 20 20"><circle cx="10" cy="10" r="9" fill="none" stroke="#fff" stroke-width="1.6"/><path d="M10 3 v14 M3 10 h14" stroke="#fff" stroke-width="1.6"/></svg>
+      <span class="word">CLEVELAND <b>FOUNDATION</b></span>
+    </div>
+    <div class="eyebrow" style="color:#8FD9BE;">2025 Community Impact Map</div>
+    <h1>Every pin is a place where Cleveland got a little stronger this year.</h1>
+    <p class="lede">Explore the grants The Cleveland Foundation made across Northeast Ohio in 2025. Filter by what you care about or where you live — then help fund more of it.</p>
+    <div class="stat-row">
+      <div class="stat"><div class="num">244</div><div class="lab">Grants on the map</div></div>
+      <div class="stat"><div class="num">65</div><div class="lab">Neighborhoods reached</div></div>
+      <div class="stat"><div class="num">8</div><div class="lab">Areas of focus</div></div>
+    </div>
+  </div>
+</div>
+
+<div class="app-shell">
+
+  <div class="sidebar-backdrop" id="sidebarBackdrop"></div>
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-head">
+      <h2>Filter the map</h2>
+      <button class="sidebar-close" id="sidebarClose" aria-label="Close filters">×</button>
+    </div>
+
+    <div class="filter-section">
+      <div class="filter-label">What do you care about? <span style="text-transform:none; font-weight:600; opacity:0.7;">(pick any number)</span></div>
+      <div class="pillar-list" id="pillarList"></div>
+    </div>
+
+    <div class="filter-section">
+      <div class="filter-label">Where do you live?</div>
+      <select id="neighSelect"></select>
+      <button class="locbtn" id="locBtn">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v4M12 18v4M2 12h4M18 12h4"/><circle cx="12" cy="12" r="5"/></svg>
+        Use my location
+      </button>
+      <button class="clearbtn" id="clearBtn">Clear all filters</button>
+    </div>
+
+    <div class="legend-mini" id="legendMini"></div>
+  </aside>
+
+  <div class="content">
+    <button class="sidebar-toggle" id="sidebarToggle">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><line x1="4" y1="6" x2="20" y2="6"/><line x1="4" y1="12" x2="20" y2="12"/><line x1="4" y1="18" x2="20" y2="18"/></svg>
+      Filters
+    </button>
+    <div class="toolbar">
+      <div></div>
+      <div class="resultcount" id="resultCount"></div>
+    </div>
+
+    <main class="wrap">
+      <div class="grid">
+        <div class="panel map-panel">
+          <div class="map-head"><h2>The map</h2></div>
+          <div id="leafletMap"></div>
+          <div class="geostatus" id="geoStatus"><span class="spinner"></span><span id="geoStatusText">Fine-tuning pin locations…</span></div>
+        </div>
+
+        <div class="panel list-panel">
+          <div class="list-head"><h2>The grants</h2></div>
+          <div class="cardlist" id="cardlist"></div>
+        </div>
+      </div>
+
+      <div class="regional">
+        <h3>Also creating impact across Ohio (13 statewide &amp; regional partners)</h3>
+        <div class="regional-scroll" id="regionalScroll"></div>
+      </div>
+    </main>
+
+    <footer>
+      <div class="wrap">
+        <p class="fineprint">Pins are placed using each grantee's address; a small number may be approximate when an exact match isn't available. Gifts made from this page support The Cleveland Foundation's grantmaking in these focus areas — they are not donations to the individual organizations shown.</p>
+        <button class="stafflink" id="staffLink">View community interest so far →</button>
+      </div>
+    </footer>
+  </div>
+</div>
+
+<div class="backdrop" id="backdrop"></div>
+<div class="drawer" id="drawer" role="dialog" aria-modal="true" aria-label="Grant details"></div>
+
+<div class="prefbar" id="prefbar">
+  <div class="txt" id="prefText"></div>
+  <div class="actions">
+    <button class="go" id="prefGive">Give</button>
+    <button class="x" id="prefClose" aria-label="Dismiss">×</button>
+  </div>
+</div>
+
+<div class="modal-backdrop" id="staffModal">
+  <div class="modal">
+    <h3>Community interest so far</h3>
+    <div class="sub">An anonymous tally of the focus areas explored most. Prototype: counted in this browser only. A site-wide tally needs an analytics tool. No personal data is collected.</div>
+    <div id="staffBars"></div>
+    <button class="modal-close" id="staffClose">Close</button>
+  </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet.markercluster/1.5.3/leaflet.markercluster.js"></script>
+<script src="../assets/data/grants-2025.js"></script>
+<script src="../assets/tools/map/map.js"></script>
+</body>
+</html>

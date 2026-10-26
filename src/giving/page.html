@@ -1,0 +1,1583 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0,viewport-fit=cover"/>
+<meta name="theme-color" content="#164430"/>
+<meta name="apple-mobile-web-app-capable" content="yes"/>
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
+<title>{{title}}</title>
+<link rel="preload" href="../assets/fonts/paralucent-bold.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="../assets/fonts/source-sans-pro-regular.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="../assets/css/tcf-v3.css">
+<!-- Impact Map dependencies (Leaflet) -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet.markercluster/1.5.3/MarkerCluster.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet.markercluster/1.5.3/MarkerCluster.Default.css">
+<link rel="stylesheet" href="../assets/giving/giving.css">
+<!-- @slot head -->
+<link rel="stylesheet" href="../assets/css/tcf-v3-giving.css">
+<link rel="icon" href="../assets/img/favicon.svg">
+</head>
+<body class="hero-view">
+
+<!-- ============ OPENING ANIMATIC ============ -->
+<div class="intro" id="intro" aria-label="Welcome animation">
+  <button class="intro-skip" onclick="skipIntro()">Skip intro</button>
+  <iframe class="intro-frame" src="../assets/intro/welcome.html" title="Cleveland Foundation welcome animation" tabindex="-1" aria-hidden="true"></iframe>
+</div>
+
+<!-- ============ TOP BAR ============ -->
+<header class="topbar">
+  <button class="tb-btn" onclick="toggleDrawer()" aria-label="Menu">
+    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M4 7h16M4 12h16M4 17h16"/></svg>
+  </button>
+  <div class="tb-brand">
+    <div class="tb-mark">cf</div>
+    <div class="tb-word">
+      <div class="l1">Cleveland Foundation</div>
+      <div class="l2" id="topbarSub">Giving Portal</div>
+    </div>
+  </div>
+
+  <!-- standing calls to action -->
+  <div class="tb-ctas">
+    <button class="tb-cta tb-cta-grow" onclick="navigate('garden',false)" aria-label="Grow Your City Together">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22V12"/><path d="M12 12C12 7 8 6 5 6c0 4 2 7 7 7z"/><path d="M12 12c0-5 4-6 7-6 0 4-2 7-7 7z"/></svg>
+      <span class="cta-full">Grow Your City Together</span><span class="cta-short">Grow</span>
+      <span class="garden-mini-dots" id="gardenMiniDots" aria-hidden="true"></span>
+      <span class="sr-only" id="gardenModuleSub">Collect Land Florals as you show up for the city.</span>
+    </button>
+    <button class="tb-cta tb-cta-give" onclick="navigate('contributions',false)" aria-label="Give Today">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 12v10H4V12"/><path d="M22 7H2v5h20V7z"/><path d="M12 22V7"/></svg>
+      <span class="cta-full">Give Today</span><span class="cta-short">Give</span>
+    </button>
+  </div>
+</header>
+
+<!-- ============ DRAWER ============ -->
+<div class="scrim" id="drawerBackdrop" onclick="toggleDrawer()"></div>
+<aside class="drawer" id="drawer" aria-label="Main navigation">
+  <div class="dr-head">
+    <div class="dr-brand">
+      <div class="mark">cf</div>
+      <div>
+        <div class="l1">The Cleveland Foundation</div>
+        <div class="l2">Giving Portal</div>
+      </div>
+    </div>
+    <div class="dr-user">
+      <div class="avatar" id="drawerAvatar">JS</div>
+      <div>
+        <div class="name" id="drawerName">Jamie Sullivan</div>
+        <div class="role" id="drawerRole">Registered Member</div>
+      </div>
+    </div>
+  </div>
+  <nav class="dr-nav">
+    <div class="dr-label">Explore</div>
+    <button class="dr-item active" data-view="home" onclick="navigate('home')"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9,22 9,12 15,12 15,22"/></svg>Home</button>
+    <button class="dr-item" data-view="newsfeed" onclick="navigate('newsfeed')"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 11a9 9 0 019 9M4 4a16 16 0 0116 16"/><circle cx="5" cy="19" r="1.5" fill="currentColor" stroke="none"/></svg>News Feed</button>
+    <button class="dr-item" data-view="legends" onclick="navigate('legends')"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2l2.9 6.3L21 9l-4.9 4.4L17.4 20 12 16.7 6.6 20l1.3-6.6L3 9l6.1-.7z"/></svg>Local Legends</button>
+    <button class="dr-item" data-view="history" onclick="navigate('history')"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="17" rx="2"/><path d="M3 9h18"/><path d="M8 2v4M16 2v4"/></svg>Cleveland History Quiz</button>
+<!-- @slot drawer-tool-1 -->
+    <button class="dr-item" data-view="impact" onclick="navigate('impact')"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 21s-7-4.5-7-10a7 7 0 0114 0c0 5.5-7 10-7 10z"/><circle cx="12" cy="11" r="2"/></svg>Stories &amp; Impact</button>
+<!-- @slot drawer-tool-2 -->
+    <button class="dr-item" data-view="impactmap" onclick="navigate('impactmap')"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 20l-6 3V7l6-3m0 16l6 3m-6-3V4m6 16l6-3V4l-6 3m0 13V7m0 0L9 4"/></svg>Impact Map</button>
+<!-- @slot drawer-tool-3 -->
+    <button class="dr-item" data-view="garden" onclick="navigate('garden')"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22V12"/><path d="M12 12C12 7 8 6 5 6c0 4 2 7 7 7z"/><path d="M12 12c0-5 4-6 7-6 0 4-2 7-7 7z"/></svg>Your Cleveland Garden</button>
+
+    <div class="dr-label" id="drawerJourneyLabel">Your Journey</div>
+    <button class="dr-item" data-view="openfund" onclick="navigate('openfund')" id="drawerOpenDAF"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg>Open a DAF</button>
+    <button class="dr-item" data-view="contributions" onclick="navigate('contributions')"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12h4l3-8 4 16 3-8h4"/></svg>Give</button>
+    <button class="dr-item" data-view="givinghistory" onclick="navigate('givinghistory')"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 3v18h18"/><path d="M7 14l4-4 3 3 5-6"/></svg>Your Giving History</button>
+    <button class="dr-item" id="drawerLegacy" onclick="showLegacyModal()"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>Plan Your Legacy &amp; Advisor</button>
+
+    <div class="dr-label" id="drawerDonorLabel" style="display:none;">My Fund</div>
+    <button class="dr-item" data-view="funds" onclick="navigate('funds')" id="drawerFunds" style="display:none;"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M9 9.5h4a2 2 0 010 4H10a2 2 0 000 4h5"/></svg>My Fund</button>
+    <button class="dr-item" data-view="grants" onclick="navigate('grants')" id="drawerGrants" style="display:none;"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg>Request a Grant</button>
+    <button class="dr-item" data-view="contributions" onclick="navigate('contributions')" id="drawerContrib" style="display:none;"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12h4l3-8 4 16 3-8h4"/></svg>Make a Gift</button>
+    <button class="dr-item" data-view="performance" onclick="navigate('performance')" id="drawerPerf" style="display:none;"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 17l6-6 4 4 8-8"/></svg>Performance</button>
+
+    <div class="dr-label">Account</div>
+    <button class="dr-item" onclick="closeDrawer();openShareModal();"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.6" y1="10.6" x2="15.4" y2="6.4"/><line x1="8.6" y1="13.4" x2="15.4" y2="17.6"/></svg>Invite a Friend</button>
+    <button class="dr-item" data-view="settings" onclick="navigate('settings')"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 00.3 1.8l.1.1a2 2 0 11-2.8 2.8l-.1-.1a1.7 1.7 0 00-1.8-.3 1.7 1.7 0 00-1 1.5V21a2 2 0 11-4 0v-.1a1.7 1.7 0 00-1.1-1.5 1.7 1.7 0 00-1.8.3l-.1.1a2 2 0 11-2.8-2.8l.1-.1a1.7 1.7 0 00.3-1.8 1.7 1.7 0 00-1.5-1H3a2 2 0 110-4h.1a1.7 1.7 0 001.5-1.1"/></svg>Account Settings</button>
+  <button class="dr-item" onclick="location.href='../'"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 18l-6-6 6-6"/></svg>Cleveland Foundation home</button>
+  </nav>
+  <div class="dr-foot">
+    <a class="signout" href="../">Sign out</a>
+    <span class="ipin ipin-setup" data-pin="idp">IdP Session</span>
+  </div>
+</aside>
+
+<main>
+
+<!-- =================== HOME =================== -->
+<section class="view active" id="view-home">
+
+  <!-- PROSPECT hero -->
+  <div class="hero" id="homeProspectHead">
+    <div class="h-inner">
+      <div class="h-copy">
+        <div class="h-eyebrow">Welcome, Jamie</div>
+        <h1>Let's Transform the City Together.</h1>
+        <p class="h-lede">When you give to the Cleveland Foundation, your gift joins the generosity of your neighbors, grows over time, and helps strengthen our city today and for generations to come.</p>
+        <div class="h-actions">
+          <button class="btn btn-accent" onclick="navigate('contributions',false)">Give today</button>
+          <button class="btn btn-onhero" onclick="navigate('garden',false)">Grow your city together</button>
+        </div>
+        <div class="h-tag">Every gift counts · It takes all of us</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- DONOR hero (revealed once a fund is active) -->
+  <div class="hero" id="homeDonorHead" style="display:none;">
+    <div class="h-inner">
+      <div class="h-copy">
+        <div class="h-eyebrow">Welcome back, Jamie</div>
+        <div class="h-fundname" id="homeDonorFundName">Sullivan Family Fund</div>
+        <div class="h-balance"><sup>$</sup><span class="num" id="homeDonorBalance">10,000</span></div>
+        <div class="h-delta"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 19V5M5 12l7-7 7 7"/></svg>+0.0% · Just opened</div>
+        <div class="h-actions">
+          <button class="btn btn-accent btn-sm" onclick="navigate('grants',false)">Recommend a grant</button>
+          <button class="btn btn-onhero btn-sm" onclick="navigate('contributions',false)">Add money</button>
+          <button class="btn btn-onhero btn-sm" onclick="navigate('funds',false)">Fund details</button>
+        </div>
+        <div class="h-meta"><span id="homeDonorMeta">INDEX POOL · PRIMARY ADVISOR</span><span class="ipin ipin-onhero" data-pin="ren-iphi-balance">Ren iPhi</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- LIVE 2025 GRANTS TICKER -->
+  <div class="ticker" aria-hidden="true">
+    <div class="tk-badge"><span class="live"></span>2025 grants</div>
+    <div class="tk-scroll"><div class="tk-track" id="tkTrack"></div></div>
+  </div>
+
+  <!-- EXPLORE — six connected squares -->
+  <div class="pgrid pgrid-explore" id="prospectTiles">
+    <button class="panel" onclick="navigate('legends',false)">
+      <div class="t-icon" style="background:var(--orange);color:var(--green);"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><path d="M12 2l2.9 6.3L21 9l-4.9 4.4L17.4 20 12 16.7 6.6 20l1.3-6.6L3 9l6.1-.7z"/></svg></div>
+      <svg class="p-arrow" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M7 17L17 7M8 7h9v9"/></svg>
+      <div class="p-label">Local Legends</div>
+      <div class="p-sub">The people who shaped this city, one story a week.</div>
+      <div class="p-count">New every Monday</div>
+    </button>
+
+    <button class="panel" onclick="navigate('history',false)">
+      <div class="t-icon" style="background:var(--orange);color:var(--green);"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><rect x="3" y="4" width="18" height="17" rx="2"/><path d="M3 9h18"/><path d="M8 2v4M16 2v4"/></svg></div>
+      <svg class="p-arrow" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M7 17L17 7M8 7h9v9"/></svg>
+      <div class="p-label">Cleveland History Quiz</div>
+      <div class="p-sub">Test your knowledge of when major events happened across our city.</div>
+      <div class="p-count">A new question every week</div>
+    </button>
+
+<!-- @slot home-panel-1 -->
+
+<!-- @slot home-panel-2 -->
+
+    <button class="panel" onclick="navigate('impactmap',false)">
+      <div class="t-icon" style="background:var(--gray2);color:var(--green);"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#C0629A" stroke-width="2"><path d="M9 20l-6 3V7l6-3m0 16l6 3m-6-3V4m6 16l6-3V4l-6 3m0 13V7m0 0L9 4"/></svg></div>
+      <svg class="p-arrow" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M7 17L17 7M8 7h9v9"/></svg>
+      <div class="p-label">Impact Map</div>
+      <div class="p-sub">See how the issues you care about are resourced across the city.</div>
+      <div class="p-count">200+ pins</div>
+    </button>
+
+<!-- @slot home-panel-3 -->
+  </div>
+
+  <!-- DONOR tiles (revealed once a fund is active) -->
+  <div class="pgrid" id="donorTiles" style="display:none;">
+    <button class="panel panel-dark panel-wide" onclick="navigate('funds',false)">
+      <svg class="guilloche" viewBox="0 0 300 300" preserveAspectRatio="xMidYMid slice" aria-hidden="true"><g fill="none" stroke="#19B9A9" stroke-width=".6" opacity=".5"><circle cx="280" cy="300" r="70"/><circle cx="280" cy="300" r="110"/><circle cx="280" cy="300" r="150"/><circle cx="280" cy="300" r="190"/><circle cx="280" cy="300" r="230"/></g></svg>
+      <div class="t-icon" style="background:var(--gray2);color:var(--green);"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#19B9A9" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M9 9.5h4a2 2 0 010 4H10a2 2 0 000 4h5"/></svg></div>
+      <div class="pw-body">
+        <div class="p-label" id="donorBalanceLabel">Sullivan Family Fund</div>
+        <div class="p-amount num" id="donorBalanceAmt">$10,000</div>
+        <div class="p-count">▲ 0.0% · Just opened</div>
+      </div>
+      <svg class="p-arrow" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M7 17L17 7M8 7h9v9"/></svg>
+    </button>
+
+    <button class="panel" onclick="navigate('grants',false)">
+      <div class="t-icon" style="background:var(--green);color:var(--white);"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg></div>
+      <svg class="p-arrow" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M7 17L17 7M8 7h9v9"/></svg>
+      <div class="p-label">Request a Grant</div>
+      <div class="p-sub">Recommend giving from your fund.</div>
+      <div class="p-count">Days to delivery</div>
+    </button>
+
+    <button class="panel" onclick="navigate('contributions',false)">
+      <div class="t-icon" style="background:var(--orange);color:var(--green);"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><path d="M20 12v10H4V12"/><path d="M22 7H2v5h20V7z"/><path d="M12 22V7"/></svg></div>
+      <svg class="p-arrow" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M7 17L17 7M8 7h9v9"/></svg>
+      <div class="p-label">Add Funds</div>
+      <div class="p-sub">Contribute to your donor advised fund.</div>
+      <div class="p-count">Card · ACH · Securities</div>
+    </button>
+
+    <button class="panel" onclick="navigate('performance',false)">
+      <div class="t-icon" style="background:var(--blue);color:var(--white);"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><path d="M3 17l6-6 4 4 8-8"/></svg></div>
+      <svg class="p-arrow" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M7 17L17 7M8 7h9v9"/></svg>
+      <div class="p-label">Performance</div>
+      <div class="p-sub">How your fund is invested and how it's tracking.</div>
+      <div class="p-count">Index pool</div>
+    </button>
+
+    <button class="panel" onclick="navigate('givinghistory',false)">
+      <div class="t-icon" style="background:var(--green);color:var(--white);"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><path d="M3 3v18h18"/><path d="M7 14l4-4 3 3 5-6"/></svg></div>
+      <svg class="p-arrow" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M7 17L17 7M8 7h9v9"/></svg>
+      <div class="p-label">Giving History</div>
+      <div class="p-sub">Every gift and grant on your account.</div>
+      <div class="p-count">Receipts · Tax summary</div>
+    </button>
+  </div>
+
+  <!-- ============ NEWS FEED — its own featured row ============ -->
+  <div class="sect-rail">
+    <div class="sr-main"><div class="sr-kick">Stories &amp; impact</div><h2>From the field</h2></div>
+    <div class="sr-lead"></div>
+    <div class="sr-meta"><span class="new"></span>2 new this week</div>
+    <button class="sr-btn" onclick="navigate('newsfeed',false)" aria-label="Open the News Feed"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M7 17L17 7M8 7h9v9"/></svg></button>
+  </div>
+  <div class="pgrid feed-row">
+    <button class="panel panel-story" onclick="openFeedStory(101)">
+      <div class="ps-bg" style="background:var(--ember);"></div>
+      <span class="ps-spine" style="background:var(--p-pros);"></span>
+      <div class="ps-body">
+        <span class="ps-kicker">In the feed</span>
+        <div class="s-tag">Connect people to prosperity</div>
+        <div class="s-title">A summer job became a career on Euclid Avenue</div>
+      </div>
+    </button>
+
+    <button class="panel panel-story" onclick="openFeedStory(102)">
+      <div class="ps-bg" style="background:var(--moss);"></div>
+      <span class="ps-spine" style="background:var(--p-neigh);"></span>
+      <div class="ps-body">
+        <span class="ps-kicker">In the feed</span>
+        <div class="s-tag">Vibrant neighborhoods</div>
+        <div class="s-title">Hough's newest homeowners built more than houses</div>
+      </div>
+    </button>
+
+    <button class="panel panel-story" onclick="openFeedStory(103)">
+      <div class="ps-bg" style="background:var(--p-region);"></div>
+      <span class="ps-spine" style="background:var(--p-region);"></span>
+      <div class="ps-body">
+        <span class="ps-kicker">In the feed</span>
+        <div class="s-tag">Grow our region</div>
+        <div class="s-title">Fresh water, new jobs: the lakefront tech corridor</div>
+      </div>
+    </button>
+
+    <button class="panel panel-cta" onclick="navigate('newsfeed',false)">
+      <svg class="guilloche" viewBox="0 0 300 300" preserveAspectRatio="xMidYMid slice" aria-hidden="true"><g fill="none" stroke="#19B9A9" stroke-width=".6" opacity=".5"><circle cx="150" cy="330" r="70"/><circle cx="150" cy="330" r="110"/><circle cx="150" cy="330" r="150"/><circle cx="150" cy="330" r="190"/><circle cx="150" cy="330" r="230"/></g></svg>
+      <div class="p-label" style="position:relative;">Open the News Feed</div>
+      <div class="p-sub" style="position:relative;">Stories from the foundation and the Whys your neighbors are sharing.</div>
+      <div class="p-count" style="position:relative;">2 new this week</div>
+    </button>
+  </div>
+
+  <!-- Donor quick cards (post-activation) -->
+  <div id="donorQuickActions" style="display:none;">
+    <div class="sect-rail">
+      <div class="sr-main"><div class="sr-kick">Post-activation</div><h2>Your fund</h2></div>
+      <div class="sr-lead"></div>
+      <div class="sr-meta"><span class="live"></span>Live · Ren iPhi</div>
+      <button class="sr-btn" onclick="navigate('funds',false)" aria-label="Fund details"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M7 17L17 7M8 7h9v9"/></svg></button>
+    </div>
+    <div class="pgrid pgrid-auto">
+      <div class="panel" style="cursor:default;">
+        <div style="display:flex;align-items:center;justify-content:space-between;width:100%;margin-bottom:12px;"><h3>Recent grants</h3><button class="btn btn-quiet btn-sm" onclick="navigate('grants')">New grant</button></div>
+        <div id="homeGrantList" class="empty" style="width:100%;padding:22px 10px;">
+          <div class="e-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 5v14M5 12h14"/></svg></div>
+          <div>No grants yet. Your first recommendation<br/>can reach a nonprofit within days.</div>
+        </div>
+      </div>
+      <div class="panel" style="cursor:default;">
+        <div style="display:flex;align-items:center;justify-content:space-between;width:100%;margin-bottom:14px;"><h3>Your advisor</h3><span class="ipin ipin-integration" data-pin="salesforce-advisor">Salesforce</span></div>
+        <div style="display:flex;gap:14px;align-items:center;margin-bottom:14px;">
+          <div style="width:50px;height:50px;border-radius:50%;background:var(--moss);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:16px;flex-shrink:0;">JR</div>
+          <div><div style="font-weight:700;color:var(--forest);font-size:15px;">Jordan Reyes</div><div class="ledger" style="font-size:10.5px;color:var(--ink-3);margin-top:2px;">SR. PHILANTHROPIC ADVISOR · TCF</div></div>
+        </div>
+        <button class="btn btn-primary btn-sm" onclick="navigate('advisor')">Schedule a call</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============ MORE WAYS TO ENGAGE ============ -->
+  <div class="sect-rail">
+    <div class="sr-main"><div class="sr-kick">Take action</div><h2>More ways to engage</h2></div>
+    <div class="sr-lead"></div>
+    <div class="sr-meta">Five paths · One foundation</div>
+  </div>
+  <div class="pgrid">
+    <!-- primary conversion, full width -->
+    <button class="panel panel-wide" id="openDafModule" onclick="navigate('openfund')">
+      <svg class="guilloche" viewBox="0 0 300 300" preserveAspectRatio="xMidYMid slice" aria-hidden="true"><g fill="none" stroke="#19B9A9" stroke-width=".6" opacity=".45"><circle cx="280" cy="300" r="70"/><circle cx="280" cy="300" r="110"/><circle cx="280" cy="300" r="150"/><circle cx="280" cy="300" r="190"/><circle cx="280" cy="300" r="230"/></g></svg>
+      <div class="t-icon" style="background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.2);"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg></div>
+      <div class="pw-body">
+        <div class="p-label mt-label">Open a Donor Advised Fund</div>
+        <div class="p-sub mt-sub">Invest in your community with a fund in your family's name.</div>
+        <div class="p-count">From $10,000 · Deductible this year</div>
+      </div>
+      <svg class="p-arrow" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M7 17L17 7M8 7h9v9"/></svg>
+    </button>
+
+    <button class="panel" onclick="showLegacyModal()">
+      <div class="t-icon" style="background:var(--blue);color:var(--white);"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg></div>
+      <svg class="p-arrow" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M7 17L17 7M8 7h9v9"/></svg>
+      <div class="p-label">Plan Your Legacy</div>
+      <div class="p-sub">Learn more about estate gifts, life insurance, and IRA distributions with guidance from a TCF team member.</div>
+      <div class="p-count">Beyond your lifetime</div>
+    </button>
+
+    <button class="panel" onclick="openGardenBadges()">
+      <div class="t-icon" style="background:var(--mid);color:var(--white);"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><path d="M12 22V12"/><path d="M12 12C12 7 8 6 5 6c0 4 2 7 7 7z"/><path d="M12 12c0-5 4-6 7-6 0 4-2 7-7 7z"/></svg></div>
+      <svg class="p-arrow" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M7 17L17 7M8 7h9v9"/></svg>
+      <div class="p-label">Grow Your Garden</div>
+      <div class="p-sub">Collect all six Land Florals as you show up for the city.</div>
+      <div class="p-count">Land Florals Challenge</div>
+    </button>
+
+    <button class="panel" onclick="navigate('contributions')">
+      <div class="t-icon" style="background:var(--orange);color:var(--green);"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><path d="M20 12v10H4V12"/><path d="M22 7H2v5h20V7z"/><path d="M12 22V7"/></svg></div>
+      <svg class="p-arrow" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M7 17L17 7M8 7h9v9"/></svg>
+      <div class="p-label">Make a Gift</div>
+      <div class="p-sub">One-time or recurring, to any TCF fund.</div>
+      <div class="p-count">Card · ACH · Securities</div>
+    </button>
+
+    <button class="panel" onclick="window.open('https://www.smallchange.co/projects/walbrook-junction','_blank')">
+      <div class="t-icon" style="background:var(--green);color:var(--white);"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><path d="M3 21h18"/><path d="M5 21V7l5-4 5 4v14"/><path d="M9 9h1M9 13h1M9 17h1"/><path d="M15 21v-8h4v8"/></svg></div>
+      <svg class="p-arrow" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M7 17L17 7M8 7h9v9"/></svg>
+      <div class="p-label">Own Part of the Neighborhood</div>
+      <div class="p-sub">Become a micro-investor in real estate projects around Cleveland and build wealth for your family.</div>
+      <div class="p-count">Via Small Change ↗</div>
+    </button>
+  </div>
+
+  <div style="text-align:center;margin-top:-4px;margin-bottom:14px;">
+    <button onclick="navigate('givinghistory')" style="background:none;border:none;padding:6px;font-size:13px;font-weight:700;color:var(--tcf-mid-green);cursor:pointer;text-decoration:underline;">Log in to see your giving history &rarr;</button>
+  </div>
+
+  <!-- impact stats strip -->
+  <div class="band band-paper" style="margin-top:0;">
+    <div class="inner" style="display:grid;grid-template-columns:repeat(3,1fr);gap:4px;text-align:center;padding-top:6px;padding-bottom:6px;">
+      <div><div class="stat-value" style="font-size:24px;">$3.1B</div><div class="stat-label" style="font-size:9px;">Granted since 1914</div></div>
+      <div style="border-left:1px solid var(--line);border-right:1px solid var(--line);">
+        <div class="stat-value" style="font-size:24px;">2,800+</div><div class="stat-label" style="font-size:9px;">Nonprofits supported</div>
+      </div>
+      <div><div class="stat-value" style="font-size:24px;">$160M</div><div class="stat-label" style="font-size:9px;">Granted last year</div></div>
+    </div>
+  </div>
+</section>
+
+<!-- =================== MEMBERS =================== -->
+<section class="view" id="view-members">
+  <div class="page">
+    <div class="page-head">
+      <div class="eyebrow">Members</div>
+      <h1>The member community</h1>
+      <p class="lede">Giving circles, event RSVPs, and donor gatherings — connected to the Salesforce community roster.</p>
+    </div>
+    <div class="card">
+      <div class="card-head"><h3>Giving circles</h3><span class="ipin ipin-integration" data-pin="salesforce-advisor">Salesforce</span></div>
+      <div class="row-list">
+        <div class="row" onclick="showToast('Opening the African American Philanthropy Committee…')">
+          <div class="org-mark alt-2">AA</div>
+          <div class="info"><div class="name">African American Philanthropy Committee</div><div class="meta">Pooled fund · Quarterly grants</div></div>
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--ink-3)" stroke-width="2.5"><path d="M9 18l6-6-6-6"/></svg>
+        </div>
+        <div class="row" onclick="showToast('Opening the Cleveland Young Professional Senate…')">
+          <div class="org-mark alt-3">YP</div>
+          <div class="info"><div class="name">Young Professional Senate</div><div class="meta">Under 40 · Monthly meetups</div></div>
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--ink-3)" stroke-width="2.5"><path d="M9 18l6-6-6-6"/></svg>
+        </div>
+        <div class="row" onclick="showToast('Opening the Womens Leadership Fund…')">
+          <div class="org-mark alt-1">WL</div>
+          <div class="info"><div class="name">Women's Leadership Fund</div><div class="meta">Collective giving · 320 members</div></div>
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--ink-3)" stroke-width="2.5"><path d="M9 18l6-6-6-6"/></svg>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-head"><h3>Upcoming gatherings</h3><span class="ipin ipin-event" data-pin="events-feed">Events</span></div>
+      <div class="row-list">
+        <div class="row" onclick="showToast('RSVP sent — you will get a calendar invite shortly.')">
+          <div class="org-mark alt-4">12</div>
+          <div class="info"><div class="name">Annual Meeting &amp; Community Celebration</div><div class="meta">Public Auditorium · 5:30 PM</div></div>
+          <button class="btn btn-ghost btn-sm">RSVP</button>
+        </div>
+        <div class="row" onclick="showToast('RSVP sent — you will get a calendar invite shortly.')">
+          <div class="org-mark">24</div>
+          <div class="info"><div class="name">Neighborhood Grants Tour: Hough</div><div class="meta">Walking tour · 10:00 AM</div></div>
+          <button class="btn btn-ghost btn-sm">RSVP</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="card" style="border:1.5px solid var(--ember);text-align:center;">
+      <div class="eyebrow">Get involved</div>
+      <h3 style="margin-bottom:8px;">Find your people</h3>
+      <p style="color:var(--ink-2);font-size:13.5px;margin-bottom:14px;">Tell us what you care about and we'll match you with a circle already working on it.</p>
+      <button class="btn btn-accent btn-block" onclick="showToast('A member coordinator will reach out within two business days.')">Match me with a circle</button>
+    </div>
+  </div>
+</section>
+
+<!-- =================== OPEN A DAF — 5-step flow =================== -->
+<section class="view" id="view-openfund">
+  <div class="page">
+    <div class="page-head">
+      <div class="eyebrow">Open a Donor Advised Fund</div>
+      <h1 id="dafFlowTitle">Name Your Fund</h1>
+    </div>
+
+    <!-- Stepper -->
+    <div class="stepper" id="dafStepper">
+      <div class="step-item active" id="step-item-1"><div class="step-circle">1</div><div class="step-label">Name</div></div>
+      <div class="step-item" id="step-item-2"><div class="step-circle">2</div><div class="step-label">Details</div></div>
+      <div class="step-item" id="step-item-3"><div class="step-circle">3</div><div class="step-label">Agreement</div></div>
+      <div class="step-item" id="step-item-4"><div class="step-circle">4</div><div class="step-label">eSign</div></div>
+      <div class="step-item" id="step-item-5"><div class="step-circle">5</div><div class="step-label">Fund It</div></div>
+    </div>
+
+    <!-- STEP 1: Name the fund -->
+    <div class="daf-step active" id="daf-step-1">
+      <div class="card">
+        <h3 style="margin-bottom:6px;">What would you like to call your fund?</h3>
+        <p style="color:var(--ink-soft);font-size:13.5px;margin-bottom:18px;">Most donors use a family name. Examples: "The Sullivan Family Fund" or "Sullivan Education Fund."</p>
+        <div class="form-row">
+          <label>Fund Name</label>
+          <input type="text" id="dafFundName" placeholder="e.g., The Sullivan Family Fund" />
+        </div>
+        <div class="form-row">
+          <label>Fund Purpose (optional)</label>
+          <select id="dafFundPurpose">
+            <option>General Giving — I'll direct it later</option>
+            <option>Education &amp; Youth</option>
+            <option>Arts &amp; Culture</option>
+            <option>Health &amp; Human Services</option>
+            <option>Economic Mobility</option>
+            <option>Environment &amp; Conservation</option>
+            <option>Community Development</option>
+          </select>
+        </div>
+        <div style="background:var(--surface-2);border-radius:10px;padding:14px;margin-bottom:18px;font-size:13px;color:var(--ink-soft);">
+          <strong style="color:var(--tcf-primary);">Your fund is permanent.</strong> Once established, it becomes a named fund at The Cleveland Foundation and can accept gifts from anyone at any time.
+        </div>
+        <button class="btn btn-accent btn-block" onclick="dafNext(1)">Continue →</button>
+      </div>
+    </div>
+
+    <!-- STEP 2: Donor details -->
+    <div class="daf-step" id="daf-step-2">
+      <div class="card">
+        <h3 style="margin-bottom:6px;">Your Information</h3>
+        <p style="color:var(--ink-soft);font-size:13.5px;margin-bottom:18px;">This information will appear on the legal instrument creating your fund.</p>
+        <div class="form-row"><label>Full Legal Name</label><input type="text" id="dafDonorName" placeholder="Jamie L. Sullivan" /></div>
+        <div class="form-row"><label>Email Address</label><input type="email" id="dafDonorEmail" placeholder="jamie@email.com" /></div>
+        <div class="form-row"><label>Phone</label><input type="tel" id="dafDonorPhone" placeholder="(216) 555-0100" /></div>
+        <div class="form-row"><label>Street Address</label><input type="text" id="dafAddr1" placeholder="123 Main Street" /></div>
+        <div style="display:grid;grid-template-columns:2fr 1fr;gap:12px;">
+          <div class="form-row"><label>City</label><input type="text" id="dafCity" placeholder="Cleveland" /></div>
+          <div class="form-row"><label>State</label><input type="text" id="dafState" placeholder="OH" /></div>
+        </div>
+        <div class="form-row"><label>ZIP Code</label><input type="text" id="dafZip" placeholder="44115" /></div>
+        <div style="display:flex;gap:10px;">
+          <button class="btn btn-ghost btn-block" onclick="dafBack(2)">← Back</button>
+          <button class="btn btn-accent btn-block" onclick="dafNext(2)">Continue →</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- STEP 3: Agreement review -->
+    <div class="daf-step" id="daf-step-3">
+      <div class="card">
+        <div class="card-head">
+          <h3>Instrument of Transfer</h3>
+          <span class="ipin ipin-config" data-pin="legal-config">CMS</span>
+        </div>
+        <p style="color:var(--ink-soft);font-size:13.5px;margin-bottom:16px;">Please read the legal agreement carefully before signing. Your fund name and details have been pre-filled.</p>
+
+        <div style="background:var(--surface-2);border-radius:10px;padding:16px;max-height:340px;overflow-y:auto;font-size:13px;color:var(--ink);line-height:1.65;margin-bottom:16px;border:1px solid var(--border);">
+          <p style="text-align:center;font-weight:700;margin-bottom:6px;">THE CLEVELAND FOUNDATION</p>
+          <p style="text-align:center;font-weight:700;margin-bottom:4px;">INSTRUMENT OF TRANSFER FOR A DONOR ADVISED FUND</p>
+          <p style="text-align:center;font-style:italic;margin-bottom:16px;color:var(--ink-soft);">Creating the <strong id="agreementFundName">[Fund Name]</strong> of the Cleveland Foundation</p>
+          <p style="margin-bottom:12px;">THIS INSTRUMENT is to evidence the transfer and charitable contribution of certain property to The Cleveland Foundation, an Ohio public benefit corporation referred to as <em>the Foundation</em>, and the terms, conditions, and purposes of the transfer.</p>
+          <p style="font-weight:700;margin-bottom:6px;">1. Contribution.</p>
+          <p style="margin-bottom:12px;">The undersigned Donor, <strong id="agreementDonorName">[Donor Name]</strong>, contemporaneously with the execution of this Instrument, shall irrevocably assign and convey certain property to the Foundation for its public charitable and educational purposes and administration in accordance with and subject to its Articles of Incorporation, Code of Regulations, and policies from time to time in effect, including its variance power (the "Contribution").</p>
+          <p style="font-weight:700;margin-bottom:6px;">2. Named Fund.</p>
+          <p style="margin-bottom:12px;">The Contribution, all additions made as below provided, and all increments, proceeds, investments, and reinvestments of the same shall comprise a separate donor advised Fund of the Foundation with the name above indicated. The assets of the Fund will be assets of the Foundation and not a separate trust.</p>
+          <p style="font-weight:700;margin-bottom:6px;">3. Distributions; Advisors and Recommendations.</p>
+          <p style="margin-bottom:12px;">Distributions and expenditures may be made in accordance with the spending and other policies of the Foundation in effect from time to time. The Donor shall act as the advisor for the Fund and shall consult with Foundation staff and make recommendations concerning the amounts, timing, and purposes of grants from the Fund. The recommendations by the Donor shall be in writing and delivered or transmitted to the Foundation. The Foundation will give careful and thoughtful attention to the recommendations of the Donor, but the Donor acknowledges that the recommendations will be advisory only and not binding on the Foundation.</p>
+          <p style="font-weight:700;margin-bottom:6px;">4. Acknowledgment.</p>
+          <p style="margin-bottom:12px;">The Donor requests that distributions attributable to the Fund be made in the Fund's name.</p>
+          <p style="font-weight:700;margin-bottom:6px;">5. Termination.</p>
+          <p style="margin-bottom:12px;">The Foundation shall have the option to terminate the Fund if the annual asset value in each of two consecutive calendar years is less than Ten Thousand Dollars ($10,000). On the date of death of Donor, if the sum of the principal and undistributed income exceeds $10,000, it shall be a named fund known as the <em id="agreementFundName2">[Fund Name]</em> of The Cleveland Foundation.</p>
+          <p style="font-weight:700;margin-bottom:6px;">6. Management.</p>
+          <p style="margin-bottom:12px;">The Foundation shall have exclusive control over the investment, reinvestment, and management of assets comprising the Fund. The Fund shall be invested in the Cleveland Foundation's Index Pool.</p>
+          <p style="font-weight:700;margin-bottom:6px;">7. Fee.</p>
+          <p style="margin-bottom:12px;">The Foundation shall be entitled to an annual fee for the administration of the Fund in accordance with the Foundation's fee policy in effect from time to time.</p>
+          <p style="font-weight:700;margin-bottom:6px;">8. Counterparts.</p>
+          <p>This Instrument may be executed in separate counterparts (including by facsimile or .pdf format). The counterparts of this Instrument may be executed and delivered by electronic signature and will be effective as delivery of a manually executed counterpart to this Instrument.</p>
+        </div>
+
+        <label style="display:flex;align-items:flex-start;gap:12px;cursor:pointer;padding:14px;background:var(--surface-2);border-radius:10px;margin-bottom:16px;">
+          <input type="checkbox" id="dafAgreementCheck" style="width:20px;height:20px;margin-top:2px;accent-color:var(--tcf-mid-green);flex-shrink:0;"/>
+          <span style="font-size:14px;color:var(--ink);">I have read and understand this Instrument of Transfer and agree to its terms.</span>
+        </label>
+
+        <div style="display:flex;gap:10px;">
+          <button class="btn btn-ghost btn-block" onclick="dafBack(3)">← Back</button>
+          <button class="btn btn-accent btn-block" onclick="dafNext(3)">Continue →</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- STEP 4: eSign -->
+    <div class="daf-step" id="daf-step-4">
+      <div class="card">
+        <div class="card-head">
+          <h3>Electronic Signature</h3>
+          <span class="ipin ipin-integration" data-pin="docusign">DocuSign</span>
+        </div>
+        <p style="color:var(--ink-soft);font-size:13.5px;margin-bottom:18px;">Sign below to execute the Instrument of Transfer. Your signature is legally binding.</p>
+
+        <div style="background:var(--surface-2);border-radius:10px;padding:14px;margin-bottom:18px;font-size:13px;color:var(--ink-soft);">
+          <div style="display:flex;justify-content:space-between;margin-bottom:6px;"><span>Fund Name:</span><strong id="signFundName" style="color:var(--tcf-primary);">[Fund Name]</strong></div>
+          <div style="display:flex;justify-content:space-between;margin-bottom:6px;"><span>Donor:</span><strong id="signDonorName" style="color:var(--tcf-primary);">[Name]</strong></div>
+          <div style="display:flex;justify-content:space-between;"><span>Date:</span><strong id="signDate" style="color:var(--tcf-primary);"></strong></div>
+        </div>
+
+        <label style="font-size:12px;font-weight:700;color:var(--tcf-primary);letter-spacing:.05em;text-transform:uppercase;display:block;margin-bottom:8px;">Your Signature</label>
+        <div class="sign-box" id="signBox" onclick="startSigning()">
+          <canvas id="signCanvas"></canvas>
+          <div class="placeholder" id="signPlaceholder">
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="var(--ink-faint)" stroke-width="1.5"><path d="M17 3a2.828 2.828 0 114 4L7.5 20.5 2 22l1.5-5.5L17 3z"/></svg>
+            <span>Tap to sign</span>
+          </div>
+        </div>
+        <button id="clearSignBtn" style="display:none;font-size:13px;color:var(--tcf-red);font-weight:600;margin-bottom:16px;" onclick="clearSign()">Clear signature</button>
+
+        <p style="font-size:11.5px;color:var(--ink-faint);margin-bottom:20px;line-height:1.5;">By signing, you acknowledge this is an electronic signature with the same legal effect as a handwritten signature, consistent with the E-SIGN Act.</p>
+
+        <div style="display:flex;gap:10px;">
+          <button class="btn btn-ghost btn-block" onclick="dafBack(4)">← Back</button>
+          <button class="btn btn-accent btn-block" id="signContinueBtn" onclick="dafNext(4)">Continue →</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- STEP 5: Fund your DAF -->
+    <div class="daf-step" id="daf-step-5">
+      <div class="card">
+        <div class="card-head">
+          <h3>Open Your Fund</h3>
+          <span class="ipin ipin-integration" data-pin="psp">PSP</span>
+        </div>
+        <p style="color:var(--ink-soft);font-size:13.5px;margin-bottom:18px;">Make your initial contribution to activate your fund. A minimum of $10,000 is required to open a Donor Advised Fund.</p>
+
+        <div style="background:var(--tcf-primary);border-radius:12px;padding:16px;margin-bottom:18px;color:#fff;">
+          <div style="font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:#9DB3A6;margin-bottom:6px;">Opening</div>
+          <div style="font-family:var(--font-head);font-size:18px;font-weight:700;" id="payFundName">Sullivan Family Fund</div>
+          <div style="font-size:12px;color:#9DB3A6;margin-top:4px;">The Cleveland Foundation · Donor Advised Fund</div>
+        </div>
+
+        <div class="form-row">
+          <label>Initial Contribution</label>
+          <input type="text" id="dafPayAmount" value="$10,000" />
+          <div class="help-text">Minimum: $10,000. Deductible in the year of contribution.</div>
+        </div>
+
+        <div class="form-row">
+          <label>Payment Method</label>
+          <select id="dafPayMethod">
+            <option>Wire Transfer (instructions follow)</option>
+            <option>ACH Bank Transfer</option>
+            <option>Check (mailed to TCF)</option>
+            <option>Appreciated Securities</option>
+          </select>
+        </div>
+
+        <div id="wireInstructions" style="background:var(--surface-2);border-radius:10px;padding:14px;margin-bottom:18px;font-size:13px;line-height:1.7;">
+          <div style="font-weight:700;color:var(--tcf-primary);margin-bottom:8px;">Wire Transfer Instructions</div>
+          <div>Bank: <strong>KeyBank NA</strong></div>
+          <div>ABA Routing: <strong>041001039</strong></div>
+          <div>Account: <strong>•••• 4471</strong> (shown at confirmation)</div>
+          <div>Memo: <strong id="wireMemofundName">Sullivan Family Fund</strong></div>
+        </div>
+
+        <label style="display:flex;align-items:flex-start;gap:12px;cursor:pointer;padding:14px;background:var(--surface-2);border-radius:10px;margin-bottom:18px;">
+          <input type="checkbox" id="dafPayConfirm" style="width:20px;height:20px;margin-top:2px;accent-color:var(--tcf-mid-green);flex-shrink:0;"/>
+          <span style="font-size:14px;color:var(--ink);">I understand my initial contribution is irrevocable and becomes an asset of The Cleveland Foundation.</span>
+        </label>
+
+        <div style="display:flex;gap:10px;">
+          <button class="btn btn-ghost btn-block" onclick="dafBack(5)">← Back</button>
+          <button class="btn btn-accent btn-block" onclick="dafComplete()">Open My Fund 🎉</button>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- =================== PENDING STATE =================== -->
+<section class="view" id="view-pending">
+  <div class="page">
+    <div class="pending-banner">
+      <div class="pb-icon">🎉</div>
+      <h2>Your Fund is Being Set Up!</h2>
+      <p>Welcome to the Cleveland Foundation family. Your Donor Advised Fund agreement has been received and your initial contribution is being processed.</p>
+      <div class="pb-meta">
+        <div class="pb-stat"><div class="val" id="pendingFundNameStat">Your Fund</div><div class="lbl">Fund Name</div></div>
+        <div class="pb-stat"><div class="val">$10,000</div><div class="lbl">Initial Gift</div></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h3 style="margin-bottom:12px;">What Happens Next</h3>
+      <div style="display:flex;flex-direction:column;gap:10px;">
+        <div style="display:flex;gap:12px;align-items:flex-start;padding:12px;background:var(--surface-2);border-radius:10px;">
+          <div style="width:28px;height:28px;border-radius:50%;background:var(--tcf-mid-green);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:12px;flex-shrink:0;">1</div>
+          <div><div style="font-weight:700;font-size:14px;color:var(--tcf-primary);">Agreement Review</div><div style="font-size:12.5px;color:var(--ink-faint);">TCF legal reviews your executed Instrument of Transfer. Usually same business day.</div></div>
+        </div>
+        <div style="display:flex;gap:12px;align-items:flex-start;padding:12px;background:var(--surface-2);border-radius:10px;">
+          <div style="width:28px;height:28px;border-radius:50%;background:var(--tcf-blue);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:12px;flex-shrink:0;">2</div>
+          <div><div style="font-weight:700;font-size:14px;color:var(--tcf-primary);">Fund Establishment</div><div style="font-size:12.5px;color:var(--ink-faint);">Your fund is created in Ren iPhi with a unique Fund ID and Transaction ID.</div></div>
+        </div>
+        <div style="display:flex;gap:12px;align-items:flex-start;padding:12px;background:var(--surface-2);border-radius:10px;">
+          <div style="width:28px;height:28px;border-radius:50%;background:var(--tcf-orange);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:12px;flex-shrink:0;">3</div>
+          <div><div style="font-weight:700;font-size:14px;color:var(--tcf-primary);">Welcome &amp; Activation</div><div style="font-size:12.5px;color:var(--ink-faint);">You'll receive a confirmation email and your portal upgrades to full donor access.</div></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h3 style="margin-bottom:8px;">While You Wait</h3>
+      <p style="color:var(--ink-soft);font-size:13.5px;margin-bottom:14px;">Explore what you'll be able to do once your fund is active.</p>
+      <button class="btn btn-primary btn-block" style="margin-bottom:8px;" onclick="navigate('impact')">Read Cleveland Impact Stories</button>
+      <button class="btn btn-ghost btn-block" style="margin-bottom:8px;" onclick="navigate('learning')">Continue Learning</button>
+      <!-- DEMO ONLY: activate immediately -->
+      <button class="btn btn-ghost btn-block" style="border-color:var(--tcf-mid-green);color:var(--tcf-mid-green);margin-top:8px;" onclick="activateDonorPortal()">✓ Demo: Activate Portal Now</button>
+    </div>
+  </div>
+</section>
+
+<!-- =================== MY FUND (donor portal) =================== -->
+<section class="view" id="view-funds">
+  <div class="page">
+    <div class="page-head"><div class="eyebrow">My Fund</div><h1 id="fundPageTitle">Sullivan Family Fund</h1></div>
+    <div class="fund-card">
+      <div class="label">Donor Advised Fund · Active</div>
+      <div class="name" id="fundCardName">Sullivan Family Fund</div>
+      <div class="balance" id="fundCardBalance">$10,000</div>
+      <div class="delta" id="fundCardDelta">▲ 0.0% YTD · Just opened</div>
+      <div class="meta" id="fundCardMeta">Established June 2026 · Primary Advisor: Jamie Sullivan</div>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px;">
+      <button class="btn btn-accent" onclick="navigate('grants')" style="flex-direction:column;gap:4px;padding:16px 10px;">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg>
+        <span style="font-size:12px;">Request Grant</span>
+      </button>
+      <button class="btn btn-primary" onclick="navigate('contributions')" style="flex-direction:column;gap:4px;padding:16px 10px;">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 12v10H4V12"/><path d="M22 7H2v5h20V7z"/></svg>
+        <span style="font-size:12px;">Add Funds</span>
+      </button>
+    </div>
+    <div class="card" onclick="navigate('performance')" style="cursor:pointer;">
+      <div class="card-head"><h3>Investment Performance</h3><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--ink-faint)" stroke-width="2.5"><path d="M9 18l6-6-6-6"/></svg></div>
+      <div style="display:flex;gap:20px;">
+        <div><div class="stat-label">Balance</div><div class="stat-value" style="font-size:22px;" id="fundPerfBalance">$10,000</div></div>
+        <div><div class="stat-label">YTD Return</div><div class="stat-value" style="font-size:22px;color:var(--tcf-mid-green);">+0.0%</div></div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-head"><h3>Pool Allocation</h3><span class="ipin ipin-integration" data-pin="ren-iphi-balance">Ren iPhi</span></div>
+      <div class="alloc-row">
+        <svg width="80" height="80" viewBox="0 0 80 80">
+          <circle cx="40" cy="40" r="30" fill="none" stroke="var(--tcf-primary)" stroke-width="14" stroke-dasharray="113 75" stroke-dashoffset="0"/>
+          <circle cx="40" cy="40" r="30" fill="none" stroke="var(--tcf-aqua)" stroke-width="14" stroke-dasharray="56 131" stroke-dashoffset="-113"/>
+          <circle cx="40" cy="40" r="30" fill="none" stroke="var(--tcf-orange)" stroke-width="14" stroke-dasharray="18 169" stroke-dashoffset="-169"/>
+        </svg>
+        <div class="alloc-legend">
+          <div><span class="dot" style="background:var(--tcf-primary);"></span>Index Pool — 60%</div>
+          <div><span class="dot" style="background:var(--tcf-aqua);"></span>Fixed Income — 30%</div>
+          <div><span class="dot" style="background:var(--tcf-orange);"></span>Alternative — 10%</div>
+        </div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-head"><h3>Fund Documents</h3><span class="ipin ipin-config">CMS</span></div>
+      <div style="display:flex;flex-direction:column;gap:8px;">
+        <div onclick="showToast('Opening: Instrument of Transfer (PDF)…')" style="display:flex;align-items:center;gap:12px;padding:12px;background:var(--surface-2);border-radius:10px;cursor:pointer;">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--tcf-red)" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14,2 14,8 20,8"/></svg>
+          <div style="flex:1;"><div style="font-weight:600;font-size:14px;">Instrument of Transfer</div><div style="font-size:12px;color:var(--ink-faint);">Executed · June 2026</div></div>
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--ink-faint)" stroke-width="2.5"><path d="M9 18l6-6-6-6"/></svg>
+        </div>
+        <div onclick="showToast('Opening: Annual Statement (PDF)…')" style="display:flex;align-items:center;gap:12px;padding:12px;background:var(--surface-2);border-radius:10px;cursor:pointer;">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--tcf-blue)" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M8 12h8M8 8h8M8 16h4"/></svg>
+          <div style="flex:1;"><div style="font-weight:600;font-size:14px;">Year-End Statement</div><div style="font-size:12px;color:var(--ink-faint);">Available after first full year</div></div>
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--ink-faint)" stroke-width="2.5"><path d="M9 18l6-6-6-6"/></svg>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- =================== PERFORMANCE =================== -->
+<section class="view" id="view-performance">
+  <div class="page">
+    <div class="page-head"><div class="eyebrow">Investments</div><h1>Performance</h1></div>
+    <div class="card">
+      <div class="card-head"><div><div class="stat-label">Total Balance</div><div class="stat-value lg" id="perfBalance">$10,000</div><div class="stat-delta up">▲ $0 YTD (0.0%)</div></div><span class="ipin ipin-integration" data-pin="ren-iphi-balance">Ren iPhi</span></div>
+      <div class="perf-ranges">
+        <button class="active" onclick="drawPerfChart(this,'1M')">1M</button>
+        <button onclick="drawPerfChart(this,'3M')">3M</button>
+        <button onclick="drawPerfChart(this,'YTD')">YTD</button>
+        <button onclick="drawPerfChart(this,'1Y')">1Y</button>
+        <button onclick="drawPerfChart(this,'ALL')">ALL</button>
+      </div>
+      <canvas class="perf-chart" id="perfCanvas"></canvas>
+    </div>
+    <div class="card">
+      <h3 style="margin-bottom:14px;">Pool Allocation</h3>
+      <div class="alloc-row">
+        <svg width="90" height="90" viewBox="0 0 90 90">
+          <circle cx="45" cy="45" r="34" fill="none" stroke="var(--tcf-primary)" stroke-width="16" stroke-dasharray="128 86" stroke-dashoffset="0"/>
+          <circle cx="45" cy="45" r="34" fill="none" stroke="var(--tcf-aqua)" stroke-width="16" stroke-dasharray="64 150" stroke-dashoffset="-128"/>
+          <circle cx="45" cy="45" r="34" fill="none" stroke="var(--tcf-orange)" stroke-width="16" stroke-dasharray="21 193" stroke-dashoffset="-192"/>
+        </svg>
+        <div class="alloc-legend">
+          <div><span class="dot" style="background:var(--tcf-primary);"></span>CF Index Pool — 60%<br><small style="color:var(--ink-faint);font-size:11px;">Diversified equity &amp; fixed</small></div>
+          <div><span class="dot" style="background:var(--tcf-aqua);"></span>Fixed Income — 30%<br><small style="color:var(--ink-faint);font-size:11px;">Investment grade bonds</small></div>
+          <div><span class="dot" style="background:var(--tcf-orange);"></span>Alternatives — 10%<br><small style="color:var(--ink-faint);font-size:11px;">Real assets, private equity</small></div>
+        </div>
+      </div>
+    </div>
+    <div class="card">
+      <h3 style="margin-bottom:14px;">Transaction History</h3>
+      <div class="row-list" style="border:none;">
+        <div class="row" style="padding:14px 0;">
+          <div class="org-mark alt-4">$</div>
+          <div class="info"><div class="name">Initial Contribution</div><div class="meta">June 2026 · Fund Opening</div></div>
+          <div class="end"><div class="amount">+$10,000</div><span class="badge badge-posted">Settled</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- =================== GRANTS =================== -->
+<section class="view" id="view-grants">
+  <div class="page">
+    <div class="page-head"><div class="eyebrow">Dollars Out</div><h1>Request a Grant</h1><p class="lede">Recommend grants to any 501(c)(3). Add to cart, submit as a batch.</p></div>
+    <button class="btn btn-accent btn-block" onclick="toggleCart()" style="margin-bottom:16px;">View Cart (<span id="cartCountBtn">0</span>)</button>
+    <div class="subtabs">
+      <button class="subtab active" onclick="switchSubtab(this,'grant-new')">Recommend</button>
+      <button class="subtab" onclick="switchSubtab(this,'grant-history')">History</button>
+      <button class="subtab" onclick="switchSubtab(this,'grant-favorites')">Favorites</button>
+    </div>
+    <div id="grant-new">
+      <div class="card">
+        <h3 style="margin-bottom:14px;">Recommend a Grant <span class="ipin ipin-integration" data-pin="candid">Candid</span></h3>
+        <div class="form-row"><label>Organization Name or EIN</label><input type="text" placeholder="Search 2.3M eligible nonprofits…" /></div>
+        <div class="form-row"><label>Grant Amount</label><input type="text" value="$1,000" /></div>
+        <div class="form-row"><label>Grant Purpose</label>
+          <select><option>General Operating Support</option><option>Program-specific</option><option>Capital Campaign</option><option>Scholarship</option></select>
+        </div>
+        <div class="form-row"><label>Recognition</label>
+          <select><option>Use my name</option><option>Anonymous</option><option>In honor of…</option><option>In memory of…</option></select>
+        </div>
+        <div class="form-row"><label>Special Notes (optional)</label><textarea placeholder="e.g., 'For youth programming, summer 2026'"></textarea></div>
+        <button class="btn btn-primary btn-block" onclick="addToCart('Organization',1000)">+ Add to Cart</button>
+      </div>
+      <div class="card">
+        <h3 style="margin-bottom:12px;">Grant Workflow</h3>
+        <div class="status-pipeline">
+          <div class="pipeline-step entered"><div class="title">1. Entered</div><div class="meta">Posted to Ren iPhi · TransactionID + DistributionID created</div></div>
+          <div class="pipeline-step approved"><div class="title">2. Approved</div><div class="meta">Foundation back-office review complete</div></div>
+          <div class="pipeline-step posted"><div class="title">3. Posted ✓</div><div class="meta">Funds disbursed · You're notified</div></div>
+        </div>
+        <div style="text-align:center;margin-top:10px;"><span class="ipin ipin-event" data-pin="grant-event">Event-driven status sync</span></div>
+      </div>
+    </div>
+    <div id="grant-history" style="display:none;">
+      <div class="card">
+        <div class="card-head"><h3>Grant History</h3><span class="ipin ipin-integration" data-pin="ren-iphi-grants">Sync</span></div>
+        <div id="grantHistoryList" style="color:var(--ink-faint);font-size:13px;text-align:center;padding:24px 0;">No grants submitted yet.</div>
+      </div>
+    </div>
+    <div id="grant-favorites" style="display:none;">
+      <div class="card">
+        <div class="card-head"><h3>Favorites</h3><span class="ipin ipin-config" data-pin="favorites-config">Portal DB</span></div>
+        <div class="row-list" style="border:none;">
+          <div class="row" style="padding:14px 0;"><div class="org-mark">CO</div><div class="info"><div class="name">Cleveland Orchestra</div><div class="meta">EIN 34-0714595</div></div><button class="btn btn-ghost btn-sm" onclick="addToCart('Cleveland Orchestra',5000)">+ Cart</button></div>
+          <div class="row" style="padding:14px 0;"><div class="org-mark alt-2">FB</div><div class="info"><div class="name">GC Food Bank</div><div class="meta">EIN 34-1135448</div></div><button class="btn btn-ghost btn-sm" onclick="addToCart('GC Food Bank',3000)">+ Cart</button></div>
+          <div class="row" style="padding:14px 0;"><div class="org-mark alt-3">LC</div><div class="info"><div class="name">Literary Cleveland</div><div class="meta">EIN 47-2298870</div></div><button class="btn btn-ghost btn-sm" onclick="addToCart('Literary Cleveland',1500)">+ Cart</button></div>
+          <div class="row" style="padding:14px 0;"><div class="org-mark alt-4">RA</div><div class="info"><div class="name">Rainey Institute</div><div class="meta">EIN 34-1037529</div></div><button class="btn btn-ghost btn-sm" onclick="addToCart('Rainey Institute',2000)">+ Cart</button></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- =================== CONTRIBUTIONS =================== -->
+<section class="view" id="view-contributions">
+  <div class="page">
+    <div class="page-head"><div class="eyebrow">Dollars In</div><h1>Make a Gift</h1><p class="lede">Contribute to your fund, manage recurring gifts, or update payment methods.</p></div>
+    <div class="subtabs">
+      <button class="subtab active" onclick="switchSubtab(this,'contrib-one')">One-time</button>
+      <button class="subtab" onclick="switchSubtab(this,'contrib-recurring')">Recurring</button>
+      <button class="subtab" id="contribRoundupsTabBtn" onclick="switchSubtab(this,'contrib-roundups')">Round-Ups</button>
+      <button class="subtab" onclick="switchSubtab(this,'contrib-methods')">Methods</button>
+    </div>
+    <div class="card" id="contrib-one">
+      <h3 style="margin-bottom:16px;">Make a Contribution <span class="ipin ipin-integration" data-pin="psp">PSP</span></h3>
+      <div class="form-row"><label>Amount</label><input type="text" value="$1,000.00"/><div class="help-text">Minimum: $250</div></div>
+      <div class="form-row"><label>Payment Method</label>
+        <select id="contribPayMethod" onchange="contribHandlePaymentMethodChange(this)"><option>Chase Bank •••• 4471 (ACH)</option><option>Visa •••• 8821</option><option>Wire Transfer</option><option>Appreciated Securities</option><option value="roundups">Round-Ups (spare change)</option><option>+ Add new method</option></select>
+      </div>
+      <button class="btn btn-accent btn-block" onclick="showToast('Contribution submitted! PSP webhook will confirm and Ren iPhi creates TransactionID.')">Contribute $1,000</button>
+      <div style="margin-top:10px;text-align:center;"><span class="ipin ipin-security" data-pin="step-up">Step-up Auth Required</span></div>
+    </div>
+    <div class="card" id="contrib-recurring" style="display:none;">
+      <h3 style="margin-bottom:14px;">Recurring Contributions</h3>
+      <div class="row-list">
+        <div class="row"><div class="org-mark alt-4">$</div><div class="info"><div class="name">$500 / month</div><div class="meta">Next: Jul 1</div></div><button class="btn btn-ghost btn-sm">Edit</button></div>
+      </div>
+      <button class="btn btn-primary btn-block" style="margin-top:16px;">+ Add Recurring Gift</button>
+    </div>
+    <div class="card" id="contrib-roundups" style="display:none;">
+      <h3 style="margin-bottom:6px;">Round-Ups <span class="ipin ipin-integration" data-pin="plaid">Plaid</span></h3>
+      <p style="color:var(--ink-soft);font-size:13.5px;margin-bottom:18px;">Connect a debit or credit card. Every time you spend, we round the purchase up to the nearest dollar and set the spare change aside for your fund — swept over automatically once a week.</p>
+
+      <div style="background:var(--surface-2);border-radius:12px;padding:14px;margin-bottom:18px;">
+        <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--ink-faint);margin-bottom:10px;">How it works</div>
+        <div style="display:flex;justify-content:space-between;font-size:13px;padding:6px 0;border-bottom:1px solid var(--border);"><span>Coffee Shop</span><span>$4.35 &nbsp;<strong style="color:var(--tcf-mid-green);">→ +$0.65</strong></span></div>
+        <div style="display:flex;justify-content:space-between;font-size:13px;padding:6px 0;border-bottom:1px solid var(--border);"><span>Grocery Store</span><span>$62.10 &nbsp;<strong style="color:var(--tcf-mid-green);">→ +$0.90</strong></span></div>
+        <div style="display:flex;justify-content:space-between;font-size:13px;padding:6px 0;"><span>Gas Station</span><span>$38.50 &nbsp;<strong style="color:var(--tcf-mid-green);">→ +$0.50</strong></span></div>
+      </div>
+
+      <!-- Pre-connection state: shown until connectRoundups() simulates a successful Plaid Link session -->
+      <div id="roundupsNotConnected">
+        <div class="form-row">
+          <label>Send Round-Ups To</label>
+          <select id="roundupsFund">
+            <option>Greatest Needs Fund</option>
+            <option>Arts &amp; Culture Fund</option>
+            <option>Youth &amp; Education Fund</option>
+            <option>Sullivan Family Fund</option>
+          </select>
+        </div>
+        <button class="btn btn-accent btn-block" onclick="connectRoundups()">Set Up Round-Ups (Demo)</button>
+        <div class="help-text" style="margin-top:10px;text-align:center;">Prototype only — no real account link happens here. A production build would use Plaid to set this up.</div>
+        <div class="help-text" style="margin-top:4px;text-align:center;">Sample data · no bank connection is made</div>
+      </div>
+
+      <!-- Post-connection state: placeholder for what a live Plaid Transactions integration would populate -->
+      <div id="roundupsConnected" style="display:none;">
+        <div class="row-list" style="margin-bottom:16px;">
+          <div class="row"><div class="org-mark alt-4">•</div><div class="info"><div class="name">Sample Account (Demo)</div><div class="meta">Not a real linked account · Round-ups active</div></div><span class="badge badge-posted">Demo</span></div>
+        </div>
+        <div style="background:var(--surface-2);border-radius:12px;padding:16px;margin-bottom:16px;">
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:4px;text-align:center;">
+            <div><div class="stat-value" style="font-size:20px;">$0.00</div><div class="stat-label" style="font-size:9.5px;">Round-ups this month</div></div>
+            <div><div class="stat-value" style="font-size:15px;" id="roundupsFundDisplay">Greatest Needs Fund</div><div class="stat-label" style="font-size:9.5px;">Destination fund</div></div>
+          </div>
+        </div>
+        <label style="display:flex;align-items:center;justify-content:space-between;gap:12px;cursor:pointer;padding:14px;background:var(--surface-2);border-radius:10px;margin-bottom:12px;">
+          <span style="font-size:14px;font-weight:600;color:var(--ink);">Round-Up Giving</span>
+          <input type="checkbox" id="roundupsToggle" checked style="accent-color:var(--tcf-mid-green);width:20px;height:20px;" onchange="toggleRoundups(this)"/>
+        </label>
+        <div class="help-text" style="text-align:center;">Illustrative only. A production build would sweep spare change to your fund weekly, once transactions settle.</div>
+      </div>
+    </div>
+    <div class="card" id="contrib-methods" style="display:none;">
+      <h3 style="margin-bottom:14px;">Payment Methods <span class="ipin ipin-integration" data-pin="psp">PSP Vault</span></h3>
+      <div class="row-list">
+        <div class="row"><div class="org-mark alt-4">B</div><div class="info"><div class="name">Chase Bank ••••4471</div><div class="meta">ACH · Verified</div></div><span class="badge badge-posted">Default</span></div>
+        <div class="row"><div class="org-mark alt-2">V</div><div class="info"><div class="name">Visa ••••8821</div><div class="meta">Expires 09/27</div></div><button class="btn btn-ghost btn-sm">Edit</button></div>
+        <div class="row"><div class="org-mark" style="background:var(--tcf-mid-green);">R</div><div class="info"><div class="name">Round-Ups</div><div class="meta" id="roundupsMethodMeta">Not connected</div></div><button class="btn btn-ghost btn-sm" onclick="document.getElementById('contribRoundupsTabBtn').click()">Set Up</button></div>
+      </div>
+      <button class="btn btn-primary btn-block" style="margin-top:16px;">+ Add Payment Method</button>
+      <div class="help-text" style="margin-top:10px;">Cards never touch Foundation infrastructure. PSP hosts the form.</div>
+    </div>
+  </div>
+</section>
+
+<!-- =================== YOUR GIVING HISTORY =================== -->
+<section class="view" id="view-givinghistory">
+  <div class="page">
+    <div class="page-head"><div class="eyebrow">Your Account</div><h1>Your Giving History</h1><p class="lede">Every gift and recurring donation made through your account, in one place.</p></div>
+
+    <div class="card" style="padding:16px 18px;margin-bottom:16px;">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:4px;text-align:center;">
+        <div><div class="stat-value" style="font-size:22px;" id="ghLifetimeTotal">$0</div><div class="stat-label" style="font-size:9.5px;">Lifetime giving</div></div>
+        <div><div class="stat-value" style="font-size:22px;" id="ghGiftCount">0</div><div class="stat-label" style="font-size:9.5px;">Gifts given</div></div>
+      </div>
+    </div>
+
+    <h3 style="font-size:15px;margin-bottom:10px;">Recurring Donations</h3>
+    <div class="row-list" id="ghRecurringList" style="margin-bottom:20px;"></div>
+
+    <h3 style="font-size:15px;margin-bottom:10px;">Gift History</h3>
+    <div class="row-list" id="ghGiftList"></div>
+  </div>
+</section>
+
+<!-- =================== LEARNING TRACKS =================== -->
+<section class="view" id="view-learning">
+  <div class="page">
+    <div id="lt-index">
+      <div class="page-head"><div class="eyebrow">Grow Your Knowledge</div><h1>Learning Tracks</h1><p class="lede">Choose a topic to explore courses, articles, and insights.</p></div>
+      <div class="card" style="background:var(--tcf-primary);border-color:rgba(255,255,255,.08);">
+        <div style="display:flex;flex-direction:column;gap:10px;">
+          <div onclick="openLearningTrack('engagement')" style="background:rgba(255,255,255,.07);border-radius:12px;padding:15px 16px;cursor:pointer;display:flex;align-items:center;gap:14px;border:1px solid rgba(255,255,255,.1);">
+            <div style="width:42px;height:42px;border-radius:10px;background:var(--tcf-mid-green);display:flex;align-items:center;justify-content:center;flex-shrink:0;"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg></div>
+            <div style="flex:1;"><div style="font-weight:700;color:#fff;font-size:14px;margin-bottom:2px;">Community Engagement</div><div style="font-size:12px;color:rgba(255,255,255,.5);">3 courses · ~18 min total</div></div>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,.3)" stroke-width="2.5"><path d="M9 18l6-6-6-6"/></svg>
+          </div>
+          <div onclick="openLearningTrack('estate')" style="background:rgba(255,255,255,.07);border-radius:12px;padding:15px 16px;cursor:pointer;display:flex;align-items:center;gap:14px;border:1px solid rgba(255,255,255,.1);">
+            <div style="width:42px;height:42px;border-radius:10px;background:var(--tcf-orange);display:flex;align-items:center;justify-content:center;flex-shrink:0;"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14,2 14,8 20,8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg></div>
+            <div style="flex:1;"><div style="font-weight:700;color:#fff;font-size:14px;margin-bottom:2px;">Estate Planning</div><div style="font-size:12px;color:rgba(255,255,255,.5);">3 courses · ~25 min total</div></div>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,.3)" stroke-width="2.5"><path d="M9 18l6-6-6-6"/></svg>
+          </div>
+          <div onclick="openLearningTrack('endowments')" style="background:rgba(255,255,255,.07);border-radius:12px;padding:15px 16px;cursor:pointer;display:flex;align-items:center;gap:14px;border:1px solid rgba(255,255,255,.1);">
+            <div style="width:42px;height:42px;border-radius:10px;background:var(--tcf-blue);display:flex;align-items:center;justify-content:center;flex-shrink:0;"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round"><polyline points="22,12 18,12 15,21 9,3 6,12 2,12"/></svg></div>
+            <div style="flex:1;"><div style="font-weight:700;color:#fff;font-size:14px;margin-bottom:2px;">Endowments</div><div style="font-size:12px;color:rgba(255,255,255,.5);">4 courses · ~20 min total</div></div>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,.3)" stroke-width="2.5"><path d="M9 18l6-6-6-6"/></svg>
+          </div>
+          <div onclick="openLearningTrack('foundations')" style="background:rgba(255,255,255,.07);border-radius:12px;padding:15px 16px;cursor:pointer;display:flex;align-items:center;gap:14px;border:1px solid rgba(255,255,255,.1);">
+            <div style="width:42px;height:42px;border-radius:10px;background:var(--tcf-aqua);display:flex;align-items:center;justify-content:center;flex-shrink:0;"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round"><line x1="3" y1="22" x2="21" y2="22"/><line x1="6" y1="18" x2="6" y2="11"/><line x1="10" y1="18" x2="10" y2="11"/><line x1="14" y1="18" x2="14" y2="11"/><line x1="18" y1="18" x2="18" y2="11"/><polygon points="12,2 20,7 4,7"/></svg></div>
+            <div style="flex:1;"><div style="font-weight:700;color:#fff;font-size:14px;margin-bottom:2px;">Community Foundations</div><div style="font-size:12px;color:rgba(255,255,255,.5);">4 courses · ~12 min total</div></div>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,.3)" stroke-width="2.5"><path d="M9 18l6-6-6-6"/></svg>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div id="lt-detail" style="display:none;">
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:18px;">
+        <button onclick="closeLearningTrack()" style="width:36px;height:36px;border-radius:50%;background:var(--surface-2);border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--ink-soft)" stroke-width="2.5"><path d="M15 18l-6-6 6-6"/></svg>
+        </button>
+        <div><div class="eyebrow" id="lt-eyebrow" style="margin-bottom:0;"></div><h2 id="lt-title" style="font-size:20px;line-height:1.2;"></h2></div>
+      </div>
+      <div class="card" id="lt-intro-card">
+        <p id="lt-description" style="color:var(--ink-soft);font-size:14px;line-height:1.6;margin-bottom:14px;"></p>
+        <div style="display:flex;gap:20px;"><div style="text-align:center;"><div id="lt-course-count" style="font-family:var(--font-head);font-size:22px;font-weight:700;color:var(--tcf-primary);"></div><div class="stat-label" style="font-size:10px;">Courses</div></div><div style="text-align:center;"><div id="lt-time" style="font-family:var(--font-head);font-size:22px;font-weight:700;color:var(--tcf-primary);"></div><div class="stat-label" style="font-size:10px;">Minutes</div></div></div>
+      </div>
+      <div id="lt-courses"></div>
+      <div class="card" style="border:2px solid var(--tcf-orange);text-align:center;margin-top:4px;">
+        <div class="eyebrow">Ready for the Next Step?</div>
+        <h3 style="margin-bottom:8px;">Talk to an Advisor</h3>
+        <p style="color:var(--ink-soft);font-size:13px;margin-bottom:14px;">Have questions? A TCF advisor is here to help — free and no obligation.</p>
+        <button class="btn btn-accent btn-block" onclick="navigate('advisor')">Schedule a Free Conversation</button>
+      </div>
+    </div>
+    <div id="lt-reader" style="display:none;">
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:18px;">
+        <button onclick="closeCourse()" style="width:36px;height:36px;border-radius:50%;background:var(--surface-2);border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--ink-soft)" stroke-width="2.5"><path d="M15 18l-6-6 6-6"/></svg>
+        </button>
+        <div id="lt-reader-track-label" class="eyebrow" style="margin-bottom:0;"></div>
+      </div>
+      <div class="card">
+        <div id="lt-reader-tag" class="tag" style="margin-bottom:10px;"></div>
+        <h2 id="lt-reader-title" style="font-size:20px;margin-bottom:12px;"></h2>
+        <div id="lt-reader-body" style="color:var(--ink-soft);font-size:14px;line-height:1.7;"></div>
+      </div>
+      <div class="card" style="background:var(--tcf-primary);border:none;text-align:center;">
+        <p style="color:rgba(255,255,255,.7);font-size:13px;margin-bottom:14px;">Want to go deeper on this topic?</p>
+        <button class="btn btn-accent btn-block" onclick="navigate('advisor')">Talk to a Philanthropic Advisor</button>
+        <button class="btn btn-ghost btn-block" style="margin-top:8px;color:#fff;border-color:rgba(255,255,255,.3);" onclick="closeCourse()">← Back to Track</button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- =================== STORIES & IMPACT =================== -->
+<section class="view" id="view-impact">
+  <div class="page">
+    <div class="page-head"><div class="eyebrow">For You</div><h1>Stories &amp; Impact</h1><p class="lede">See how Cleveland Foundation grants are changing Greater Cleveland.</p></div>
+    <div class="card">
+      <div class="card-head"><div><h3>Recent Stories</h3><div style="font-size:11.5px;color:var(--ink-faint);margin-top:2px;">Curated for you</div></div></div>
+      <div class="story-row" onclick="showToast('Opening story…')" style="cursor:pointer;"><div class="thumb t1"></div><div><div class="tag">Arts &amp; Culture · 5 min</div><h4>How $50K Built a Free Music Program for 200 Kids</h4><div class="excerpt">Arts Mastery is reaching neighborhoods that haven't seen sustained arts funding in a generation.</div></div></div>
+      <div class="story-row" onclick="showToast('Opening story…')" style="cursor:pointer;"><div class="thumb t2"></div><div><div class="tag">Economic Equity · 6 min</div><h4>Cleveland's Small Business Revival on the East Side</h4><div class="excerpt">Foundation grants helped 47 entrepreneurs launch or expand — generating 180 new local jobs.</div></div></div>
+      <div class="story-row" onclick="showToast('Opening story…')" style="cursor:pointer;"><div class="thumb t3"></div><div><div class="tag">Community Health · 4 min</div><h4>Doula Network Expands to West Side</h4><div class="excerpt">Five new community-based doulas joined the program this spring — maternal outcomes are rising.</div></div></div>
+      <div class="story-row" onclick="showToast('Opening story…')" style="cursor:pointer;"><div class="thumb t1" style="background:var(--tcf-blue);"></div><div><div class="tag">Education · 7 min</div><h4>Closing the Third-Grade Reading Gap in Cleveland Schools</h4><div class="excerpt">A targeted literacy program is helping 3,200 students reach grade-level reading.</div></div></div>
+    </div>
+    <div class="card">
+      <h3 style="margin-bottom:14px;">Learning Tracks</h3>
+      <div style="display:flex;flex-direction:column;gap:10px;">
+        <div onclick="openLearningTrack('engagement')" style="background:var(--surface-2);border-radius:10px;padding:14px;cursor:pointer;display:flex;align-items:center;gap:12px;"><span style="font-size:18px;">🤝</span><div style="flex:1;"><div style="font-weight:700;font-size:14px;color:var(--tcf-primary);">Community Engagement</div><div style="font-size:12px;color:var(--ink-faint);">4 articles · ~18 min</div></div><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--ink-faint)" stroke-width="2.5"><path d="M9 18l6-6-6-6"/></svg></div>
+        <div onclick="openLearningTrack('estate')" style="background:var(--surface-2);border-radius:10px;padding:14px;cursor:pointer;display:flex;align-items:center;gap:12px;"><span style="font-size:18px;">📋</span><div style="flex:1;"><div style="font-weight:700;font-size:14px;color:var(--tcf-primary);">Estate Planning &amp; Legacy Giving 101</div><div style="font-size:12px;color:var(--ink-faint);">5 articles · ~25 min</div></div><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--ink-faint)" stroke-width="2.5"><path d="M9 18l6-6-6-6"/></svg></div>
+        <div onclick="openLearningTrack('endowments')" style="background:var(--surface-2);border-radius:10px;padding:14px;cursor:pointer;display:flex;align-items:center;gap:12px;"><span style="font-size:18px;">📈</span><div style="flex:1;"><div style="font-weight:700;font-size:14px;color:var(--tcf-primary);">Endowments</div><div style="font-size:12px;color:var(--ink-faint);">4 articles · ~20 min</div></div><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--ink-faint)" stroke-width="2.5"><path d="M9 18l6-6-6-6"/></svg></div>
+      </div>
+    </div>
+    <div class="card" style="border:2px solid var(--tcf-orange);text-align:center;">
+      <div class="eyebrow">Ready to Act?</div>
+      <h3 style="margin-bottom:8px;">Turn inspiration into impact</h3>
+      <p style="color:var(--ink-soft);font-size:13.5px;margin-bottom:14px;">Open a Donor Advised Fund and start directing your giving.</p>
+      <button class="btn btn-accent btn-block" onclick="navigate('openfund')">Open a Donor Advised Fund</button>
+    </div>
+  </div>
+</section>
+
+<!-- =================== IMPACT CALCULATOR =================== -->
+<section class="view" id="view-calculator">
+  <div class="page">
+    <div class="page-head"><div class="eyebrow">Your Gift, Magnified</div><h1>Impact Calculator</h1></div>
+
+    <!-- STEP 1: Grow your gift -->
+    <div class="card calc-panel">
+      <div class="calc-step-label">Step 1 · Grow Your Gift</div>
+      <div class="calc-mode-toggle">
+        <button id="calcModeOnetime" class="calc-mode-btn active" onclick="calcSetMode('onetime')">One-Time Gift</button>
+        <button id="calcModeMonthly" class="calc-mode-btn" onclick="calcSetMode('monthly')">Monthly Gift</button>
+      </div>
+      <div class="calc-field">
+        <div class="calc-field-head"><span class="calc-field-label" id="calcGiftLabel">Gift Amount</span><span class="calc-field-value" id="calcGiftDisplay">$500</span></div>
+        <input type="range" class="calc-slider" id="calcGiftSlider" min="25" max="10000" step="25" value="500" oninput="calcOnGift(this.value)">
+        <div class="calc-field-range"><span>$25</span><span>$10,000</span></div>
+      </div>
+      <div class="calc-field">
+        <div class="calc-field-head"><span class="calc-field-label">Years of Growth</span><span class="calc-field-value" id="calcYearsDisplay">10 years</span></div>
+        <input type="range" class="calc-slider" id="calcYearsSlider" min="1" max="25" step="1" value="10" oninput="calcOnYears(this.value)">
+      </div>
+      <div class="calc-field">
+        <div class="calc-field-head"><span class="calc-field-label">Annual Growth Rate</span><span class="calc-field-value" id="calcRateDisplay">6%</span></div>
+        <input type="range" class="calc-slider" id="calcRateSlider" min="1" max="12" step="0.5" value="6" oninput="calcOnRate(this.value)">
+      </div>
+    </div>
+
+    <div id="calcMoneyCards" class="calc-money-cards"></div>
+
+    <div class="card calc-panel">
+      <div class="calc-chart-label">Your Gift's Growth Over Time</div>
+      <div style="position:relative;height:160px;"><canvas id="mobileCalcChart" style="display:block;width:100%;height:160px;"></canvas></div>
+    </div>
+
+    <!-- STEP 2: Choose your impact area -->
+    <div class="calc-step2-head">
+      <div class="calc-step2-eyebrow">Step 2</div>
+      <h2 style="font-size:19px;margin:0 0 4px;">Choose Your Impact Area</h2>
+      <p class="lede" style="margin:0;">See what this gift could fund in Cleveland, today and over time.</p>
+    </div>
+
+    <div class="card calc-panel">
+      <div class="calc-area-label">Impact Area</div>
+      <div class="calc-area-grid" id="calcAreaGrid"></div>
+    </div>
+
+    <div id="calcImpactCards" class="calc-money-cards"></div>
+
+    <div class="card calc-note"><p id="calcExplanation"></p></div>
+    <button class="btn btn-accent btn-block" onclick="navigate('openfund')" style="margin-top:4px;">Open a Fund to Make It Real →</button>
+  </div>
+</section>
+
+<!-- =================== VISION 2040 =================== -->
+<section class="view" id="view-vision">
+  <div class="page" style="padding-top:12px;">
+    <div class="page-head"><div class="eyebrow">Cleveland 2040</div><h1>Shape the Future</h1><p class="lede">Explore six bold visions for Cleveland's future and discover your philanthropic profile.</p></div>
+    <div style="position:relative;border-radius:20px;overflow:hidden;height:360px;margin-bottom:14px;" id="visionStage">
+      <div id="vCard" style="position:absolute;inset:0;border-radius:20px;overflow:hidden;transition:all .35s ease;">
+        <div id="vCardInner" style="height:100%;display:flex;flex-direction:column;padding:28px 24px;position:relative;overflow:hidden;"></div>
+      </div>
+    </div>
+    <div style="display:flex;align-items:center;justify-content:center;gap:12px;margin-bottom:12px;">
+      <button id="vPrevBtn" onclick="vGoCard(-1)" style="background:rgba(22,68,48,.08);border:1.5px solid var(--border);color:var(--ink-soft);width:40px;height:40px;border-radius:50%;font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center;">‹</button>
+      <div id="vDotRow" style="display:flex;gap:6px;"></div>
+      <button id="vNextBtn" onclick="vGoCard(1)" style="background:rgba(22,68,48,.08);border:1.5px solid var(--border);color:var(--ink-soft);width:40px;height:40px;border-radius:50%;font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center;">›</button>
+    </div>
+    <div class="card" id="vReflection">
+      <div style="font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--tcf-orange);margin-bottom:10px;">Your Take</div>
+      <div style="font-size:16px;font-weight:700;color:var(--tcf-primary);margin-bottom:14px;line-height:1.35;" id="vReflQ"></div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;" id="vReflOpts"></div>
+      <button onclick="vSkip()" style="background:none;border:none;color:var(--ink-faint);font-family:inherit;font-size:13px;cursor:pointer;margin-top:10px;padding:4px;">Skip this one →</button>
+    </div>
+    <div class="card" id="vFinal" style="display:none;text-align:center;">
+      <div style="width:72px;height:72px;border-radius:50%;background:var(--tcf-orange);margin:0 auto 16px;display:flex;align-items:center;justify-content:center;font-size:32px;">🌟</div>
+      <div style="font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--tcf-orange);margin-bottom:6px;">Your Philanthropic Profile</div>
+      <h3 id="vBuilderType" style="font-size:22px;margin-bottom:8px;"></h3>
+      <p id="vBuilderDesc" style="color:var(--ink-soft);font-size:14px;line-height:1.55;margin-bottom:12px;"></p>
+      <div id="vBuilderVision" style="font-size:16px;font-weight:700;color:var(--tcf-orange);margin-bottom:20px;"></div>
+      <button class="btn btn-accent btn-block" onclick="navigate('openfund')">Channel Your Vision — Open a DAF</button>
+      <button class="btn btn-ghost btn-block" style="margin-top:8px;" onclick="vReset()">Start Over</button>
+    </div>
+  </div>
+</section>
+
+<!-- =================== YOUR CLEVELAND GARDEN =================== -->
+<section class="view" id="view-garden">
+  <div class="page">
+    <div class="page-head">
+      <div class="eyebrow">Land Florals Challenge</div>
+      <h1>Your Cleveland Garden</h1>
+      <p class="lede">Every time you show up for the city, plant a flower. Collect all six Land Florals and watch your garden grow.</p>
+    </div>
+
+    <div class="garden-hero">
+      <div class="gh-eyebrow">Your Garden</div>
+      <div class="gh-count" id="gardenHeroCount">0 of 6 planted</div>
+      <div class="garden-progress-track"><div class="garden-progress-fill" id="gardenHeroBar" style="width:0%"></div></div>
+    </div>
+
+    <div class="garden-nudge">
+      <div class="gn-icon">🎁</div>
+      <div class="gn-text"><b>Unlock all 6</b> to receive an exclusive gift from the Cleveland Foundation.</div>
+    </div>
+
+    <div class="badge-grid" id="gardenBadgeGrid"></div>
+  </div>
+</section>
+
+<!-- =================== LOCAL LEGENDS =================== -->
+<section class="view" id="view-legends">
+  <div class="page">
+    <div class="page-head">
+      <div class="eyebrow">A Weekly Feature</div>
+      <h1>Local Legends</h1>
+      <p class="lede">Every week, we tell the story of someone whose generosity, courage, or vision left Greater Cleveland better than they found it.</p>
+    </div>
+
+    <div class="lgd-hero" id="lgdHero">
+      <div class="lgd-hero-top">
+        <div class="lgd-avatar" id="lgdAvatar">FG</div>
+        <div>
+          <div class="lgd-tag" id="lgdTag">Category</div>
+          <div class="lgd-years" id="lgdYears">Years</div>
+        </div>
+      </div>
+      <h2 id="lgdName">Name</h2>
+      <div class="lgd-quote" id="lgdQuote">&ldquo;Quote&rdquo;</div>
+    </div>
+
+    <div class="card">
+      <div style="font-size:11px;font-weight:700;color:var(--tcf-orange);letter-spacing:.06em;text-transform:uppercase;margin-bottom:8px;">Their Story</div>
+      <p style="font-size:14.5px;line-height:1.6;color:var(--ink);" id="lgdStory">Story text.</p>
+      <div class="lgd-legacy" id="lgdLegacy">Legacy line.</div>
+    </div>
+
+    <div class="lgd-callout">
+      <div class="lc-icon">✨</div>
+      <div class="lc-text">Everyday Clevelanders have done amazing things across history. <b>Begin your own local legacy today.</b></div>
+    </div>
+
+    <div class="lgd-actions">
+      <button class="btn btn-accent" onclick="openGiveModal()">Give to a Fund</button>
+      <button class="btn btn-ghost" onclick="openShareModal({subject:'A Local Legend worth knowing', text:'Read about this week\u2019s Local Legend on the Cleveland Foundation Giving Portal:'})">Share This Story</button>
+    </div>
+    <button class="alert-toggle" id="lgdAlertBtn" onclick="toggleAlert('legends', this)">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 8a6 6 0 1112 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 003.4 0"/></svg>
+      <span id="lgdAlertLabel">Get notified of new Legends</span>
+    </button>
+
+    <div class="lgd-browse-head">
+      <h4>Meet more Local Legends</h4>
+      <button class="lgd-toggle" id="lgdBrowseToggle" onclick="toggleLgdBrowse()">Browse all 52 &darr;</button>
+    </div>
+    <div class="lgd-chip-grid" id="lgdChipGrid"></div>
+  </div>
+</section>
+
+<!-- ================= GIVE MODAL (Local Legends) ================= -->
+<div class="modal-backdrop" id="give-modal">
+  <div class="modal">
+    <button class="modal-close" onclick="closeGiveModal()" aria-label="Close">&times;</button>
+    <div id="modal-body-select">
+      <h3 style="font-size:20px;margin-bottom:6px;color:var(--tcf-primary);">Start Your Fund</h3>
+      <p style="font-size:13.5px;color:var(--ink-soft);margin-bottom:16px;line-height:1.5;">Choose where your gift goes today. You can open a fund in your own name any time.</p>
+      <div class="fund-option-row"><span>Greatest Needs Fund</span><button class="btn btn-accent" style="padding:8px 16px;font-size:13px;" onclick="confirmGive()">Give</button></div>
+      <div class="fund-option-row"><span>Arts &amp; Culture Fund</span><button class="btn btn-accent" style="padding:8px 16px;font-size:13px;" onclick="confirmGive()">Give</button></div>
+      <div class="fund-option-row"><span>Youth &amp; Education Fund</span><button class="btn btn-accent" style="padding:8px 16px;font-size:13px;" onclick="confirmGive()">Give</button></div>
+      <div style="margin-top:14px;font-size:12px;color:var(--ink-soft);background:var(--surface-2);border-radius:10px;padding:10px 12px;line-height:1.5;">Prototype note: this demo does not process real payments. In production, this hands off to the Cleveland Foundation's secure giving checkout.</div>
+    </div>
+    <div class="modal-confirm" id="modal-confirm" style="display:none;text-align:center;padding:10px 0 4px;">
+      <div style="width:52px;height:52px;border-radius:50%;background:var(--tcf-aqua);color:#fff;display:flex;align-items:center;justify-content:center;font-size:24px;margin:0 auto 14px;">&#10003;</div>
+      <h3 style="font-size:20px;margin-bottom:8px;color:var(--tcf-primary);">Thank you</h3>
+      <p style="font-size:13.5px;color:var(--ink-soft);line-height:1.5;">Your generosity is already writing the next Local Legend story.</p>
+    </div>
+  </div>
+</div>
+
+<!-- =================== CLEVELAND HISTORY QUIZ =================== -->
+<section class="view" id="view-history">
+  <div class="page">
+    <div class="page-head">
+      <div class="eyebrow">A Cleveland Trivia Challenge</div>
+      <h1>Cleveland History Quiz</h1>
+      <p class="lede">A weekly quiz on Cleveland&rsquo;s civic history &mdash; the people, places and turning points that shaped our city.</p>
+    </div>
+
+    <div class="hq-give-banner">
+      <p>We&rsquo;ve helped make this city thrive for the last 100 years, and we want you to help us see it thrive for the next 100.</p>
+      <button class="btn btn-accent" onclick="navigate('openfund')">Give Today</button>
+    </div>
+
+    <div class="hw-hero">
+      <div class="hw-week-label">Week Of</div>
+      <div class="hw-week-range" id="hwRange">Loading&hellip;</div>
+      <div class="hw-week-year" id="hwYearLine"></div>
+      <div class="hw-week-count" id="hwCount"></div>
+      <div class="hw-score-row">
+        <div class="hw-score-pill"><span id="hwScoreCorrect">0</span>/<span id="hwScoreTotal">52</span> correct</div>
+        <div class="hw-score-pill hw-score-pill-ghost"><span id="hwScoreAnswered">0</span> of 52 played</div>
+      </div>
+      <div class="hw-nav">
+        <button onclick="hwStep(-1)">&larr; Previous</button>
+        <button onclick="hwSurprise()">Surprise me</button>
+        <button onclick="hwStep(1)">Next &rarr;</button>
+      </div>
+    </div>
+
+    <div id="hwCardsWrap"></div>
+
+    <div class="hw-share-row">
+      <button class="btn btn-primary" onclick="hqShareScore()">Share My Score</button>
+      <button class="btn btn-ghost" onclick="hqShareQuiz()">Share This Quiz</button>
+    </div>
+
+    <div class="hw-alert-block">
+      <button class="alert-toggle" id="hwAlertBtn" onclick="toggleAlert('history', this)">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 8a6 6 0 1112 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 003.4 0"/></svg>
+        <span id="hwAlertLabel">Get weekly quiz alerts</span>
+      </button>
+      <p class="hw-alert-sub">Receive weekly notifications of new questions to test and compare your city knowledge.</p>
+    </div>
+
+    <div class="hq-leaderboard">
+      <div class="hq-lb-head"><div class="hq-lb-title">Leaderboard</div></div>
+      <div class="hq-lb-sub">Ranked among players who&rsquo;ve answered at least 5 questions.</div>
+      <div class="hq-lb-toggle">
+        <button id="hqLbSortAccuracy" class="active" onclick="hqSetLeaderboardSort('accuracy')">Highest Accuracy</button>
+        <button id="hqLbSortScore" onclick="hqSetLeaderboardSort('score')">Most Correct</button>
+      </div>
+      <div id="hqLeaderboardList"></div>
+    </div>
+  </div>
+</section>
+
+<!-- =================== NEWS FEED =================== -->
+<section class="view" id="view-newsfeed">
+  <div class="page">
+    <div class="page-head">
+      <div class="eyebrow">For You</div>
+      <h1>News Feed</h1>
+      <p class="lede">Personalized stories from others making an impact — plus the Whys people are sharing in Your Cleveland Garden.</p>
+    </div>
+
+    <div class="nf-composer" onclick="navigate('garden');showToast('Share your \u201cwhy\u201d from the Foxglove badge in Your Cleveland Garden.')">
+      <div class="nf-comp-icon">+</div>
+      <div class="nf-comp-text">Share your own "why" in Your Cleveland Garden&hellip;</div>
+    </div>
+
+    <div id="nfFeed"></div>
+  </div>
+</section>
+
+<!-- =================== ADVISOR =================== -->
+<!-- =================== IMPACT MAP (merged sub-app) =================== -->
+<section class="view" id="view-impactmap">
+<div class="im-hero">
+  <div class="im-dotfield" id="dotfield"></div>
+  <div class="im-wrap">
+    <div class="im-brandmark">
+      <svg width="20" height="20" viewBox="0 0 20 20"><circle cx="10" cy="10" r="9" fill="none" stroke="#fff" stroke-width="1.6"/><path d="M10 3 v14 M3 10 h14" stroke="#fff" stroke-width="1.6"/></svg>
+      <span class="im-word">CLEVELAND <b>FOUNDATION</b></span>
+    </div>
+    <div class="im-eyebrow" style="color:#8FD9BE;">2025 Community Impact Map</div>
+    <h1>Every pin is a place where Cleveland got a little stronger this year.</h1>
+    <p class="im-lede">Explore the grants The Cleveland Foundation made across Northeast Ohio in 2025. Filter by what you care about or where you live — then help fund more of it.</p>
+    <div class="im-stat-row">
+      <div class="im-stat"><div class="im-num">244</div><div class="im-lab">Grants on the map</div></div>
+      <div class="im-stat"><div class="im-num">65</div><div class="im-lab">Neighborhoods reached</div></div>
+      <div class="im-stat"><div class="im-num">8</div><div class="im-lab">Areas of focus</div></div>
+    </div>
+  </div>
+</div>
+
+<div class="im-app-shell">
+
+  <div class="im-sidebar-backdrop" id="sidebarBackdrop"></div>
+  <aside class="im-sidebar" id="sidebar">
+    <div class="im-sidebar-head">
+      <h2>Filter the map</h2>
+      <button class="im-sidebar-close" id="sidebarClose" aria-label="Close filters">×</button>
+    </div>
+
+    <div class="im-filter-section">
+      <div class="im-filter-label">What do you care about? <span style="text-transform:none; font-weight:600; opacity:0.7;">(pick any number)</span></div>
+      <div class="im-pillar-list" id="pillarList"></div>
+    </div>
+
+    <div class="im-filter-section">
+      <div class="im-filter-label">Where do you live?</div>
+      <select id="neighSelect"></select>
+      <button class="im-locbtn" id="locBtn">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v4M12 18v4M2 12h4M18 12h4"/><circle cx="12" cy="12" r="5"/></svg>
+        Use my location
+      </button>
+      <button class="im-clearbtn" id="clearBtn">Clear all filters</button>
+    </div>
+  </aside>
+
+  <div class="im-content">
+    <button class="im-sidebar-toggle" id="sidebarToggle">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><line x1="4" y1="6" x2="20" y2="6"/><line x1="4" y1="12" x2="20" y2="12"/><line x1="4" y1="18" x2="20" y2="18"/></svg>
+      Filters
+    </button>
+    <div class="im-toolbar">
+      <div></div>
+      <div class="im-resultcount" id="resultCount"></div>
+    </div>
+
+    <div class="im-wrap im-content-wrap">
+      <div class="im-grid">
+        <div class="im-panel im-map-panel">
+          <div class="im-map-head"><h2>The map</h2></div>
+          <div id="leafletMap"></div>
+          <div class="im-geostatus" id="geoStatus"><span class="im-spinner"></span><span id="geoStatusText">Fine-tuning pin locations…</span></div>
+        </div>
+
+        <div class="im-panel im-list-panel">
+          <div class="im-list-head"><h2>The grants</h2></div>
+          <div class="im-cardlist" id="cardlist"></div>
+        </div>
+      </div>
+
+      <div class="im-regional">
+        <h3>Also creating impact across Ohio (13 statewide &amp; regional partners)</h3>
+        <div class="im-regional-scroll" id="regionalScroll"></div>
+      </div>
+    </div>
+
+    <footer>
+      <div class="im-wrap">
+        <p class="im-fineprint">Pins are placed using each grantee's address; a small number may be approximate when an exact match isn't available. Gifts made from this page support The Cleveland Foundation's grantmaking in these focus areas — they are not donations to the individual organizations shown.</p>
+        <button class="im-stafflink" id="staffLink">View community interest so far →</button>
+      </div>
+    </footer>
+  </div>
+</div>
+
+<div class="im-backdrop" id="imBackdrop"></div>
+<div class="im-drawer" id="imDrawer" role="dialog" aria-modal="true" aria-label="Grant details"></div>
+
+<div class="im-prefbar" id="prefbar">
+  <div class="im-txt" id="prefText"></div>
+  <div class="im-actions">
+    <button class="im-go" id="prefGive">Give</button>
+    <button class="im-x" id="prefClose" aria-label="Dismiss">×</button>
+  </div>
+</div>
+
+<div class="im-modal-backdrop" id="staffModal">
+  <div class="im-modal">
+    <h3>Community interest so far</h3>
+    <div class="im-sub">An anonymous tally of the focus areas explored most. Prototype: counted in this browser only. A site-wide tally needs an analytics tool. No personal data is collected.</div>
+    <div id="staffBars"></div>
+    <button class="im-modal-close" id="staffClose">Close</button>
+  </div>
+</div>
+
+</section>
+
+<section class="view" id="view-advisor">
+  <div class="page">
+    <div class="page-head"><div class="eyebrow">Free Consultation</div><h1>Talk to an Advisor</h1></div>
+    <div class="card" style="text-align:center;">
+      <div style="width:80px;height:80px;border-radius:50%;background:var(--tcf-mid-green);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:26px;margin:0 auto 14px;">JR</div>
+      <h3 style="font-size:20px;margin-bottom:4px;">Jordan Reyes</h3>
+      <div style="color:var(--ink-soft);font-size:14px;margin-bottom:4px;">Sr. Philanthropic Advisor</div>
+      <div style="color:var(--ink-faint);font-size:13px;margin-bottom:14px;">15 years with TCF</div>
+      <p style="color:var(--ink-soft);font-size:13.5px;margin-bottom:16px;text-align:left;">Jordan works with individuals and families beginning or deepening their relationship with philanthropy. Conversations are exploratory, pressure-free, and completely confidential.</p>
+      <div style="display:flex;flex-direction:column;gap:8px;">
+        <button class="btn btn-primary btn-block" onclick="showToast('Message sent! Jordan will reply within 1 business day.')">Send a Message</button>
+        <button class="btn btn-ghost btn-block" onclick="showToast('Opening calendar link…')">Schedule a Free Call</button>
+      </div>
+    </div>
+    <div class="card">
+      <h3 style="margin-bottom:14px;">Send a Message</h3>
+      <div class="form-row"><label>Your Name</label><input type="text" placeholder="Jamie Sullivan"/></div>
+      <div class="form-row"><label>Email</label><input type="email" placeholder="your@email.com"/></div>
+      <div class="form-row"><label>What's on your mind?</label><textarea placeholder="e.g., 'I'm thinking about opening a fund. Not sure where to start.'"></textarea></div>
+      <button class="btn btn-primary btn-block" onclick="showToast('Message sent to Jordan! Expect a reply within 1 business day.')">Send to Jordan</button>
+    </div>
+  </div>
+</section>
+
+<!-- =================== SETTINGS =================== -->
+<section class="view" id="view-settings">
+  <div class="page">
+    <div class="page-head"><div class="eyebrow">Account</div><h1>Settings</h1></div>
+    <div class="card">
+      <div class="card-head"><h3>Profile</h3><span class="ipin ipin-integration" data-pin="salesforce-advisor">Salesforce</span></div>
+      <div class="form-row"><label>Full Name</label><input type="text" value="Jamie Sullivan"/></div>
+      <div class="form-row"><label>Email</label><input type="email" value="jamie.sullivan@email.com"/></div>
+      <div class="form-row"><label>Phone</label><input type="tel" value="(216) 555-0100"/></div>
+      <button class="btn btn-primary btn-block btn-sm" onclick="showToast('Profile saved.')">Save Changes</button>
+    </div>
+    <div class="card">
+      <h3 style="margin-bottom:14px;">Security <span class="ipin ipin-security" data-pin="mfa-policy">MFA</span></h3>
+      <div style="display:flex;justify-content:space-between;align-items:center;padding:14px 0;border-bottom:1px solid var(--border);">
+        <div><div style="font-weight:600;">Two-Factor Authentication</div><div style="font-size:12.5px;color:var(--tcf-mid-green);">Active — TOTP App</div></div>
+        <button class="btn btn-ghost btn-sm">Manage</button>
+      </div>
+      <div style="display:flex;justify-content:space-between;align-items:center;padding:14px 0;">
+        <div><div style="font-weight:600;">Password</div><div style="font-size:12.5px;color:var(--ink-faint);">Last changed 90 days ago</div></div>
+        <button class="btn btn-ghost btn-sm">Change</button>
+      </div>
+    </div>
+    <div class="card">
+      <h3 style="margin-bottom:14px;">Notifications</h3>
+      <div style="display:flex;justify-content:space-between;align-items:center;padding:14px 0;border-bottom:1px solid var(--border);"><span style="font-weight:600;">Grant Posted</span><input type="checkbox" checked style="accent-color:var(--tcf-mid-green);width:20px;height:20px;"/></div>
+      <div style="display:flex;justify-content:space-between;align-items:center;padding:14px 0;border-bottom:1px solid var(--border);"><span style="font-weight:600;">Contribution Settled</span><input type="checkbox" checked style="accent-color:var(--tcf-mid-green);width:20px;height:20px;"/></div>
+      <div style="display:flex;justify-content:space-between;align-items:center;padding:14px 0;"><span style="font-weight:600;">New Stories &amp; Impact</span><input type="checkbox" checked style="accent-color:var(--tcf-mid-green);width:20px;height:20px;"/></div>
+    </div>
+  </div>
+</section>
+
+<!-- @slot app-views -->
+</main>
+
+<!-- ============ DOCK ============ -->
+<!-- Home sits far right: the easiest reach for a right thumb on a phone. -->
+<nav class="dock" aria-label="Primary">
+  <button class="dock-item" data-view="newsfeed" onclick="navigate('newsfeed',false)"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 11a9 9 0 019 9M4 4a16 16 0 0116 16"/><circle cx="5" cy="19" r="1.5" fill="currentColor" stroke="none"/></svg>Feed</button>
+  <button class="dock-item" data-view="contributions" onclick="navigate('contributions',false)"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 12v10H4V12"/><path d="M22 7H2v5h20V7z"/><path d="M12 22V7"/></svg>Give</button>
+  <button class="dock-item" data-view="impactmap" onclick="navigate('impactmap',false)"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 20l-6 3V7l6-3m0 16l6 3m-6-3V4m6 16l6-3V4l-6 3m0 13V7m0 0L9 4"/></svg>Map</button>
+  <button class="dock-item" data-view="garden" onclick="navigate('garden',false)"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22V12"/><path d="M12 12C12 7 8 6 5 6c0 4 2 7 7 7z"/><path d="M12 12c0-5 4-6 7-6 0 4-2 7-7 7z"/></svg>Grow</button>
+  <button class="dock-item active" data-view="home" onclick="navigate('home',false)"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9,22 9,12 15,12 15,22"/></svg>Home</button>
+</nav>
+
+<!-- CART DRAWER -->
+<div class="drawer-backdrop" id="cartBackdrop" onclick="toggleCart()" style="z-index:179;"></div>
+<div class="cart-drawer" id="cartDrawer">
+  <div class="cart-handle"></div>
+  <div class="cart-head">
+    <div><h3>Grant Cart</h3><div class="sub" id="cartSubtitle">0 grants</div></div>
+    <button onclick="toggleCart()" style="font-size:22px;color:var(--ink-soft);">×</button>
+  </div>
+  <div class="cart-body" id="cartBody"></div>
+  <div class="cart-foot">
+    <div class="cart-total"><span>Total</span><span id="cartTotal">$0</span></div>
+    <button class="btn btn-accent btn-block" onclick="submitCart()">Submit Grant Batch</button>
+    <button class="btn btn-ghost btn-block" style="margin-top:8px;" onclick="toggleCart()">Continue Adding</button>
+  </div>
+</div>
+
+<!-- LEGACY MODAL -->
+<div class="modal-backdrop" id="legacyModal">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-head">
+      <div class="kind">Legacy &amp; Estate Giving</div>
+      <h3>Leave Your Legacy</h3>
+      <button class="modal-close" onclick="closeLegacyModal()">×</button>
+    </div>
+    <div class="modal-body">
+      <p>There are several ways to leave a lasting philanthropic legacy at the Cleveland Foundation. Explore the options below — or talk to Jordan Reyes to find the right fit.</p>
+      <div class="legacy-option" onclick="openLearningTrack('estate');closeLegacyModal()">
+        <div class="legacy-icon" style="background:rgba(238,115,49,.12);"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--tcf-orange)" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14,2 14,8 20,8"/></svg></div>
+        <div><div style="font-weight:700;color:var(--tcf-primary);font-size:15px;margin-bottom:3px;">Charitable Bequest</div><div style="font-size:13px;color:var(--ink-soft);">Leave a gift in your will. Learn how bequests work and what language to use.</div></div>
+      </div>
+      <div class="legacy-option" onclick="showToast('Opening: Beneficiary designation guide…');closeLegacyModal()">
+        <div class="legacy-icon" style="background:rgba(26,141,169,.12);"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--tcf-blue)" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 8v4l3 3"/></svg></div>
+        <div><div style="font-weight:700;color:var(--tcf-primary);font-size:15px;margin-bottom:3px;">Retirement Account Designation</div><div style="font-size:13px;color:var(--ink-soft);">Name TCF as beneficiary of an IRA or 401(k). Often more tax-efficient than a bequest.</div></div>
+      </div>
+      <div class="legacy-option" onclick="showToast('Opening: Life insurance giving guide…');closeLegacyModal()">
+        <div class="legacy-icon" style="background:rgba(192,98,154,.12);"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--tcf-pink)" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg></div>
+        <div><div style="font-weight:700;color:var(--tcf-primary);font-size:15px;margin-bottom:3px;">Life Insurance Gift</div><div style="font-size:13px;color:var(--ink-soft);">Name TCF as owner or beneficiary of a life insurance policy.</div></div>
+      </div>
+      <div class="legacy-option" onclick="navigate('advisor');closeLegacyModal()">
+        <div class="legacy-icon" style="background:rgba(8,108,67,.12);"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--tcf-mid-green)" stroke-width="2"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg></div>
+        <div><div style="font-weight:700;color:var(--tcf-primary);font-size:15px;margin-bottom:3px;">Talk to Jordan</div><div style="font-size:13px;color:var(--ink-soft);">Free, confidential conversation about what legacy giving could look like for you.</div></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- PIN MODAL -->
+<div class="modal-backdrop" id="pinModal">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-head">
+      <div class="kind" id="pinKind"></div>
+      <h3 id="pinTitle"></h3>
+      <button class="modal-close" onclick="closePin()">×</button>
+    </div>
+    <div class="modal-body" id="pinBody"></div>
+  </div>
+</div>
+
+<!-- GARDEN BADGE MODAL -->
+<div class="modal-backdrop" id="gardenModal">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-head">
+      <div class="kind">Land Florals Challenge</div>
+      <h3 id="gmTitle">&nbsp;</h3>
+      <button class="modal-close" onclick="closeGardenModal()">×</button>
+    </div>
+    <div class="modal-body" id="gmBody"></div>
+  </div>
+</div>
+
+<!-- SHARE MODAL -->
+<div class="modal-backdrop" id="shareModal">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-head">
+      <div class="kind">Invite a Friend</div>
+      <h3>Share the Giving Portal</h3>
+      <button class="modal-close" onclick="closeShareModal()">×</button>
+    </div>
+    <div class="modal-body">
+      <p style="font-size:13.5px;color:var(--ink-soft);line-height:1.5;margin-bottom:16px;">Send a friend a link to the Cleveland Foundation Giving Portal.</p>
+      <div class="legacy-option" onclick="shareVia('text')">
+        <div class="legacy-icon" style="background:rgba(25,185,169,.12);"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--tcf-aqua)" stroke-width="2"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg></div>
+        <div><div style="font-weight:700;color:var(--tcf-primary);font-size:15px;margin-bottom:3px;">Text a Friend</div><div style="font-size:13px;color:var(--ink-soft);">Opens a text message with the portal link.</div></div>
+      </div>
+      <div class="legacy-option" onclick="shareVia('email')">
+        <div class="legacy-icon" style="background:rgba(238,115,49,.12);"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--tcf-orange)" stroke-width="2"><path d="M4 4h16v16H4z"/><path d="M22 6l-10 7L2 6"/></svg></div>
+        <div><div style="font-weight:700;color:var(--tcf-primary);font-size:15px;margin-bottom:3px;">Email a Friend</div><div style="font-size:13px;color:var(--ink-soft);">Opens an email with the portal link.</div></div>
+      </div>
+      <div class="legacy-option" onclick="shareVia('copy')">
+        <div class="legacy-icon" style="background:rgba(8,108,67,.12);"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--tcf-mid-green)" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg></div>
+        <div><div style="font-weight:700;color:var(--tcf-primary);font-size:15px;margin-bottom:3px;">Copy Link</div><div style="font-size:13px;color:var(--ink-soft);">Copy the portal URL to paste anywhere.</div></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
+<!-- PIN TOGGLE FAB -->
+<button class="pin-toggle" id="pinToggle" onclick="togglePins()">
+  <div class="swatch"><span style="background:var(--tcf-orange);"></span><span style="background:var(--tcf-mid-green);"></span><span style="background:var(--tcf-blue);"></span></div>
+  Pins
+</button>
+
+
+<!-- Impact Map dependencies + logic (namespaced; see #view-impactmap) -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet.markercluster/1.5.3/leaflet.markercluster.js"></script>
+<script src="../assets/data/grants-2025.js"></script>
+<script src="../assets/giving/map-and-grants.js"></script>
+
+<script src="../assets/giving/app.js"></script>
+
+<script src="../assets/giving/extras.js"></script>
+<!-- @slot app-scripts -->
+<script>window.SITE_HOME = "../";</script>
+<script src="../assets/js/tcf-bridge.js"></script>
+</body>
+</html>

@@ -1,0 +1,10 @@
+{
+  "name": "tcf-digital-prototype",
+  "private": true,
+  "description": "Cleveland Foundation digital experience prototype (static site). No dependencies.",
+  "scripts": {
+    "build": "node scripts/build-pages.js",
+    "check": "node scripts/build-pages.js --check",
+    "serve": "python -m http.server 8000"
+  }
+}

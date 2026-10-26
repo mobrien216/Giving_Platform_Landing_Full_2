@@ -1,0 +1,72 @@
+/* ============================================================
+   tcf-v3.css — Component Library 3.0 foundation (Digital Style Guide 2026)
+   Load first on every page. Tokens copied verbatim from tokens.css.
+   ============================================================ */
+/* Self-hosted brand fonts (licensed). Paralucent for headings, Source Sans Pro for everything else. */
+@font-face{font-family:'Paralucent';src:url('../fonts/paralucent-light.woff2') format('woff2');font-weight:100 400;font-style:normal;font-display:swap}
+@font-face{font-family:'Paralucent';src:url('../fonts/paralucent-medium.woff2') format('woff2');font-weight:500;font-style:normal;font-display:swap}
+@font-face{font-family:'Paralucent';src:url('../fonts/paralucent-demi-bold.woff2') format('woff2');font-weight:600;font-style:normal;font-display:swap}
+@font-face{font-family:'Paralucent';src:url('../fonts/paralucent-bold.woff2') format('woff2');font-weight:700 800;font-style:normal;font-display:swap}
+@font-face{font-family:'Paralucent';src:url('../fonts/paralucent-heavy.woff2') format('woff2');font-weight:900;font-style:normal;font-display:swap}
+@font-face{font-family:'Paralucent';src:url('../fonts/paralucent-bold-italic.woff2') format('woff2');font-weight:700 800;font-style:italic;font-display:swap}
+@font-face{font-family:'Paralucent Condensed';src:url('../fonts/paralucent-condensed-bold.woff2') format('woff2');font-weight:700;font-style:normal;font-display:swap}
+@font-face{font-family:'Paralucent Condensed';src:url('../fonts/paralucent-condensed-heavy.woff2') format('woff2');font-weight:800 900;font-style:normal;font-display:swap}
+@font-face{font-family:'Source Sans Pro';src:url('../fonts/source-sans-pro-regular.woff2') format('woff2');font-weight:400;font-style:normal;font-display:swap}
+@font-face{font-family:'Source Sans Pro';src:url('../fonts/source-sans-pro-italic.woff2') format('woff2');font-weight:400;font-style:italic;font-display:swap}
+@font-face{font-family:'Source Sans Pro';src:url('../fonts/source-sans-pro-semibold.woff2') format('woff2');font-weight:600;font-style:normal;font-display:swap}
+@font-face{font-family:'Source Sans Pro';src:url('../fonts/source-sans-pro-bold.woff2') format('woff2');font-weight:700;font-style:normal;font-display:swap}
+@font-face{font-family:'Source Sans Pro';src:url('../fonts/source-sans-pro-black.woff2') format('woff2');font-weight:800 900;font-style:normal;font-display:swap}
+/* tokens.css — Cleveland Foundation Component Library 3.0
+   Source of truth: Digital Style Guide 2026 (hand-off p.102), built on the
+   October 2024 Brand Guidelines. Paste this :root block first. Any value not
+   in this block is not part of the system. */
+:root{
+  /* Brand color (F1) */
+  --green:#164430; --red:#CB1E4B;
+  --orange:#EE7331; --mid:#086C43; --blue:#1A8DA9; --pink:#C0629A; --aqua:#19B9A9;
+  --white:#FFFFFF; --gray2:#E8EAE5; --gray3:#DEE2DB;
+  --gray1:#F3F2F0; --black:#000000;            /* print only */
+  /* Land Florals (F8): artwork, map fills, chart marks only. Never text, buttons or borders.
+     Sampled values; confirm with marketing before they ship. */
+  --gold:#F5AD30; --leaf:#48A852;
+  --fl-forest:#224030; --fl-gold:#F5AD30; --fl-teal:#64B6AA; --fl-terra:#D87D46;
+  --fl-meadow:#669F64; --fl-erie:#528BA6; --fl-foxglove:#AF6B99; --fl-leaf:#48A852;
+  /* Impact Agenda pillars and programs (F8): one pillar, one color, everywhere */
+  --p-region:var(--blue); --p-neigh:var(--pink); --p-pros:var(--orange);
+  --p-well:var(--red); --p-org:var(--mid); --p-new:var(--aqua);
+  /* Fund types (G9, T3) */
+  --ft-affinity:var(--pink); --ft-community:var(--blue); --ft-dag:var(--orange); --ft-org:var(--mid);
+
+  /* Type (F2). Paralucent needs a web font license; Aptos is the only fallback. */
+  --head:'Paralucent','Aptos',system-ui,-apple-system,'Segoe UI',sans-serif;
+  --body:'Source Sans 3','Source Sans Pro','Aptos',system-ui,-apple-system,'Segoe UI',sans-serif;
+  /* Web type scale: mobile at 390px to desktop at 1280px */
+  --fs-display:clamp(44px,31.73px + 3.146vw,72px);
+  --fs-h1:clamp(36px,27.24px + 2.247vw,56px);
+  --fs-h2:clamp(30px,25.62px + 1.124vw,40px);
+  --fs-h3:clamp(24px,22.25px + .449vw,28px);
+  --fs-quote:clamp(24px,20.49px + .899vw,32px);
+  --fs-sub:clamp(14px,13.56px + .112vw,15px);
+  --fs-body-lg:clamp(18px,17.12px + .225vw,20px);
+  --fs-body:clamp(16px,15.12px + .225vw,18px);
+  --fs-caption:clamp(13px,12.56px + .112vw,14px);
+
+  /* Space and layout (F3): 8-point scale, 12 columns, 1280px max */
+  --space-1:4px; --space-2:8px; --space-3:12px; --space-4:16px; --space-5:24px;
+  --space-6:32px; --space-7:48px; --space-8:64px; --space-9:96px;
+  --gutter:clamp(20px,4.5vw,56px); --max:1280px;
+  --bar:4px; --tap:44px;
+
+  /* Shape, elevation, focus (F4) */
+  --r:4px;
+  --focus:0 0 0 2px var(--white),0 0 0 4px var(--orange);
+  --shadow-o:0 2px 6px rgba(22,68,48,.08),0 22px 48px -16px rgba(22,68,48,.34);
+  --scrim:rgba(22,68,48,.62);
+
+  /* Motion (F6) */
+  --ease:cubic-bezier(.2,.8,.2,1);
+  --t-fast:150ms; --t:200ms; --t-reveal:450ms; --t-stagger:70ms; --t-count:900ms; --t-ticker:52s;
+}
+@media (prefers-reduced-motion:reduce){:root{--t-fast:0ms;--t:0ms;--t-reveal:0ms;--t-stagger:0ms;--t-count:0ms}}
+:root{--logo:url(../img/tcf-logo.png);--camp:'Paralucent Condensed','Paralucent','Aptos',system-ui,sans-serif;}
+:focus-visible{outline:none!important;box-shadow:var(--focus)!important;}

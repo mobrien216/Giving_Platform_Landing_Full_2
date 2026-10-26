@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Cleveland Foundation — welcome</title>
+<!-- Giving Portal animatic v5 (10-21-2026), adapted: shared font files, portrait layout, hand-off message -->
+<!-- Fonts + brand tokens come from the shared stylesheet (already cached by the parent page) -->
+<link rel="stylesheet" href="../css/tcf-v3.css">
+<style>
+:root{--green:#164430;--red:#CB1E4B;--orange:#EE7331;--mid:#086C43;--blue:#1A8DA9;--pink:#C0629A;--aqua:#19B9A9;--gray1:#F3F2F0;--gray2:#E8EAE5;--white:#FFFFFF;
+  --head:'Paralucent','Aptos',system-ui,sans-serif;--body:'Source Sans Pro','Aptos',system-ui,sans-serif;--camp:'Paralucent Condensed','Paralucent',sans-serif;--ease:cubic-bezier(.2,.8,.2,1)}
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{width:100%;height:100%;background:var(--green);overflow:hidden}
+#stage{position:absolute;left:50%;top:50%;width:1920px;height:1080px;margin:-540px 0 0 -960px;background:var(--green);overflow:hidden;transform-origin:50% 50%}
+.f{position:absolute;inset:0;opacity:0}
+.play .f{animation:fIn .45s var(--ease) var(--tin) both,fOut .4s ease var(--tout) forwards}
+.f1{--tin:.08s;--tout:1.40s;background:var(--green)}
+.ground{position:absolute;inset:0;background:var(--white);opacity:0}
+.play .ground{animation:fIn .45s var(--ease) 1.48s both}
+.f2{--tin:1.52s;--tout:2.85s}.f3{--tin:2.92s;--tout:7s}
+@keyframes fIn{from{opacity:0}to{opacity:1}}@keyframes fOut{to{opacity:0}}
+.kick{position:absolute;display:flex;align-items:center;gap:14px;font:700 24px/1 var(--body);letter-spacing:.08em;text-transform:uppercase;color:var(--gray2);opacity:0}
+.kick::before{content:'';width:14px;height:14px;background:var(--orange)}
+.kick.c{left:0;right:0;justify-content:center}
+.kick.g{color:var(--mid)}
+.play .kick{animation:up .45s ease calc(var(--tin) + .08s) both}
+.line{position:absolute;font:700 104px/1.05 var(--head);letter-spacing:-.015em;color:var(--white)}
+.line.c{left:0;right:0;text-align:center}
+.line.g{color:var(--green)}
+.w{display:inline-block;opacity:0;transform:translateY(.45em)}
+.play .w{animation:wIn .48s cubic-bezier(.2,.9,.3,1) calc(var(--tin) + var(--wd)) both}
+@keyframes wIn{to{opacity:1;transform:none}}@keyframes up{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
+/* the single line: color bar, fixed order and proportions */
+.bar{position:absolute;height:8px;display:flex;transform:scaleX(0);transform-origin:0 50%}
+.bar i{display:block;height:100%}
+.play .bar{animation:draw .55s var(--ease) var(--bd) both}@keyframes draw{to{transform:scaleX(1)}}
+/* the geometric design: true circles and squares on a 10 x 12 grid, quiet field in Gray 1, cluster in brand colors */
+.geo{position:absolute;left:0;top:0}
+.geo .cell{position:absolute;width:var(--d);height:var(--d);border-radius:50%;background:var(--gray1);transform:scale(0)}
+.geo .cell.sq{border-radius:0}
+.play .geo .cell{animation:pop .4s cubic-bezier(.2,.9,.3,1.2) var(--cd) both}@keyframes pop{to{transform:none}}
+/* right column, beside the pattern */
+.col{position:absolute;left:1000px;width:800px}
+.stats{display:flex;gap:90px;margin-top:40px;opacity:0}
+.play .stats{animation:up .45s ease 1.98s both}
+.stat .v{font:800 92px/1 var(--head);color:var(--green);letter-spacing:-.01em;font-variant-numeric:tabular-nums}
+.stat .k{font:700 18px/1 var(--body);letter-spacing:.08em;text-transform:uppercase;color:var(--mid);margin-top:12px}
+.camp{position:absolute;left:1000px;top:270px;font:900 176px/.92 var(--camp);letter-spacing:0;text-transform:uppercase;color:var(--green)}
+.camp .w{transform:translateY(.25em)}
+/* end card: Gray 2, primary logo, the line, the name */
+.f4{position:absolute;inset:0;background:var(--gray2);clip-path:circle(0px at 50% 50%)}
+.play .f4{animation:reveal .5s cubic-bezier(.6,0,.25,1) 4.05s both}@keyframes reveal{to{clip-path:circle(1150px at 50% 50%)}}
+.logo{position:absolute;left:580px;top:330px;width:760px;height:244px;background:url(../img/tcf-logo@2x.png) center/contain no-repeat;clip-path:inset(0 100% 0 0)}
+.play .logo{animation:wipe .75s cubic-bezier(.55,0,.25,1) 4.3s both,settle .75s var(--ease) 4.3s both}
+@keyframes wipe{to{clip-path:inset(0 0 0 0)}}@keyframes settle{from{transform:scale(1.03)}to{transform:none}}
+.f4 .bar{left:580px;top:628px;width:760px}
+.sub{position:absolute;left:0;right:0;top:672px;text-align:center;font:700 28px/1 var(--body);letter-spacing:.12em;text-transform:uppercase;color:var(--mid);opacity:0}
+.play .sub{animation:track .35s var(--ease) 5.05s both}@keyframes track{from{opacity:0;letter-spacing:.4em}to{opacity:1;letter-spacing:.12em}}
+
+
+/* ---- site integration ---- */
+#stage{background:transparent!important}
+.play .ground{animation:fIn .45s var(--ease) 1.48s both,gOut .01s linear 4.6s forwards}
+@keyframes gOut{to{opacity:0}}
+html,body{animation:ground 6.2s linear both}
+@keyframes ground{0%,24%{background:#164430}31%,64%{background:#FFFFFF}70%,100%{background:#E8EAE5}}
+/* ---- portrait layout for phones: same four scenes, stacked ---- */
+.portrait#stage{width:1080px;height:1920px;margin:-960px 0 0 -540px}
+.portrait .f1 .kick{top:780px!important}
+.portrait .f1 .line{top:834px!important;font-size:80px}
+.portrait .f1 .bar{left:160px!important;top:990px!important}
+.portrait .geo{transform:translate(30px,40px)}
+.portrait .f2 .col{left:120px;width:840px;top:1110px!important}
+.portrait .f2 .line{font-size:84px}
+.portrait .stats{gap:70px}
+.portrait .camp{left:120px;top:1110px;font-size:160px}
+.portrait .f4 .logo{left:160px;top:760px}
+.portrait .f4 .bar{left:160px;top:1060px}
+@media (prefers-reduced-motion:reduce){*{animation-duration:.01ms!important;animation-delay:0s!important}}
+</style>
+</head><body>
+<div id="stage" class="play">
+ <div class="f f1">
+  <div class="kick c" style="top:372px">Est. 1914 · Cleveland, Ohio</div>
+  <div class="line c" style="top:426px"><span class="w" style="--wd:0.24s">It</span> <span class="w" style="--wd:0.32s">Takes</span> <span class="w" style="--wd:0.40s;color:var(--orange)">All</span> <span class="w" style="--wd:0.48s">of</span> <span class="w" style="--wd:0.56s">Us.</span></div>
+  <div class="bar" style="left:580px;top:600px;width:760px;--bd:.62s"><i style="width:2.8%;background:#086C43"></i><i style="width:60.5%;background:#E8EAE5"></i><i style="width:1.3%;background:#EE7331"></i><i style="width:12%;background:#19B9A9"></i><i style="width:12%;background:#CB1E4B"></i><i style="width:6.6%;background:#C0629A"></i><i style="width:2.8%;background:#1A8DA9"></i></div>
+ </div>
+ <div class="ground"></div>
+ <div class="geo" style="--d:68px"><i class="cell q " style="left:374px;top:132px;--cd:1.560s"></i><i class="cell q " style="left:442px;top:132px;--cd:1.569s"></i><i class="cell q " style="left:510px;top:132px;--cd:1.577s"></i><i class="cell q sq" style="left:646px;top:132px;--cd:1.586s"></i><i class="cell q " style="left:238px;top:200px;--cd:1.594s"></i><i class="cell q " style="left:306px;top:200px;--cd:1.603s"></i><i class="cell q sq" style="left:374px;top:200px;--cd:1.611s"></i><i class="cell q " style="left:442px;top:200px;--cd:1.620s"></i><i class="cell q sq" style="left:578px;top:200px;--cd:1.628s"></i><i class="cell q " style="left:714px;top:200px;--cd:1.637s"></i><i class="cell q " style="left:782px;top:200px;--cd:1.645s"></i><i class="cell q sq" style="left:170px;top:268px;--cd:1.653s"></i><i class="cell q " style="left:238px;top:268px;--cd:1.662s"></i><i class="cell q " style="left:374px;top:268px;--cd:1.671s"></i><i class="cell q " style="left:442px;top:268px;--cd:1.679s"></i><i class="cell q sq" style="left:510px;top:268px;--cd:1.688s"></i><i class="cell q " style="left:646px;top:268px;--cd:1.696s"></i><i class="cell q " style="left:714px;top:268px;--cd:1.705s"></i><i class="cell q " style="left:374px;top:336px;--cd:1.713s"></i><i class="cell q " style="left:510px;top:336px;--cd:1.722s"></i><i class="cell q " style="left:578px;top:336px;--cd:1.730s"></i><i class="cell q " style="left:646px;top:336px;--cd:1.739s"></i><i class="cell q " style="left:714px;top:336px;--cd:1.747s"></i><i class="cell q " style="left:782px;top:336px;--cd:1.756s"></i><i class="cell q sq" style="left:374px;top:404px;--cd:1.764s"></i><i class="cell q " style="left:578px;top:404px;--cd:1.772s"></i><i class="cell q sq" style="left:646px;top:404px;--cd:1.781s"></i><i class="cell q " style="left:782px;top:404px;--cd:1.790s"></i><i class="cell q " style="left:646px;top:472px;--cd:1.798s"></i><i class="cell q " style="left:714px;top:472px;--cd:1.806s"></i><i class="cell q " style="left:782px;top:472px;--cd:1.815s"></i><i class="cell q sq" style="left:510px;top:676px;--cd:1.824s"></i><i class="cell q " style="left:714px;top:676px;--cd:1.832s"></i><i class="cell q " style="left:170px;top:744px;--cd:1.841s"></i><i class="cell q " style="left:238px;top:744px;--cd:1.849s"></i><i class="cell q sq" style="left:306px;top:744px;--cd:1.858s"></i><i class="cell q " style="left:374px;top:744px;--cd:1.866s"></i><i class="cell q " style="left:510px;top:744px;--cd:1.875s"></i><i class="cell q " style="left:578px;top:744px;--cd:1.883s"></i><i class="cell q " style="left:646px;top:744px;--cd:1.892s"></i><i class="cell q " style="left:714px;top:744px;--cd:1.900s"></i><i class="cell q " style="left:782px;top:744px;--cd:1.909s"></i><i class="cell q " style="left:238px;top:812px;--cd:1.917s"></i><i class="cell q " style="left:306px;top:812px;--cd:1.925s"></i><i class="cell q sq" style="left:374px;top:812px;--cd:1.934s"></i><i class="cell q " style="left:442px;top:812px;--cd:1.943s"></i><i class="cell q " style="left:510px;top:812px;--cd:1.951s"></i><i class="cell q " style="left:578px;top:812px;--cd:1.960s"></i><i class="cell q sq" style="left:646px;top:812px;--cd:1.968s"></i><i class="cell q " style="left:782px;top:812px;--cd:1.977s"></i><i class="cell q " style="left:306px;top:880px;--cd:1.985s"></i><i class="cell q " style="left:374px;top:880px;--cd:1.994s"></i><i class="cell q " style="left:510px;top:880px;--cd:2.002s"></i><i class="cell q " style="left:646px;top:880px;--cd:2.010s"></i><i class="cell q " style="left:714px;top:880px;--cd:2.019s"></i><i class="cell k " style="left:170px;top:336px;background:#164430;--cd:2.970s"></i><i class="cell k " style="left:238px;top:336px;background:#164430;--cd:2.987s"></i><i class="cell k sq" style="left:306px;top:336px;background:#CB1E4B;--cd:3.004s"></i><i class="cell k " style="left:238px;top:404px;background:#164430;--cd:3.021s"></i><i class="cell k " style="left:306px;top:404px;background:#CB1E4B;--cd:3.038s"></i><i class="cell k " style="left:442px;top:404px;background:#EE7331;--cd:3.055s"></i><i class="cell k " style="left:510px;top:404px;background:#EE7331;--cd:3.072s"></i><i class="cell k " style="left:306px;top:472px;background:#CB1E4B;--cd:3.089s"></i><i class="cell k " style="left:374px;top:472px;background:#086C43;--cd:3.106s"></i><i class="cell k " style="left:510px;top:472px;background:#EE7331;--cd:3.123s"></i><i class="cell k sq" style="left:238px;top:540px;background:#164430;--cd:3.140s"></i><i class="cell k " style="left:374px;top:540px;background:#1A8DA9;--cd:3.157s"></i><i class="cell k " style="left:442px;top:540px;background:#1A8DA9;--cd:3.174s"></i><i class="cell k " style="left:510px;top:540px;background:#EE7331;--cd:3.191s"></i><i class="cell k " style="left:578px;top:540px;background:#19B9A9;--cd:3.208s"></i><i class="cell k sq" style="left:646px;top:540px;background:#19B9A9;--cd:3.225s"></i><i class="cell k " style="left:170px;top:608px;background:#086C43;--cd:3.242s"></i><i class="cell k " style="left:238px;top:608px;background:#086C43;--cd:3.259s"></i><i class="cell k " style="left:306px;top:608px;background:#086C43;--cd:3.276s"></i><i class="cell k sq" style="left:374px;top:608px;background:#1A8DA9;--cd:3.293s"></i><i class="cell k " style="left:442px;top:608px;background:#1A8DA9;--cd:3.310s"></i><i class="cell k sq" style="left:578px;top:608px;background:#19B9A9;--cd:3.327s"></i><i class="cell k " style="left:714px;top:608px;background:#C0629A;--cd:3.344s"></i><i class="cell k " style="left:782px;top:608px;background:#C0629A;--cd:3.361s"></i><i class="cell k " style="left:238px;top:676px;background:#086C43;--cd:3.378s"></i><i class="cell k " style="left:374px;top:676px;background:#1A8DA9;--cd:3.395s"></i><i class="cell k " style="left:442px;top:676px;background:#1A8DA9;--cd:3.412s"></i><i class="cell k " style="left:646px;top:676px;background:#C0629A;--cd:3.429s"></i></div>
+ <div class="f f2">
+  <div class="col" style="top:286px"><div class="kick g" style="position:static">One hundred and twelve years</div>
+   <div class="line g" style="position:static;margin-top:16px"><span class="w" style="--wd:0.30s">Neighbors</span> <span class="w" style="--wd:0.38s;color:var(--mid)">funding</span> <span class="w" style="--wd:0.46s">neighbors.</span></div>
+   <div class="stats"><div class="stat"><div class="v cu" data-to="3.1" data-dec="1" data-pre="$" data-suf="B">$0.0B</div><div class="k">Granted since 1914</div></div>
+    <div class="stat"><div class="v cu" data-to="2800" data-grp="1" data-suf="+">0+</div><div class="k">Nonprofits supported</div></div></div></div>
+ </div>
+ <div class="f f3">
+  <div class="camp"><span class="w" style="--wd:0.30s">Cleveland.</span><br><span class="w" style="--wd:0.40s">You’re</span><br><span class="w" style="--wd:0.48s">the</span> <span class="w" style="--wd:0.54s">reason.</span></div>
+ </div>
+ <div class="f4"><div class="logo" role="img" aria-label="Cleveland Foundation"></div>
+  <div class="bar" style="--bd:4.95s"><i style="width:2.8%;background:#086C43"></i><i style="width:60.5%;background:#164430"></i><i style="width:1.3%;background:#EE7331"></i><i style="width:12%;background:#19B9A9"></i><i style="width:12%;background:#CB1E4B"></i><i style="width:6.6%;background:#C0629A"></i><i style="width:2.8%;background:#1A8DA9"></i></div>
+  </div>
+</div>
+<script>
+/* counters, fit-to-screen (landscape or portrait), and the hand-off back to the app */
+function counts(t){document.querySelectorAll('.cu').forEach(function(el){
+  var to=parseFloat(el.dataset.to),p=t<2.03?0:Math.min((t-2.03)/0.72,1),v=to*(1-Math.pow(1-p,3));
+  var s=el.dataset.grp?Math.round(v).toLocaleString('en-US'):v.toFixed(parseInt(el.dataset.dec||'0',10));
+  el.textContent=(el.dataset.pre||'')+s+(el.dataset.suf||'');});}
+var stage=document.getElementById('stage');
+function fit(){var tall=innerHeight>innerWidth*1.05;stage.classList.toggle('portrait',tall);
+  var w=tall?1080:1920,h=tall?1920:1080;stage.style.transform='scale('+Math.min(innerWidth/w,innerHeight/h)+')';}
+addEventListener('resize',fit);fit();
+var t0=performance.now(),sent=false;
+function done(){if(sent)return;sent=true;try{parent.postMessage({tcf:'intro-done'},location.origin)}catch(e){}}
+function loop(){var t=(performance.now()-t0)/1000;counts(t);if(t>=6.0)done();if(!sent)requestAnimationFrame(loop);}
+requestAnimationFrame(loop);
+if(matchMedia('(prefers-reduced-motion:reduce)').matches)setTimeout(done,300);
+</script>
+</body></html>

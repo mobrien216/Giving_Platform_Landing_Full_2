@@ -1,0 +1,158 @@
+/* ============================================================
+   tcf-v3-site.css — Component Library 3.0 bridge for the landing page and the portal
+   Load AFTER the app stylesheet. Source of truth: Digital Style Guide 2026 (approved 10-20-2026).
+   1. Token name map (style guide p.103)  2. Base  3. Actions  4. Labels  5. Landing  6. Portal
+   ============================================================ */
+
+/* ---------- 1. Design System 1.0 → 2.0 name map ---------- */
+:root{
+  --forest:var(--green); --pine:var(--green); --moss:var(--mid);
+  --ember:var(--orange); --ember-deep:var(--red); --olive:var(--mid);
+  --magenta:var(--pink); --magenta-lt:var(--pink);
+  --parchment:var(--white); --paper:var(--white); --well:var(--gray2);
+  --ink:var(--green); --ink-2:var(--mid); --ink-3:var(--mid);
+  --line:var(--gray3); --line-2:var(--gray3);
+  --p-well:var(--red); --p-org:var(--mid); --p-new:var(--aqua);
+  --p-pros:var(--orange); --p-neigh:var(--pink); --p-region:var(--blue);
+  --f-display:var(--head); --f-ui:var(--body); --f-figures:var(--body); --f-ledger:var(--body);
+  --sh-1:none; --sh-2:none; --sh-3:var(--shadow-o);
+  --r:4px;
+}
+
+/* ---------- 2. Base ---------- */
+body{font-family:var(--body);color:var(--green);background:var(--white);}
+h1,h2,h3,h4{font-family:var(--head);font-weight:700;}
+.gate-guilloche{display:none!important;}               /* the brand has no gradients or rings; flat Green */
+input[type=range]::-webkit-slider-thumb{background:var(--green);box-shadow:0 0 0 3px var(--white),0 0 0 4.5px var(--green);}
+input[type=range]::-moz-range-thumb{background:var(--green);}
+input[type=range]{background:var(--gray3);}
+
+/* ---------- 3. Actions (A1–A4): one Green primary; no Orange fills behind text ---------- */
+.btn{border-radius:var(--r);font-family:var(--body);font-weight:700;font-size:16px;letter-spacing:0;min-height:48px;padding:0 22px;border:1.5px solid transparent;box-shadow:none;}
+.btn-sm{min-height:40px;padding:0 16px;font-size:15px;}
+.btn-lg{min-height:56px;padding:0 28px;font-size:18px;}
+.btn:active{transform:none;}
+@media(hover:hover){.btn:hover{transform:none;}}
+.btn-accent,.btn-primary{background:var(--green)!important;border-color:var(--green)!important;color:var(--white)!important;box-shadow:none!important;}
+.btn-accent:hover,.btn-primary:hover{background:var(--mid)!important;border-color:var(--mid)!important;}
+.btn-quiet{background:transparent;border-color:var(--green);color:var(--green);}
+.btn-quiet:hover{background:var(--gray2);}
+.btn-onhero{background:transparent!important;border-color:var(--white)!important;color:var(--white)!important;}
+.btn-onhero:hover{background:rgba(255,255,255,.14)!important;}
+/* inside Green blocks the primary action is White with a Green label */
+:is(.hero,.film,.footer,.panel-gate,.vault,.calc-out,.lg-hero,.si-band,.msheet) .btn-accent,
+body.at-hero:not(.scrolled) .nav .btn-accent{background:var(--white)!important;border-color:var(--white)!important;color:var(--green)!important;}
+:is(.hero,.film,.footer,.panel-gate,.vault,.calc-out,.lg-hero,.si-band,.msheet) .btn-accent:hover,
+body.at-hero:not(.scrolled) .nav .btn-accent:hover{background:var(--gray2)!important;border-color:var(--gray2)!important;}
+.btn[disabled]{background:var(--gray2)!important;border-color:var(--gray2)!important;color:rgba(22,68,48,.42)!important;opacity:1;}
+.link{font-family:var(--body);font-size:14px;font-weight:700;letter-spacing:.08em;color:var(--mid);}
+.link:hover{color:var(--green);}
+
+.chip{min-height:36px;padding:6px 16px;border:1.5px solid var(--gray3);border-radius:var(--r);background:var(--white);color:var(--green);font-family:var(--body);font-weight:600;font-size:15px;letter-spacing:0;text-transform:none;}
+.chip:hover{background:var(--white);border-color:var(--mid);color:var(--green);}
+.chip.sel,.chip.sel:hover{background:var(--green);border-color:var(--green);color:var(--white);}
+.seg{background:var(--white);border:1.5px solid var(--gray3);border-radius:var(--r);padding:0;gap:0;}
+.seg button{border-radius:0;min-height:38px;font-weight:600;font-size:15px;color:var(--green);border-left:1.5px solid var(--gray3);}
+.seg button:first-child{border-left:0;}
+.seg button.sel{background:var(--green);color:var(--white);box-shadow:none;}
+.rng{border-radius:var(--r);border:1.5px solid rgba(255,255,255,.45);color:var(--white);font-family:var(--body);font-weight:700;font-size:14px;letter-spacing:0;}
+.rng:hover{border-color:var(--white);color:var(--white);}
+.rng.sel{background:var(--white);border-color:var(--white);color:var(--green);}
+.ranges.on-light .rng{background:var(--white);border-color:var(--gray3);color:var(--green);}
+.ranges.on-light .rng.sel{background:var(--green);border-color:var(--green);color:var(--white);}
+.amt-grid button{border:1.5px solid var(--gray3);font-family:var(--body);font-weight:700;font-size:18px;color:var(--green);}
+.amt-grid button.sel{background:var(--green);border-color:var(--green);color:var(--white);box-shadow:none;}
+
+/* ---------- 4. Labels: ledger mono is retired; labels use the sub-header style ---------- */
+.sr-kick,.ph-kick{font-family:var(--body);font-size:var(--fs-sub);font-weight:700;letter-spacing:.08em;color:var(--mid);}
+.p-kick,.card-k,.fb-greet,.k-label{font-family:var(--body);font-size:13px;font-weight:700;letter-spacing:.08em;color:var(--mid);}
+.sr-kick::before,.ph-kick::before,.p-kick::before,.card-k::before,.fb-greet::before{width:8px;height:8px;border-radius:0;}
+.sect-rail h2{font-size:clamp(24px,3vw,30px);font-weight:700;letter-spacing:-.01em;}
+.page-head h1{font-size:clamp(28px,4vw,34px);font-weight:700;letter-spacing:-.015em;}
+.p-label{font-weight:700;}
+.sr-lead{background-image:none;border-bottom:2px dotted var(--gray3);height:0;animation:none;}
+
+/* ---------- 5. Landing ---------- */
+body:not(.at-hero) .nav, body.scrolled .nav{background:rgba(255,255,255,.96);border-bottom-color:var(--gray3);}
+.nav-link{font-family:var(--body);font-weight:600;font-size:16px;color:var(--green);}
+.nav .nav-login{background:transparent;border:1.5px solid var(--green);color:var(--green);}
+body.at-hero:not(.scrolled) .nav-login{border-color:var(--white);color:var(--white);}
+.hero h1{font-weight:700;letter-spacing:-.02em;}
+.h-stats .v,.hero .stat .v{color:var(--orange);}               /* stats at display size: Orange on Green */
+/* persona doors (G2 icon tiles): Community Orange · Nonprofit Mid-Green · Advisor Blue · Fundholder Green gate */
+.sect-rail + .pgrid > .panel .t-icon svg{stroke:currentColor;}
+.sect-rail + .pgrid > .panel:nth-child(1) .t-icon{background:var(--orange)!important;color:var(--green);}
+.sect-rail + .pgrid > .panel:nth-child(2) .t-icon{background:var(--mid)!important;color:var(--white);}
+.sect-rail + .pgrid > .panel:nth-child(3) .t-icon{background:var(--blue)!important;color:var(--white);}
+.pc-kick{color:var(--mid)!important;}
+.film .f-play,.film:hover .f-play{background:var(--white);color:var(--green);}
+.tk-item .amt{color:var(--white);font-weight:700;}
+.calc-units .u-v{color:var(--white);}
+.calc-units>div{background:var(--mid);}
+
+/* ---------- 6. Portal ---------- */
+.top{background:rgba(255,255,255,.96);border-bottom:1px solid var(--gray3);}
+.top .ic-btn:hover{background:var(--gray2);}
+.dot-count{background:var(--red);color:var(--white);font-family:var(--body);font-weight:700;font-size:11px;}
+/* bottom bar becomes the Green dock (P1) */
+.tabs{background:var(--green);border-top:0;padding:6px 6px calc(6px + var(--safe-b));gap:2px;}
+.tab{color:var(--gray2);border-radius:var(--r);font-family:var(--body);font-size:11px;font-weight:700;letter-spacing:.06em;}
+.tab.sel{background:var(--white);color:var(--green);}
+.tab.sel::after{display:none;}
+.tab-home{width:auto;height:auto;min-height:52px;margin:0;padding:8px 14px;border-radius:var(--r);background:transparent;color:var(--white);box-shadow:none;}
+.tab-home.sel{background:var(--white);color:var(--green);box-shadow:none;}
+/* drawer (P10): White, Gray 2 hover, Orange bar on the current page */
+.drawer{background:var(--white);color:var(--green);border-right:1px solid var(--gray3);}
+.drawer .brand-logo.on-dark{filter:none;}
+.drawer .brand-logo.text.on-dark{color:var(--green);}
+.dr-close{background:var(--gray2);color:var(--green);}
+.dr-who{background:var(--white);border:1px solid var(--gray3);}
+.dr-who .avatar{background:var(--mid);}
+.dr-who .n{color:var(--green);}
+.dr-who .f{color:var(--mid);}
+.dr-sec{color:var(--mid);font-size:12px;letter-spacing:.08em;}
+.dr-item{position:relative;color:var(--green);font-weight:600;}
+.dr-item svg{color:var(--mid);}
+.dr-item:hover{background:var(--gray2);color:var(--green);}
+.dr-item.sel{background:var(--gray2);color:var(--green);font-weight:700;}
+.dr-item.sel::before{content:"";position:absolute;left:0;top:8px;bottom:8px;width:3px;background:var(--orange);}
+.dr-item.sel svg{color:var(--green);}
+.dr-item .dc{background:var(--red);color:var(--white);font-family:var(--body);}
+.dr-foot{border-top:1px solid var(--gray3);}
+.dr-foot .btn-onhero{border-color:var(--green)!important;color:var(--green)!important;}
+.dr-foot .btn-onhero:hover{background:var(--gray2)!important;}
+/* balance card (vault): flat Green statement block */
+.v-fund{color:var(--white);}
+.v-type,.v-asof,.v-stats .k{color:var(--gray2);}
+.v-chg,.v-chg.neg{color:var(--white);}
+.v-stats{background:rgba(255,255,255,.18);}
+.v-stats>div{background:var(--mid);}
+.pin{border:0;background:var(--gray2);color:var(--green);font-family:var(--body);font-size:11px;letter-spacing:.08em;}
+.pin::before{background:var(--blue);}
+.pin.dark{background:rgba(255,255,255,.14);color:var(--white);}
+/* status (P12): Gray 2 pill with a colored square */
+.status{background:var(--gray2)!important;color:var(--green)!important;font-family:var(--body);font-size:11.5px;font-weight:700;letter-spacing:.08em;padding:5px 10px;}
+.status::before{width:9px;height:9px;border-radius:0;background:var(--st,var(--mid));}
+.st-entered,.st-queued{--st:var(--gray3);}
+.st-entered::before,.st-queued::before{box-shadow:inset 0 0 0 1px rgba(22,68,48,.18);}
+.st-approved{--st:var(--orange);}
+.st-posted{--st:var(--mid);}
+.seal{background:var(--white)!important;border:1.5px solid var(--gray3);color:var(--green)!important;font-family:var(--body);font-size:11.5px;letter-spacing:.08em;padding:4px 10px;display:inline-flex;align-items:center;gap:7px;}
+.seal::before{content:"";width:9px;height:9px;border-radius:50%;background:var(--metal,var(--orange));box-shadow:0 0 0 2px var(--white),0 0 0 3px var(--metal,var(--orange));}
+.seal.plat{--metal:var(--green);} .seal.silver{--metal:var(--gray3);}
+.steps span.on{background:var(--orange);}
+.ptype{background:var(--gray2);color:var(--green);font-family:var(--body);font-size:11.5px;}
+.ptype.news{background:var(--green);color:var(--white);}
+.qz-opt.right{border-color:var(--mid);background:var(--gray2);}
+.qz-opt.wrong{border-color:var(--red);background:var(--gray2);}
+.fund-pill .fp-t,.ffr-name,.p-label,.card h3{font-family:var(--head);font-weight:700;}
+.lg-hero{background:var(--green)!important;}
+
+/* film panel (G6): flat Green, no glow; play button White with a Green icon */
+.film .f-sun,.film::after{display:none!important;}
+.film .f-play{background:var(--white);color:var(--green);border:0;backdrop-filter:none;}
+.film:hover .f-play{background:var(--white);border-color:var(--white);}
+.film .f-meta::before{border-radius:0;background:var(--orange);}
+/* window labels use the sub-header style */
+.ph-kick,#popKick{color:var(--mid)!important;}
+.film .f-title em{color:var(--orange);}     /* G6: the accent word is Orange (large type on Green) */

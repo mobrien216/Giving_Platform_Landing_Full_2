@@ -610,9 +610,10 @@ input[type=range]::-moz-range-thumb{width:22px;height:22px;border-radius:50%;bac
 .cap-kick{font-size:13px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--gray2);}
 .capstone h2{color:#fff;font-size:clamp(24px,4vw,32px);font-weight:800;letter-spacing:-.02em;margin-top:6px;}
 .capstone p{color:var(--gray2);font-size:14.5px;line-height:1.6;margin-top:8px;max-width:62ch;}
-.cap-tot{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:rgba(255,255,255,.18);border-radius:var(--r);overflow:hidden;margin-top:16px;}
-.cap-tot>div{background:var(--mid);padding:12px;}
-.cap-tot span{display:block;font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:var(--gray2);}
+/* tile colours: tcf-v3-site.css → stat strips on a Green block */
+.cap-tot{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;border-radius:var(--r);overflow:hidden;margin-top:16px;}
+.cap-tot>div{padding:12px;}
+.cap-tot span{display:block;font-size:12px;letter-spacing:.06em;text-transform:uppercase;}
 .cap-tot b{display:block;font-family:var(--f-display);font-size:clamp(15px,3.4vw,20px);margin-top:4px;font-variant-numeric:tabular-nums;overflow-wrap:anywhere;}
 .cap-bars{display:flex;align-items:flex-end;gap:10px;height:120px;margin-top:18px;}
 .cb-y{flex:1;display:flex;flex-direction:column;align-items:center;gap:6px;height:100%;}

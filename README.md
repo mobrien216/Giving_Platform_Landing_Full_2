@@ -25,6 +25,7 @@ Only **four pages** make up the whole system. Inside each app, moving between mo
 /
 ├── index.html                    Landing page
 ├── portal/index.html             Account Holder Portal
+├── portal/plan/index.html        Five-year giving plan (values, contributions, investments, gifts) — opened from My profile
 ├── community/index.html          Community Member experience   ┐ GENERATED from src/giving/
 ├── advisors/index.html           Advisor experience            ┘ (do not edit — see below)
 ├── tools/
@@ -53,7 +54,7 @@ Only **four pages** make up the whole system. Inside each app, moving between mo
 
 | App | Link pattern | Examples |
 |---|---|---|
-| Portal | `portal/#/<module>` | `#/home` `#/performance` `#/allocation` `#/grants` `#/history` `#/contribute` `#/statements` `#/documents` `#/endow` `#/family` `#/advisor` `#/profile` `#/engage` `#/feed` `#/map` `#/legends` `#/quiz` `#/garden` `#/impact` `#/qr` (org funds) |
+| Portal | `portal/#/<module>` | `#/home` `#/performance` `#/allocation` `#/grants` `#/history` `#/contribute` `#/statements` `#/documents` `#/endow` `#/family` `#/advisor` `#/profile` `#/plan` `#/engage` `#/feed` `#/map` `#/legends` `#/quiz` `#/garden` `#/impact` `#/qr` (org funds) |
 | Community / Advisors | `community/#/<view>` · `advisors/#/<view>` | `#/home` `#/newsfeed` `#/legends` `#/history` `#/garden` `#/impactmap` `#/calculator` |
 
 Portal links ask the person to sign in once per browser session, then open the module the link pointed to. Community and advisor links skip the intro animation and open the module directly.
@@ -68,6 +69,7 @@ Portal links ask the person to sign in once per browser session, then open the m
 | Sign out (any app) → landing | Returns to `index.html`. |
 | Portal profile | Saved as `tcf-donor-portal-profile-v1`; **Profile → Sync & data → Reset demo** clears it. |
 | Portal session | `tcf_portal_session` in sessionStorage, or localStorage when **Keep me signed in** is ticked. |
+| Five-year giving plan | The plan saves itself as `tcf-five-year-plan-v2` and, after every change, a small summary as `tcf-five-year-plan-summary`, which **My profile** reads. **Reset demo** clears both. |
 | Impact map interest | `impact-map-my-interests` / `impact-map-aggregate-v1` in localStorage (this browser only on a static host). |
 
 ## Speed
@@ -111,6 +113,26 @@ The site follows **Component Library 3.0**, built on the approved Digital Style 
 
 The maps (Leaflet + OpenStreetMap tiles) and the portal's QR code library load from public CDNs. Everything else, including all fonts, is in this folder.
 
+## My profile and the giving profile
+
+**My profile** (`portal/#/profile`) is a hub with five parts, top to bottom:
+
+1. **Who you are + profile strength.** Contact basics count 10%, registration causes 10%, and each of the five steps below 16%.
+2. **Your giving profile:** five optional steps, each showing what we already know: **Your values · Contribution plan · Matched organizations · Investments · Granting plan**.
+3. **Your five-year giving plan:** the optional capstone, with contributions and grants by year once the steps are filled in, and a PDF.
+4. **Tell us what you care about:** the causes tagged at registration (editable), plus three ways to go deeper: a quick pick list, a values quiz and a values card game.
+5. **Settings:** Profile details, Preferences, Security and Sync & data, each on its own page (`#/profile` with `{tab}`), unchanged in what they do.
+
+The steps, the activities and the capstone all open the five-year giving plan inside the portal (`#/plan`), which runs `portal/plan/index.html` in a frame. That page is the standalone giving-plan prototype with one marked **PORTAL INTEGRATION** block at the end, which:
+
+- hides its own header when embedded (`?embed=1`) and opens the requested section (`step=1-5`) or activity (`values=picks|quiz|cards`);
+- starts a **new** plan from the fund's real balance (`balance=`) and pre-selects the donor's registration causes in the pick list (`interests=`, mapped in `INTEREST_AREAS` in `assets/portal/app.js`);
+- publishes the summary the hub reads, and tells the portal when values change or the plan is saved (shown as Salesforce updates under Sync & data).
+
+The hub never reads the plan's internals, only the summary, so either side can change as long as the summary keeps its shape (`v: 1`).
+
+**Tony**, the AI portfolio-allocation assistant, is linked from the Investments section. Set `TONY_URL` near the top of `portal/plan/index.html`; while it's `null`, the button explains that Tony isn't connected yet.
+
 ## Maintaining it
 
 See **REFACTOR-NOTES.md** for what changed in the October 2026 clean-up and the shared page template, the conventions to follow (load order, where data lives, escaping), and the remaining recommendations.
@@ -125,6 +147,8 @@ See **REFACTOR-NOTES.md** for what changed in the October 2026 clean-up and the 
 
 ## Open items
 
+- **Tony:** set `TONY_URL` in `portal/plan/index.html` when the assistant has an address.
+- **Giving plan storage:** the plan and its summary live in this browser only. A real build would save values, the plan and its sections to Salesforce (and planned contributions and grants to Ren iPhi) so they follow the donor across devices and reach their advisor.
 - **Grantee Portal link:** set `GRANTEE_PORTAL_URL` in `assets/landing/tracks.js`. While it's blank, that option shows the "Coming soon" window.
 - Placeholder content to replace before any public use: Candid seal levels, fund documents, wiring details, spending-policy figures and QR link.
 - **Figures that disagree across pages** (need an approved source): $3.9B vs $3.1B granted since 1914; $90M vs $160M granted last year; "$100M+ every year this decade" vs $90M last year; ticker labelled "2026 grants" on the landing page but "2025 grants" in the apps. Details in REFACTOR-NOTES.md.

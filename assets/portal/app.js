@@ -130,7 +130,8 @@ function logSync(sys, obj, text){
   setTimeout(function(){ e.st='synced'; save(); var el=document.getElementById('sy-'+String(e.id).replace('.','')); if(el){ el.textContent='Synced'; el.className='status st-posted'; } }, 1400);
 }
 function resetDemo(){
-  try{ localStorage.removeItem(STORE_KEY); }catch(e){}
+  try{ localStorage.removeItem(STORE_KEY); localStorage.removeItem(PLAN_STATE_KEY); localStorage.removeItem(PLAN_SUMMARY_KEY); }catch(e){}
+  LAST_PLAN = null;
   S = defaultState(); S.signedIn = true; save();
   FUND_CACHE = {}; closeSheet(); toast('Demo reset. Your profile is back to its starting point.'); go('home', null, true);
 }
@@ -342,7 +343,9 @@ function go(route, params, replace){
   }
   if(!S.signedIn && route!=='signin') route='signin';
   if(!allowed(route)) route='home';
-  if(!replace && ROUTE && ROUTE!==route && ROUTE!=='signin') HIST.push([ROUTE,PARAMS]);
+  /* a settings page is a step inside My profile: Back returns to the hub */
+  var subPage = route==='profile' && ROUTE==='profile' && ((PARAMS&&PARAMS.tab)||'')!==((params&&params.tab)||'');
+  if(!replace && ROUTE && (ROUTE!==route || subPage) && ROUTE!=='signin') HIST.push([ROUTE,PARAMS]);
   if(HIST.length>30) HIST.shift();
   ROUTE=route; PARAMS=params||null;
   closeDrawer(); closeSheet();
@@ -365,11 +368,13 @@ window.addEventListener('popstate', function(){
   if(!allowed(r)) r='home';
   ROUTE=r; PARAMS=null; closeDrawer(); closeSheet(); render(); window.scrollTo(0,0);
 });
-function back(){ var h=HIST.pop(); if(h){ ROUTE=h[0]; PARAMS=h[1]; render(); window.scrollTo(0,0); } else go('home',null,true); }
+/* With no history (arrived by a direct link), the plan and settings pages go up to My profile, everything else to the dashboard */
+function back(){ var h=HIST.pop(); if(h){ ROUTE=h[0]; PARAMS=h[1]; render(); syncHash(true); window.scrollTo(0,0); } else go(ROUTE==='plan'||(ROUTE==='profile'&&PARAMS&&PARAMS.tab)?'profile':'home',null,true); }
 function render(){
   var app=$('#app');
   document.body.classList.toggle('pins-on', !!S.settings.pins);
   document.body.classList.toggle('signin-on', ROUTE==='signin');
+  document.body.classList.toggle('plan-on', ROUTE==='plan');   /* the embedded plan needs the full width */
   if(ROUTE==='signin'){ app.innerHTML = VIEWS.signin(); $('#chrome').hidden=true; return; }
   $('#chrome').hidden=false;
   var v = VIEWS[ROUTE] || VIEWS.home, html;
@@ -395,7 +400,7 @@ function renderChrome(){
     if(n.sec) return '<div class="dr-sec'+(n.engage?' engage':'')+'">'+n.sec+'</div>';
     if(!allowed(n.id)) return '';
     var c = n.count ? n.count() : 0;
-    return '<button class="dr-item'+(ROUTE===n.id?' sel':'')+'" onclick="go(\''+n.id+'\')">'+ic(n.icon,19)+'<span>'+esc(isOrg()&&n.orgLabel?n.orgLabel:n.label)+'</span>'+(c?'<span class="dc">'+c+'</span>':'')+'</button>';
+    return '<button class="dr-item'+(ROUTE===n.id||(n.id==='profile'&&ROUTE==='plan')?' sel':'')+'" onclick="go(\''+n.id+'\')">'+ic(n.icon,19)+'<span>'+esc(isOrg()&&n.orgLabel?n.orgLabel:n.label)+'</span>'+(c?'<span class="dc">'+c+'</span>':'')+'</button>';
   }).join('');
 }
 function toggleDrawer(){ $('#drawer').classList.toggle('open'); $('#drawerScrim').classList.toggle('open'); }
@@ -1224,27 +1229,172 @@ function openSchedule(){
 }
 function bookCall(){ var sl=$('#slotRow .chip.sel').textContent, tp=$('#callTopic').value; S.calls.push({t:Date.now(), slot:sl, topic:tp}); save(); logSync('sf','Event','Call booked: '+sl+' — '+tp); closeSheet(); toast('Booked for '+sl+'. A calendar invite is on its way.'); if(ROUTE==='advisor') render(); }
 
-/* ============ MY PROFILE & SETTINGS ============ */
+/* ============ MY PROFILE: hub · giving profile · settings ============
+   #/profile                  the hub: who you are, profile strength, five optional
+                              "giving profile" steps, the five-year plan, ways to tell
+                              us what you care about, and account settings
+   #/profile {tab:…}          one settings page (profile · prefs · security · sync)
+   #/plan {step | values}     the five-year giving plan (portal/plan/), embedded
+   The plan keeps its own state in this browser and publishes a small summary
+   (PLAN_SUMMARY_KEY) after every change. The hub only reads that summary, so
+   the two can evolve separately. */
 var INTERESTS = ['Arts & culture','Education','Environment','Food access','Health','Housing','Youth','Workforce','Neighborhoods','Racial equity'];
-var PT = 'profile';
+/* profile causes → the plan's focus-area keys (portal/plan/, QUIZ.areas) */
+var INTEREST_AREAS = { 'Arts & culture':'arts', 'Education':'education', 'Environment':'environment', 'Food access':'food', 'Health':'healthaccess',
+  'Housing':'housing', 'Youth':'youth', 'Workforce':'workforce', 'Neighborhoods':'commdev', 'Racial equity':'racial' };
+var PLAN_SUMMARY_KEY = 'tcf-five-year-plan-summary', PLAN_STATE_KEY = 'tcf-five-year-plan-v2';
+var SETTINGS = [
+  { id:'profile',  label:'Profile details', icon:'user' },
+  { id:'prefs',    label:'Preferences',     icon:'bell' },
+  { id:'security', label:'Security',        icon:'shield' },
+  { id:'sync',     label:'Sync & data',     icon:'sync' }
+];
+/* The five optional steps, in the order we suggest them. `open` is where each lands in the plan
+   (plan sections: 1 giving goal & funding · 2 values · 3 investments · 4 gifts · 5 summary). */
+var JOURNEY = [
+  { k:'values',  n:'Your values',           open:{ step:2 },
+    d:'What matters most to you. Start from your registration causes, then go deeper with a pick list, a quiz or the card game.' },
+  { k:'contrib', n:'Contribution plan',     open:{ step:1 },
+    d:'How much you plan to give over five years, and how you’ll add it to your fund.' },
+  { k:'orgs',    n:'Matched organizations', open:{ step:4 },
+    d:'Nonprofits and Foundation projects ranked by how closely they fit your values.' },
+  { k:'invest',  n:'Investments',           open:{ step:3 },
+    d:'Keep the TCF Index Pool or build your own mix of pools. Tony, the portfolio assistant, can suggest one.' },
+  { k:'grants',  n:'Granting plan',         open:{ step:4 },
+    d:'How much goes to each organization, year by year, against your giving goal.' }
+];
+var ACTIVITIES = [
+  { k:'picks', src:'pick',  n:'Quick pick list',  t:'About 2 minutes', d:'Tap the causes you care about from 64 focus areas.' },
+  { k:'quiz',  src:'quiz',  n:'Values quiz',      t:'About 4 minutes', d:'Rank your choices in real Cleveland scenarios.' },
+  { k:'cards', src:'cards', n:'Values card game', t:'About 8 minutes', d:'Sort value cards and say why. The most revealing of the three.' }
+];
+function planSummary(){ try{ var s=JSON.parse(localStorage.getItem(PLAN_SUMMARY_KEY)||'null'); return s && s.v===1 ? s : null; }catch(e){ return null; } }
+function sumArr(a){ return (a||[]).reduce(function(t,v){ return t+(+v||0); },0); }
+function openPlan(o){ go('plan', o||{}); }
+
+/* Status of one step: { p: 0..1, label, detail } */
+function journeyStatus(k, s){
+  var P=S.profile, sec=function(i){ return (s && s.sections && s.sections[i]) || {progress:0, seen:false}; };
+  var done=function(detail){ return {p:1, label:'Done', detail:detail}; };
+  var part=function(p, label, detail){ return {p:p, label:label, detail:detail}; };
+  var none=function(detail){ return {p:0, label:'Not started', detail:detail}; };
+  if(k==='values'){
+    if(s && s.values) return done('Top: '+s.values.topAreas.join(' · '));
+    return P.interests.length ? part(.25,'Started',P.interests.length+' cause'+(P.interests.length===1?'':'s')+' from your registration') : none('Any activity below fills this in');
+  }
+  if(k==='contrib'){
+    var c=sec(0);
+    if(c.seen && c.progress>=1) return done(money(sumArr(s.additions))+' over '+s.years[0]+'–'+s.years[s.years.length-1]);
+    return c.seen ? part(.5,'In progress','Set a five-year goal') : none('A suggested plan is ready to adjust');
+  }
+  if(k==='orgs'){
+    if(s && s.orgsChosen) return done(s.orgsChosen+' organization'+(s.orgsChosen===1?'':'s')+' chosen');
+    return s && s.values ? part(.25,'Matches ready','Ranked against your values') : none('Works best after your values');
+  }
+  if(k==='invest'){
+    var v=sec(2);
+    if(v.seen && v.progress>=1) return done(s.investments.label+' · '+(+s.investments.rate).toFixed(1)+'% estimated return');
+    return v.seen ? part(.5,'In progress','Your custom mix needs to reach 100%') : none('Your fund keeps its current allocation until you choose');
+  }
+  var g=sec(3);   // grants
+  if(g.progress>=1) return done(money(sumArr(s.grants))+' planned · meets your goal');
+  return g.progress>0 ? part(g.progress, Math.round(g.progress*100)+'% planned', money(sumArr(s.grants))+' of '+money(sumArr(s.goals))+' goal') : none('Spread your goal across organizations');
+}
+/* Whole-profile meter: account basics 10 · causes 10 · each of the five steps 16 */
+function profileStrength(s){
+  var P=S.profile, basics=['first','last','email','phone','street','city','zip'].filter(function(k){ return P[k]; }).length/7;
+  var steps=JOURNEY.map(function(j){ return journeyStatus(j.k, s).p; });
+  return Math.round(basics*10 + (P.interests.length?10:0) + sumArr(steps)*16);
+}
+
 VIEWS.profile = function(p){
-  if(p && p.tab) PT=p.tab;
-  var P=S.profile, f=F();
-  var html = pageHead('Account','My profile & settings')+
-    '<div class="pad"><div class="card row" style="gap:14px"><span class="avatar round" style="width:56px;height:56px;font-size:20px;background:var(--ember)">'+initials(P.first+' '+P.last)+'</span><div style="flex:1;min-width:0"><div style="font-family:var(--f-display);font-weight:800;font-size:21px;color:var(--forest);letter-spacing:-.02em">'+esc(P.first+' '+P.last)+'</div><div class="tiny">'+esc(P.email)+'</div><div style="margin-top:6px">'+pin('sf')+'</div></div></div>'+
-    '<div class="gap-s"></div><div class="seg">'+[['profile','Profile'],['prefs','Preferences'],['security','Security'],['sync','Sync & data']].map(function(t){ return '<button class="'+(PT===t[0]?'sel':'')+'" onclick="PT=\''+t[0]+'\';render()">'+t[1]+'</button>'; }).join('')+'</div></div><div class="gap-m"></div>';
-  if(PT==='profile'){
+  var tab = p && p.tab;
+  if(tab && SETTINGS.some(function(t){ return t.id===tab; })) return settingsPage(tab);
+  var P=S.profile, s=planSummary(), pct=profileStrength(s);
+
+  /* identity + profile strength */
+  var html = pageHead('Account','My profile')+
+    '<div class="pad"><div class="card prof-id"><span class="avatar round prof-av">'+initials(P.first+' '+P.last)+'</span>'+
+      '<div class="prof-who"><div class="prof-name">'+esc(P.first+' '+P.last)+'</div><div class="tiny">'+esc(P.email)+'</div><div style="margin-top:6px">'+pin('sf')+'</div></div>'+
+      '<div class="prof-meter"><div class="pm-top"><span>Profile strength</span><b>'+pct+'%</b></div>'+
+      '<div class="pm-bar" role="progressbar" aria-label="Profile strength" aria-valuemin="0" aria-valuemax="100" aria-valuenow="'+pct+'"><span style="width:'+pct+'%"></span></div>'+
+      '<div class="tiny">Everything below is optional. Each step helps us match you to organizations and options that fit.</div></div></div></div>';
+
+  /* the five steps */
+  html += '<div class="gap-m"></div>'+rail('Your giving profile','Five steps, at your own pace')+
+    '<div class="pad" style="padding-top:14px"><div class="journey">'+JOURNEY.map(function(j, i){
+      var st=journeyStatus(j.k, s), cls=st.p>=1?'st-posted':st.p>0?'st-approved':'st-queued';
+      var cta=st.p>=1?'Review':st.p>0?'Continue':'Start';
+      return '<button class="j-card'+(st.p>=1?' done':'')+'" onclick="openPlan('+esc(JSON.stringify(j.open))+')">'+
+        '<span class="j-num" aria-hidden="true">'+(st.p>=1?ic('check',16,2.4):(i+1))+'</span>'+
+        '<span class="j-body"><span class="j-top"><span class="j-name">'+esc(j.n)+'</span><span class="status '+cls+'">'+esc(st.label)+'</span></span>'+
+        '<span class="j-desc">'+esc(j.d)+'</span><span class="j-know">'+esc(st.detail)+'</span>'+
+        (st.p>0&&st.p<1?'<span class="j-prog"><span style="width:'+Math.round(st.p*100)+'%"></span></span>':'')+'</span>'+
+        '<span class="j-cta">'+cta+ic('chev',16,2.2)+'</span></button>';
+    }).join('')+'</div></div>';
+
+  /* the capstone: the five-year plan */
+  var years=(s&&s.years)||[], add=(s&&s.additions)||[], gr=(s&&s.grants)||[];
+  var built=!!(s && (s.sections[0].seen || s.orgsChosen) && sumArr(add)+sumArr(gr)>0);
+  var max=Math.max.apply(null,[1].concat(add,gr));
+  html += '<div class="gap-m"></div><div class="pad"><div class="capstone">'+guilloche(270,40)+
+    '<div class="cap-kick">The finished plan · optional</div><h2>Your five-year giving plan</h2>'+
+    (built
+      ? '<p>What you’ll add to your fund and what you’ll grant from it, '+years[0]+'–'+years[years.length-1]+'. The plan is '+s.percent+'% complete.</p>'+
+        '<div class="cap-tot"><div><span>Contributions</span><b>'+money(sumArr(add))+'</b></div><div><span>Grants</span><b>'+money(sumArr(gr))+'</b></div><div><span>Invested in</span><b>'+esc(s.investments.label)+'</b></div></div>'+
+        '<div class="cap-bars" role="img" aria-label="Contributions and grants by year">'+years.map(function(y,i){
+          return '<div class="cb-y"><div class="cb-pair"><i class="cb-in" style="height:'+Math.round((add[i]||0)/max*100)+'%" title="'+y+' contributions '+money(add[i])+'"></i><i class="cb-out" style="height:'+Math.round((gr[i]||0)/max*100)+'%" title="'+y+' grants '+money(gr[i])+'"></i></div><span>'+y+'</span></div>';
+        }).join('')+'</div><div class="cap-key"><span><i class="cb-in"></i>Contributions</span><span><i class="cb-out"></i>Grants</span></div>'+
+        '<div class="cap-act"><button class="btn btn-accent" onclick="openPlan({step:5})">Open my plan</button><button class="btn btn-onhero" onclick="openPlan({step:5})">'+ic('download',16)+'Download PDF</button></div>'
+      : '<p>The steps above build it for you: a year-by-year plan of what you’ll add to your fund and what you’ll grant, matched to your values. Not everyone needs one, but it makes long-range giving much easier to talk through with your advisor.</p>'+
+        '<div class="cap-act"><button class="btn btn-accent" onclick="openPlan({step:'+(s&&s.values?1:2)+'})">Start building</button><button class="btn btn-onhero" onclick="openPlan({step:5})">See what it looks like</button></div>')+
+    '</div></div>';
+
+  /* ways to tell us what you care about */
+  var src = s && s.values && s.values.source;
+  html += '<div class="gap-m"></div>'+rail('Personalization','Tell us what you care about', pin('sf'))+
+    '<div class="pad" style="padding-top:14px"><div class="card-k">From your registration</div><p class="tiny" style="margin-bottom:10px">Tap to change. We use these to recommend nonprofits and stories, and to pre-fill the pick list below.</p>'+
+    '<div class="chip-row">'+INTERESTS.map(function(i){ var on=P.interests.indexOf(i)>-1; return '<button class="chip'+(on?' sel':'')+'" aria-pressed="'+on+'" onclick="toggleInterest(\''+jsq(i)+'\')">'+esc(i)+'</button>'; }).join('')+'</div>'+
+    '<div class="gap-m"></div><div class="card-k">Go deeper · each one updates your values</div><div class="acts">'+ACTIVITIES.map(function(a){
+      var did=src===a.src;
+      return '<button class="act'+(did?' done':'')+'" onclick="openPlan({values:\''+a.k+'\'})"><span class="act-t">'+esc(a.n)+(did?'<span class="status st-posted">Current values</span>':'')+'</span><span class="act-d">'+esc(a.d)+'</span><span class="act-m">'+esc(a.t)+ic('arrowUR',14,2.2)+'</span></button>';
+    }).join('')+'</div></div>';
+
+  /* account & settings */
+  var C=P.comms, on=Object.keys(C).filter(function(k){ return C[k]; }).length, syncN=S.sync.length;
+  var sub={ profile: esc(P.first+' '+P.last)+' · '+esc(P.email),
+            prefs: on+' of '+Object.keys(C).length+' notifications on · fiscal year starts in '+MONTHS[fyStart()-1],
+            security: 'Multi-factor authentication is on',
+            sync: 'Salesforce and Ren iPhi connected · '+syncN+' update'+(syncN===1?'':'s') };
+  html += '<div class="gap-m"></div>'+rail('Account','Settings')+
+    '<div class="pad" style="padding-top:14px"><div class="card flush set-list">'+SETTINGS.map(function(t){
+      return '<button class="set-row" onclick="go(\'profile\',{tab:\''+t.id+'\'})"><span class="set-ic">'+ic(t.icon,18)+'</span><span class="set-main"><span class="set-n">'+t.label+'</span><span class="set-s">'+sub[t.id]+'</span></span>'+ic('chev',16,2.2)+'</button>';
+    }).join('')+'</div></div>';
+  return html;
+};
+
+/* One settings page. The segmented control moves between the four without stacking history. */
+function settingsPage(tab){
+  var cur=SETTINGS.filter(function(t){ return t.id===tab; })[0];
+  return pageHead('My profile', cur.label)+
+    '<div class="pad"><div class="seg">'+SETTINGS.map(function(t){ return '<button class="'+(t.id===tab?'sel':'')+'" onclick="go(\'profile\',{tab:\''+t.id+'\'},true)">'+t.label+'</button>'; }).join('')+'</div></div><div class="gap-m"></div>'+
+    settingsBody(tab);
+}
+
+/* The four settings panels (unchanged from the earlier tabbed page). */
+function settingsBody(tab){
+  var P=S.profile, f=F(), html='';
+  if(tab==='profile'){
     html += '<div class="pad"><div class="f-two"><div class="f-row"><label for="pFirst">First name</label><input id="pFirst" value="'+esc(P.first)+'"></div><div class="f-row"><label for="pLast">Last name</label><input id="pLast" value="'+esc(P.last)+'"></div></div>'+
       '<div class="f-row"><label for="pEmail">Email</label><input id="pEmail" type="email" value="'+esc(P.email)+'"></div><div class="f-row"><label for="pPhone">Phone</label><input id="pPhone" value="'+esc(P.phone)+'"></div>'+
       '<div class="f-row"><label for="pStreet">Mailing address</label><input id="pStreet" value="'+esc(P.street)+'"></div><div class="f-two"><div class="f-row"><label for="pCity">City</label><input id="pCity" value="'+esc(P.city)+'"></div><div class="f-row"><label for="pZip">ZIP</label><input id="pZip" value="'+esc(P.zip)+'"></div></div>'+
       '<button class="btn btn-accent btn-block" onclick="saveProfile()">Save changes</button></div>';
-    html += '<div class="gap-m"></div>'+rail('Personalization','Causes you care about', pin('sf'))+'<div class="pad" style="padding-top:14px"><p class="tiny" style="margin-bottom:10px">We use these to recommend nonprofits and stories.</p><div class="chip-row">'+INTERESTS.map(function(i){ return '<button class="chip'+(P.interests.indexOf(i)>-1?' sel':'')+'" onclick="toggleInterest(\''+jsq(i)+'\')">'+esc(i)+'</button>'; }).join('')+'</div></div>';
-  } else if(PT==='prefs'){
+  } else if(tab==='prefs'){
     var C=P.comms;
     html += '<div class="pad"><div class="card-k">Communication '+pin('sf')+'</div><div class="facts">'+[['grantPosted','Email me when a grant is paid',''],['receipts','Contribution receipts by email',''],['push','Push notifications','On this device'],['stories','Monthly impact stories','Personalized to your causes'],['newsletter','Quarterly Foundation newsletter','']].map(function(c){ return '<div class="toggle"><div><div>'+c[1]+'</div>'+(c[2]?'<div class="tg-s">'+c[2]+'</div>':'')+'</div><button class="sw-t'+(C[c[0]]?' on':'')+'" role="switch" aria-checked="'+!!C[c[0]]+'" aria-label="'+esc(c[1])+'" onclick="toggleComm(\''+c[0]+'\')"></button></div>'; }).join('')+'</div>'+
       '<div class="gap-m"></div><div class="card-k">Reporting for '+esc(f.name)+'</div><div class="facts"><div class="toggle"><div><div>Fiscal year starts in</div><div class="tg-s">Used for fiscal-year-to-date views and statements</div></div><select id="fySel" onchange="setFY(+this.value)" style="border:1px solid var(--line-2);border-radius:10px;padding:8px 10px;background:var(--paper)">'+MONTHS.map(function(m,i){ return '<option value="'+(i+1)+'"'+(fyStart()===i+1?' selected':'')+'>'+m+'</option>'; }).join('')+'</select></div></div>'+
       '<div class="gap-m"></div><div class="card-k">Display</div><div class="facts"><div class="toggle"><div><div>Show data sources</div><div class="tg-s">Tags each module with the system it comes from</div></div><button class="sw-t'+(S.settings.pins?' on':'')+'" role="switch" aria-checked="'+!!S.settings.pins+'" aria-label="Show data sources" onclick="S.settings.pins=!S.settings.pins;save();render()"></button></div></div></div>';
-  } else if(PT==='security'){
+  } else if(tab==='security'){
     html += '<div class="pad"><div class="card"><div class="row"><span class="avatar" style="background:var(--gray2);color:var(--moss)">'+ic('shield',20)+'</span><div><div style="font-weight:700;color:var(--forest)">Multi-factor authentication is on</div><div class="tiny">Microsoft Authenticator · managed by Microsoft Entra External ID</div></div></div><div class="row wrap" style="margin-top:12px"><button class="btn btn-quiet btn-sm" onclick="toast(\'Adding a sign-in method opens Microsoft Entra.\')">Add a method</button><button class="btn btn-quiet btn-sm" onclick="toast(\'New recovery codes would be generated in Entra.\')">Recovery codes</button><button class="btn btn-quiet btn-sm" onclick="toast(\'Passkey setup opens your device prompt.\')">Set up a passkey</button></div></div>'+
       '<div class="gap-m"></div><div class="card-k">Recent sign-ins</div><div class="facts">'+[['Today · this device','Cleveland Heights, OH'],['Yesterday · iPhone','Cleveland, OH'],[fdate(addDays(TODAY,-6),'short')+' · Chrome on Mac','Cleveland, OH']].map(function(r){ return '<div class="fr"><span class="fk">'+r[0]+'</span><span class="fv">'+r[1]+'</span></div>'; }).join('')+'</div>'+
       '<div class="gap-m"></div><button class="btn btn-quiet btn-block" onclick="signOut()">Sign out</button></div>';
@@ -1258,7 +1408,33 @@ VIEWS.profile = function(p){
       '<div class="gap-m"></div><button class="link" onclick="go(\'architecture\')">'+ic('layers',14)+'For developers: architecture map</button></div>';
   }
   return html;
+}
+
+/* ---- the five-year giving plan, embedded (portal/plan/index.html) ---- */
+VIEWS.plan = function(p){
+  p=p||{};
+  var q=['embed=1'];
+  if(p.values) q.push('values='+encodeURIComponent(p.values));
+  else if(p.step) q.push('step='+(+p.step));
+  if(!isOrg()) q.push('balance='+Math.round(balance()));   // seeds a NEW plan with this fund's balance
+  var keys=S.profile.interests.map(function(i){ return INTEREST_AREAS[i]; }).filter(Boolean);
+  if(keys.length) q.push('interests='+keys.join(','));
+  return pageHead('My profile','Five-year giving plan')+
+    '<div class="plan-host"><iframe class="plan-frame" title="Five-year giving plan" src="plan/?'+q.join('&')+'"></iframe></div>';
 };
+/* Messages from the embedded plan (same origin only) */
+var LAST_PLAN = planSummary();
+window.addEventListener('message', function(e){
+  if(e.origin!==location.origin || !e.data || e.data.tcf!==true) return;
+  if(e.data.type==='plan-summary'){
+    var s=e.data.summary, was=LAST_PLAN;
+    if(s && s.values && (!was || !was.values || was.values.source!==s.values.source || was.values.topAreas.join()!==s.values.topAreas.join()))
+      logSync('sf','Giving Values','Values from the '+({pick:'pick list',quiz:'values quiz',cards:'card game'}[s.values.source]||'plan')+': '+s.values.topAreas.join(', '));
+    LAST_PLAN=s;
+  }
+  if(e.data.type==='plan-saved') logSync('sf','Giving Plan','Saved five-year giving plan');
+});
+
 function saveProfile(){ var P=S.profile; ['First','Last','Email','Phone','Street','City','Zip'].forEach(function(k){ var el=$('#p'+k); if(el) P[k.toLowerCase()]=el.value.trim(); }); save(); logSync('sf','Contact','Updated contact details'); toast('Profile saved.'); render(); }
 function toggleInterest(i){ var a=S.profile.interests, x=a.indexOf(i); if(x>-1) a.splice(x,1); else a.push(i); save(); logSync('sf','Contact Interests',(x>-1?'Removed ':'Added ')+i); render(); }
 function toggleComm(k){ S.profile.comms[k]=!S.profile.comms[k]; save(); logSync('sf','Communication Preferences',k+' '+(S.profile.comms[k]?'on':'off')); render(); }

@@ -106,6 +106,7 @@ Every link is relative, so the site works at that address without any changes.
 The site follows **Component Library 3.0**, built on the approved Digital Style Guide 2026 (10-20-2026).
 
 - `assets/css/tcf-v3.css` — the v3 tokens and font declarations. Every page loads it first.
+- Corners: `--r` (4px) for cards, panels and inputs; `--r-btn` (6px) for every button, chip and control, slightly softer. Change a button's corners there, not in the app stylesheets.
 - `assets/css/tcf-v3-site.css`, `tcf-v3-giving.css`, `tcf-v3-tools.css` — bridges that map each app's older token names to v3 (style guide p.103) and restyle shared components.
 - `assets/fonts/` — Paralucent, Paralucent Condensed and Source Sans Pro, self-hosted (licensed).
 - `assets/intro/welcome.html` — the welcome animation (Giving Portal animatic v5) used by the Community and Advisor apps.

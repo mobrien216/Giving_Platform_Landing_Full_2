@@ -62,6 +62,10 @@ body.at-hero:not(.scrolled) .nav .btn-accent:hover{background:var(--gray2)!impor
 .ranges.on-light .rng.sel{background:var(--green);border-color:var(--green);color:var(--white);}
 .amt-grid button{border:1.5px solid var(--gray3);font-family:var(--body);font-weight:700;font-size:18px;color:var(--green);}
 .amt-grid button.sel{background:var(--green);border-color:var(--green);color:var(--white);box-shadow:none;}
+/* button corners: one token (--r-btn in tcf-v3.css) for every rectangular button and control.
+   Round icon buttons (50%) and clickable cards (panels, plan steps, settings rows) keep their own shape. */
+.btn,.btn-sm,.btn-lg,.chip,.rng,.amt-grid button,.ps-exit,.fund-pill,.top .ic-btn,.qz-opt{border-radius:var(--r-btn);}
+.seg,.method-grid{border-radius:var(--r-btn);}   /* both already clip their contents (overflow) */
 
 /* ---------- 4. Labels: ledger mono is retired; labels use the sub-header style ---------- */
 .sr-kick,.ph-kick{font-family:var(--body);font-size:var(--fs-sub);font-weight:700;letter-spacing:.08em;color:var(--mid);}

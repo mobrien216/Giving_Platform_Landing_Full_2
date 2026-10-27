@@ -9,3 +9,6 @@
 }
 body{font-family:var(--body);color:var(--green);}
 h1,h2,h3,h4{font-family:var(--head);font-weight:700;}
+/* button corners: one token (--r-btn in tcf-v3.css) for every rectangular button and control */
+.toggle,.toggle button,.preset-btn,.perpetuity-cta,
+.pillar-opt,.locbtn,.clearbtn,.cta,.prefbar button.go,.modal-close,.sidebar-toggle{border-radius:var(--r-btn);}

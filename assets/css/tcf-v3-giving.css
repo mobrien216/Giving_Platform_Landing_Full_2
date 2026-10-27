@@ -36,6 +36,11 @@ body.hero-view:not(.scrolled) .tb-cta-give{background:var(--white)!important;bor
 :is(.hero,.panel-dark,.pcard-hero) :is(.btn-ghost,.btn-onhero),.btn-onhero{background:transparent!important;border:1.5px solid var(--white)!important;color:var(--white)!important;}
 .tb-cta-grow{border-radius:var(--r);}
 .chip{border-radius:var(--r);font-family:var(--body);font-weight:600;letter-spacing:0;text-transform:none;}
+/* button corners: one token (--r-btn in tcf-v3.css) for every rectangular button and control.
+   Round icon buttons (50%) and cards keep their own shape. */
+.btn,.btn-sm,.btn-ghost,.btn-ghost.btn-sm,.chip,.amt-grid button,.tb-cta,.tb-cta-grow,.intro-skip,.calc-mode-btn,.calc-area-btn,
+.hq-lb-toggle button,.lgd-chip,#view-estate .ec-mini,#view-faq .faq-chip,#view-giftplanner .gp-btn,
+#view-impactmap :is(.im-pillar-opt,.im-locbtn,.im-clearbtn,.im-cta,.im-prefbar button.im-go,.im-modal-close,.im-sidebar-toggle){border-radius:var(--r-btn);}
 
 /* counts and new-item flags: Red badge, White number */
 .dr-item .count,.icon-btn .dot,.tb-btn .dot{background:var(--red);color:var(--white);}

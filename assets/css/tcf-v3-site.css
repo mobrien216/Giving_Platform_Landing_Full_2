@@ -87,8 +87,12 @@ body.at-hero:not(.scrolled) .nav-login{border-color:var(--white);color:var(--whi
 .pc-kick{color:var(--mid)!important;}
 .film .f-play,.film:hover .f-play{background:var(--white);color:var(--green);}
 .tk-item .amt{color:var(--white);font-weight:700;}
-.calc-units .u-v{color:var(--white);}
-.calc-units>div{background:var(--mid);}
+/* stat strips on a Green block (balance card, plan capstone, calculator results): White tiles,
+   Green figures, Mid-Green labels, Gray 3 dividers. Mid-Green tiles on Green lacked contrast. */
+.v-stats,.cap-tot,.calc-units{background:var(--gray3);}
+.v-stats>div,.cap-tot>div,.calc-units>div{background:var(--white);}
+.v-stats .k,.cap-tot span,.calc-units .u-k{color:var(--mid);}
+.v-stats .v,.cap-tot b,.calc-units .u-v{color:var(--green);}
 
 /* ---------- 6. Portal ---------- */
 .top{background:rgba(255,255,255,.96);border-bottom:1px solid var(--gray3);}
@@ -123,10 +127,8 @@ body.at-hero:not(.scrolled) .nav-login{border-color:var(--white);color:var(--whi
 .dr-foot .btn-onhero:hover{background:var(--gray2)!important;}
 /* balance card (vault): flat Green statement block */
 .v-fund{color:var(--white);}
-.v-type,.v-asof,.v-stats .k{color:var(--gray2);}
+.v-type,.v-asof{color:var(--gray2);}
 .v-chg,.v-chg.neg{color:var(--white);}
-.v-stats{background:rgba(255,255,255,.18);}
-.v-stats>div{background:var(--mid);}
 .pin{border:0;background:var(--gray2);color:var(--green);font-family:var(--body);font-size:11px;letter-spacing:.08em;}
 .pin::before{background:var(--blue);}
 .pin.dark{background:rgba(255,255,255,.14);color:var(--white);}

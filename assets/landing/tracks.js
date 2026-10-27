@@ -65,9 +65,10 @@ if (location.hash === '#join') setTimeout(function(){ hideGreeter(true); openPop
 
 /* speed: once the landing page is idle, quietly warm the cache for the next page */
 (function(){
+  /* Pages, the intro, the logo and a font only. Scripts and stylesheets are loaded with a
+     ?v= fingerprint (scripts/stamp-assets.js), so prefetching their bare addresses would
+     download copies the pages never use. */
   var urls = [SITE.portal, SITE.community, SITE.advisors,
-              'assets/portal/portal.css', 'assets/portal/app.js', 'assets/portal/data.js',
-              'assets/giving/giving.css', 'assets/giving/app.js', 'assets/data/grants-2025.js', 'assets/giving/map-and-grants.js',
               'assets/intro/welcome.html', 'assets/img/tcf-logo@2x.png', 'assets/fonts/paralucent-condensed-heavy.woff2'];
   function warm(){ urls.forEach(function(u){ var l = document.createElement('link'); l.rel = 'prefetch'; l.href = u; document.head.appendChild(l); }); }
   if ('requestIdleCallback' in window) requestIdleCallback(warm, {timeout: 4000}); else setTimeout(warm, 2500);

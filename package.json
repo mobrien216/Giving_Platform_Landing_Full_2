@@ -3,8 +3,8 @@
   "private": true,
   "description": "Cleveland Foundation digital experience prototype (static site). No dependencies.",
   "scripts": {
-    "build": "node scripts/build-pages.js",
-    "check": "node scripts/build-pages.js --check",
+    "build": "node scripts/stamp-assets.js && node scripts/build-pages.js",
+    "check": "node scripts/stamp-assets.js --check && node scripts/build-pages.js --check",
     "serve": "python -m http.server 8000"
   }
 }

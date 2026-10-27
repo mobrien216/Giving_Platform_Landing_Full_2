@@ -44,6 +44,7 @@ Only **four pages** make up the whole system. Inside each app, moving between mo
 │   ├── intro/welcome.html        Welcome animation (iframe) for community/advisors
 │   └── js/tcf-bridge.js          Registration hand-off + deep links for community/advisors
 ├── src/giving/                   Source for the two app pages: page.html (shared) + community.html / advisors.html (per-app fills)
+├── scripts/stamp-assets.js       Adds a ?v= fingerprint to every local .js/.css reference so browsers never run stale code
 ├── scripts/build-pages.js        Builds community/ and advisors/index.html from src/giving/ (no dependencies)
 ├── package.json                  npm run build · npm run check · npm run serve (optional shortcuts)
 ├── 404.html                      Friendly not-found page
@@ -140,8 +141,10 @@ See **REFACTOR-NOTES.md** for what changed in the October 2026 clean-up and the 
 - **Grants data:** edit only `assets/data/grants-2025.js`. Every record needs `lat`/`lng`; a record without them is placed at its ZIP centroid and looked up once via OpenStreetMap Nominatim.
 - **Community and Advisor pages are generated.** `community/index.html` and `advisors/index.html` share ~1,550 identical lines, so both are built from one template:
   1. Edit `src/giving/page.html` for anything both apps show, or `src/giving/community.html` / `src/giving/advisors.html` for the per-app parts (title, 3 menu entries, 3 home panels, extra views, extra scripts — listed at the top of each file).
-  2. Run `node scripts/build-pages.js` (or `npm run build`) and commit the source **and** the generated pages. GitHub Pages serves the generated files as-is; no build runs on GitHub.
-  3. `node scripts/build-pages.js --check` exits with an error if a generated page is out of date or was hand-edited — run it before committing.
+  2. Run `npm run build` (or `node scripts/stamp-assets.js` then `node scripts/build-pages.js`) and commit the source **and** the generated pages. GitHub Pages serves the files as-is; no build runs on GitHub.
+  3. `npm run check` exits with an error if a page is out of date, was hand-edited, or points at an old version of a script — run it before committing.
+- **After editing any .js or .css file, run `npm run build`.** Pages load scripts and stylesheets as `app.js?v=<fingerprint>`. GitHub Pages lets browsers keep files for 10 minutes, so without a new fingerprint, visitors can keep running the old file (or a mix of old and new) after a deploy. The fingerprint only changes for files you edited.
+- **Seeing an old version right after a deploy?** The page itself can still be cached for up to 10 minutes: hard-refresh (Ctrl+F5 / Cmd+Shift+R). Also check the address: the old site is `…/Giving_Platform_Landing_Full/` (no `_2`).
 - **Shared app code:** `assets/giving/app.js` serves both community and advisors. Advisor-only hooks are guarded with `typeof`.
 - **Stylesheet order is load-bearing:** `tcf-v3.css` → app stylesheet → the matching `tcf-v3-*.css` bridge.
 

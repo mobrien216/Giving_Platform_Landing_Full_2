@@ -129,11 +129,20 @@ function logSync(sys, obj, text){
   S.sync.unshift(e); S.sync = S.sync.slice(0,80); save();
   setTimeout(function(){ e.st='synced'; save(); var el=document.getElementById('sy-'+String(e.id).replace('.','')); if(el){ el.textContent='Synced'; el.className='status st-posted'; } }, 1400);
 }
+/* Reset demo = start fresh: clear every saved piece of the demo, then reload the portal at a
+   one-time address (?fresh=<time>). The browser has never seen that address, so it must fetch
+   the newest page from the server — and with it the newest ?v=-stamped scripts. GitHub Pages
+   otherwise lets a browser reuse a saved page for up to 10 minutes after a deploy.
+   init.js removes ?fresh= from the address bar and shows the "Demo reset" message. */
+var FRESH_KEY = 'tcf_portal_fresh';   /* this tab's fresh token; also used for the plan frame (VIEWS.plan) */
 function resetDemo(){
   try{ localStorage.removeItem(STORE_KEY); localStorage.removeItem(PLAN_STATE_KEY); localStorage.removeItem(PLAN_SUMMARY_KEY); }catch(e){}
   LAST_PLAN = null;
   S = defaultState(); S.signedIn = true; save();
-  FUND_CACHE = {}; closeSheet(); toast('Demo reset. Your profile is back to its starting point.'); go('home', null, true);
+  FUND_CACHE = {}; closeSheet();
+  var t = Date.now();
+  try{ sessionStorage.setItem(SESSION_KEY,'1'); sessionStorage.setItem(FRESH_KEY, String(t)); sessionStorage.setItem('tcf_portal_reset_toast','1'); }catch(e){}
+  location.replace(location.pathname + '?fresh=' + t + '#/home');
 }
 
 /* ============================================================
@@ -1404,7 +1413,7 @@ function settingsBody(tab){
       '<div class="pgrid" style="border-radius:14px;overflow:hidden;border:1px solid var(--line)"><div class="panel" style="min-height:0"><div class="p-kick" style="--pk:#1A8DA9">CRM</div><div class="p-label" style="font-size:18px">Salesforce</div><div class="p-sub">Profile, preferences, interests, badges, quiz, feed, advisor contact</div><div class="p-count">'+sf+' update'+(sf===1?'':'s')+' · <span class="live" style="vertical-align:-1px"></span> connected</div></div><div class="panel" style="min-height:0"><div class="p-kick" style="--pk:var(--moss)">ERP</div><div class="p-label" style="font-size:18px">Ren iPhi</div><div class="p-sub">Balances, grants, contributions, rebalance requests, statements</div><div class="p-count">'+ri+' update'+(ri===1?'':'s')+' · <span class="live" style="vertical-align:-1px"></span> connected</div></div></div>'+
       '<div class="gap-m"></div><div class="card-k">Sync activity</div><div class="card flush">'+(S.sync.length?S.sync.slice(0,30).map(function(e){ return '<div class="sync-row"><span class="sy-s '+(e.sys==='sf'?'sy-sf':'sy-ri')+'">'+SYS[e.sys]+'</span><span class="sy-t"><b style="color:var(--forest);font-weight:600">'+esc(e.obj)+'</b> · '+esc(e.text)+'</span><span id="sy-'+String(e.id).replace('.','')+'" class="status '+(e.st==='synced'?'st-posted':'st-queued')+'">'+(e.st==='synced'?'Synced':'Queued')+'</span></div>'; }).join(''):'<div class="empty" style="border:none"><b>No activity yet</b>Make a grant, earn a badge or answer the quiz — each action appears here.</div>')+'</div>'+
       '<p class="tiny" style="margin-top:10px">Prototype: sync is simulated and data stays in this browser. The object names show where each action is proposed to land.</p>'+
-      '<div class="gap-m"></div><div class="card" style="border-color:var(--ember)"><div class="card-k">Demo controls</div><p style="font-size:13.5px;color:var(--ink-2)">Clear every grant, gift, badge, quiz answer, post and setting you\u2019ve made, and start the demo fresh.</p><div class="gap-s"></div><button class="btn btn-accent btn-block" onclick="confirmReset()">Reset demo</button></div>'+
+      '<div class="gap-m"></div><div class="card" style="border-color:var(--ember)"><div class="card-k">Demo controls</div><p style="font-size:13.5px;color:var(--ink-2)">Clear every grant, gift, badge, quiz answer, post, setting and giving plan you\u2019ve made, and start fresh on the latest version of the site.</p><div class="gap-s"></div><button class="btn btn-accent btn-block" onclick="confirmReset()">Reset demo</button></div>'+
       '<div class="gap-m"></div><button class="link" onclick="go(\'architecture\')">'+ic('layers',14)+'For developers: architecture map</button></div>';
   }
   return html;
@@ -1417,6 +1426,7 @@ VIEWS.plan = function(p){
   if(p.values) q.push('values='+encodeURIComponent(p.values));
   else if(p.step) q.push('step='+(+p.step));
   if(!isOrg()) q.push('balance='+Math.round(balance()));   // seeds a NEW plan with this fund's balance
+  try{ var fresh=sessionStorage.getItem(FRESH_KEY); if(fresh) q.push('fresh='+fresh); }catch(e){}   // after Reset demo: newest plan page too
   var keys=S.profile.interests.map(function(i){ return INTEREST_AREAS[i]; }).filter(Boolean);
   if(keys.length) q.push('interests='+keys.join(','));
   return pageHead('My profile','Five-year giving plan')+
@@ -1439,7 +1449,7 @@ function saveProfile(){ var P=S.profile; ['First','Last','Email','Phone','Street
 function toggleInterest(i){ var a=S.profile.interests, x=a.indexOf(i); if(x>-1) a.splice(x,1); else a.push(i); save(); logSync('sf','Contact Interests',(x>-1?'Removed ':'Added ')+i); render(); }
 function toggleComm(k){ S.profile.comms[k]=!S.profile.comms[k]; save(); logSync('sf','Communication Preferences',k+' '+(S.profile.comms[k]?'on':'off')); render(); }
 function setFY(m){ S.settings.fyStart[S.fundId]=m; save(); logSync('ri','Fund Reporting Settings','Fiscal year start set to '+MONTHS[m-1]+' for '+F().name); toast('Fiscal year now starts in '+MONTHS[m-1]+'.'); if(PERF.range==='FYTD' && m===1) PERF.range='YTD'; render(); }
-function confirmReset(){ openSheet({ kick:'Demo controls', title:'Reset the demo?', body:'<p class="lede">This clears everything you\u2019ve done in the prototype — grants, contributions, badges, quiz answers, posts, invites and settings — and returns every fund to its starting balance.</p>', foot:'<button class="btn btn-quiet" onclick="closeSheet()">Keep my changes</button><button class="btn btn-accent" onclick="resetDemo()">Reset demo</button>' }); }
+function confirmReset(){ openSheet({ kick:'Demo controls', title:'Reset the demo?', body:'<p class="lede">This clears everything you\u2019ve done in the prototype — grants, contributions, badges, quiz answers, posts, invites, settings and your five-year giving plan — and returns every fund to its starting balance. The portal then reloads on the latest version of the site.</p>', foot:'<button class="btn btn-quiet" onclick="closeSheet()">Keep my changes</button><button class="btn btn-accent" onclick="resetDemo()">Reset demo</button>' }); }
 
 /* ============ ARCHITECTURE MAP (buried: profile → sync & data) ============ */
 VIEWS.architecture = function(){

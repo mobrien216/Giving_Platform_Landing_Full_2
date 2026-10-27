@@ -263,7 +263,7 @@ function submitGardenSelfReport(id) {
   gardenUnlock(id, val);
 }
 function submitGardenShare(id) {
-  var shareData = { title: 'Cleveland Foundation Giving Portal', text: 'I\u2019m growing my Cleveland Garden \u2014 come check out the Giving Portal.', url: window.location.href };
+  var shareData = { title: 'Cleveland Foundation Giving Portal', text: 'I\u2019m taking part in Grow Your City with the Cleveland Foundation \u2014 come check out the Giving Portal.', url: window.location.href };
   if (navigator.share) {
     navigator.share(shareData).then(function() { gardenUnlock(id); }).catch(function() {});
   } else {
@@ -833,7 +833,7 @@ function renderNewsFeed(){
     html += '<div class="nf-post nf-you-post">' +
       '<div class="nf-post-top">' +
         '<div class="nf-avatar" style="background:var(--tcf-orange);">' + youInitials + '</div>' +
-        '<div><div class="nf-post-name">You</div><div class="nf-post-meta">Shared from Your Cleveland Garden</div></div>' +
+        '<div><div class="nf-post-name">You</div><div class="nf-post-meta">Shared from Grow Your City</div></div>' +
         '<div class="nf-post-badge">Your Why</div>' +
       '</div>' +
       '<div class="nf-post-body">\u201C' + escHtml(gardenState.why.detail) + '\u201D</div>' +

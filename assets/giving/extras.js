@@ -184,7 +184,7 @@ if (introEl){
   playIntro();
 }
 
-/* ---------- Grow Your Garden tile → straight to the badge grid ---------- */
+/* ---------- Grow Your City tile → straight to the badge grid ---------- */
 function openGardenBadges(){
   navigate('garden', false);
   setTimeout(function(){

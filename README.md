@@ -26,6 +26,7 @@ Only **four pages** make up the whole system. Inside each app, moving between mo
 ├── index.html                    Landing page
 ├── portal/index.html             Account Holder Portal
 ├── portal/plan/index.html        Five-year giving plan (values, contributions, investments, gifts) — opened from My profile
+├── open/index.html               Open a Donor Advised Fund (online flow) — from "Open a DAF" in the apps and the portal sign-in
 ├── community/index.html          Community Member experience   ┐ GENERATED from src/giving/
 ├── advisors/index.html           Advisor experience            ┘ (do not edit — see below)
 ├── tools/
@@ -115,6 +116,42 @@ The site follows **Component Library 3.0**, built on the approved Digital Style 
 
 The maps (Leaflet + OpenStreetMap tiles) and the portal's QR code library load from public CDNs. Everything else, including all fonts, is in this folder.
 
+## Opening a Donor Advised Fund
+
+`open/index.html` is the online "Open a Donor Advised Fund" flow: intro, then **You · Your fund · Fund it · Secure & agree · Review**, then confirmation. Its steps and fields follow the current Microsoft Form process ("Build notes" in its header shows the question each field maps to; "Ren spec" shows the record it would send).
+
+**Ways in** (`?from=`):
+
+| From | Where |
+|---|---|
+| `community` / `advisors` | every "Open a DAF" button in the registration apps (`openDAF()` in `assets/giving/app.js`) |
+| `signin` | "Open a Donor Advised Fund" under the portal's sign-in form |
+| `portal` | "Open a new fund" inside the portal (fund switcher, My funds, Contribute), for an existing holder |
+
+**When the donor finishes**, "Go to my account" saves a small hand-off (`tcf_new_fund`: name, email, fund name, gift, card or ACH, allocation, persona) and opens `portal/?newfund=1`:
+
+- **A new donor** lands signed in with only their new fund. The opening gift is the balance, and a **Sign your fund agreement** card stays on the dashboard until they sign (DocuSign is simulated).
+- **An existing holder** gets the new fund added alongside their others.
+- **Persona:** a donor who came from the community or advisor app sees that app's own engagement tools at the bottom of the portal's **Engage** menu (Community: Learn, Members, Vision cards; Advisor: Gift planner, Estate planning checklist, Advisor FAQ). They open inside the portal (`#/learning`, `#/giftplanner` …), using the apps' frame mode (`?embed=1`).
+- **Reset demo** returns to the Taylor Williams demo account.
+
+**Prototype safeguards:** the payment and password steps show a prototype notice, and obvious test values are filled in. Card, bank, password, date of birth, address and phone are never saved or handed on; the flow clears them on submit. Everything joining the flow to the site is in the **SITE INTEGRATION** block at the end of `open/index.html`; the flow itself is unchanged apart from brand styling (self-hosted fonts, the `tcf-v3-site.css` bridge, brand corners, flat green, light only).
+
+### Future state: no separate signing step
+
+**Today (what the prototype shows):** after submitting, the donor logs in to the portal and signs a fund agreement in DocuSign before the fund opens. This mirrors the current process, so it stays as is for now.
+
+**Where we want to go:** no log-in-and-sign step at all. Checking the three boxes on **Secure & agree** (Terms and Conditions, irrevocable gift, accurate information) should be everything needed to open the account, and the donor goes straight from submitting to an open fund. The confirmation page becomes "Congratulations, welcome, you've opened your fund. Log in and start granting" instead of "log in and sign your agreement".
+
+**What has to change to get there:**
+- **Terms and agreement language** (legal/compliance): rewrite the Terms and Conditions, and the agreement terminology throughout, so that accepting them in the flow is the fund agreement. Legal and compliance confirm this is sufficient before launch.
+- **`open/index.html`:**
+  - drop the intro's third phase ("Sign your fund agreement");
+  - update the Secure & agree checkbox wording;
+  - turn the confirmation screen into a welcome / start-granting page;
+  - update the Ren build notes and spec (the record's status is "Pending agreement signature" today).
+- **Portal** (`assets/portal/app.js`): new funds open immediately. Remove `agreementCard`, `signAgreement`, `completeAgreement` and the "Agreement to sign" status.
+
 ## My profile and the giving profile
 
 **My profile** (`portal/#/profile`) is a hub with five parts, top to bottom:
@@ -159,7 +196,8 @@ See **REFACTOR-NOTES.md** for what changed in the October 2026 clean-up and the 
 - Placeholder content to replace before any public use: Candid seal levels, fund documents, wiring details, spending-policy figures and QR link.
 - **Figures that disagree across pages** (need an approved source): $3.9B vs $3.1B granted since 1914; $90M vs $160M granted last year; "$100M+ every year this decade" vs $90M last year; ticker labelled "2026 grants" on the landing page but "2025 grants" in the apps. Details in REFACTOR-NOTES.md.
 - **Gift Planner tax logic** (QCD eligibility and the household-level limit) needs review by the tax-content owner before advisors rely on it.
-- **"Open a fund"** in the portal sign-in goes to "Join the Community" — there is no dedicated open-a-fund window yet.
+- **Open a DAF, for real:** the flow needs a PCI-compliant payment processor, Ren for the fund record, DocuSign for the agreement and Entra for the login before it collects real information, with the usual security, legal and compliance review. Its five investment pools marked "To confirm" also need names and descriptions.
+- **Leftover donor screens in the registration apps:** the apps' old in-app "donor mode" (My fund, performance, grants…) can no longer be reached now that fund holders go to the portal. It can be removed in a clean-up.
 - **Unlinked views:** `vision` (both apps) and `calculator`/`members`/`learning` on advisors are only reachable by `#/` link. Link or remove.
 
 ### Resolved

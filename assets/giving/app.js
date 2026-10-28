@@ -19,6 +19,15 @@ function initialsOf(name){
   return name ? escHtml(name.split(/\s+/).map(function(p){ return p[0]; }).join('').slice(0,2).toUpperCase()) : 'YOU';
 }
 
+/* Open a Donor Advised Fund: every "Open a DAF" button goes to the Foundation's online
+   flow (open/), the same one the portal's sign-in page links to. ?from= tells the flow which
+   app sent the person, so their persona (community member or advisor) carries into the
+   Account Holder portal when they finish. */
+function openDAF(){
+  var app = location.pathname.indexOf('/advisors/') > -1 ? 'advisors' : 'community';
+  location.href = '../open/?from=' + app;
+}
+
 /* ============================================================
    APP STATE
    ============================================================ */
@@ -969,151 +978,6 @@ function toggleRoundups(checkbox) {
   var methodMeta = document.getElementById('roundupsMethodMeta');
   if (methodMeta) methodMeta.textContent = (checkbox.checked ? 'Demo active · ' : 'Paused · ') + roundupsState.fund;
   showToast(checkbox.checked ? 'Round-Up Giving turned on.' : 'Round-Up Giving paused.');
-}
-
-/* ============================================================
-   DAF FLOW
-   ============================================================ */
-var dafData = { fundName:'', donorName:'', signed: false };
-var dafTitles = ['','Name Your Fund','Your Information','Review Agreement','Sign Your Agreement','Fund Your DAF'];
-
-function dafNext(step) {
-  if (step === 1) {
-    var fn = document.getElementById('dafFundName').value.trim();
-    if (!fn) { showToast('Please enter a fund name.'); return; }
-    dafData.fundName = fn;
-    document.getElementById('agreementFundName').textContent = fn;
-    document.getElementById('agreementFundName2').textContent = fn;
-  }
-  if (step === 2) {
-    var dn = document.getElementById('dafDonorName').value.trim();
-    if (!dn) { showToast('Please enter your full legal name.'); return; }
-    dafData.donorName = dn;
-    document.getElementById('agreementDonorName').textContent = dn;
-  }
-  if (step === 3) {
-    if (!document.getElementById('dafAgreementCheck').checked) { showToast('Please read and check the agreement box to continue.'); return; }
-    document.getElementById('signFundName').textContent = dafData.fundName;
-    document.getElementById('signDonorName').textContent = dafData.donorName;
-    document.getElementById('signDate').textContent = new Date().toLocaleDateString('en-US',{year:'numeric',month:'long',day:'numeric'});
-  }
-  if (step === 4) {
-    if (!dafData.signed) { showToast('Please sign the agreement before continuing.'); return; }
-    document.getElementById('payFundName').textContent = dafData.fundName;
-    document.getElementById('wireMemofundName').textContent = dafData.fundName;
-  }
-  goToStep(step + 1);
-}
-
-function dafBack(step) { goToStep(step - 1); }
-
-function goToStep(n) {
-  document.querySelectorAll('.daf-step').forEach(function(s) { s.classList.remove('active'); });
-  var s = document.getElementById('daf-step-' + n);
-  if (s) s.classList.add('active');
-  document.getElementById('dafFlowTitle').textContent = dafTitles[n] || '';
-  for (var i = 1; i <= 5; i++) {
-    var item = document.getElementById('step-item-' + i);
-    item.classList.remove('active','done');
-    if (i < n) item.classList.add('done');
-    if (i === n) item.classList.add('active');
-  }
-  window.scrollTo({ top: 0, behavior: 'instant' });
-}
-
-function dafComplete() {
-  if (!document.getElementById('dafPayConfirm').checked) { showToast('Please confirm the irrevocability of your contribution.'); return; }
-  document.getElementById('pendingFundNameStat').textContent = dafData.fundName;
-  navigate('pending');
-}
-
-/* ============================================================
-   PORTAL ACTIVATION (post-DAF approval)
-   ============================================================ */
-function activateDonorPortal() {
-  appState.isDonor = true;
-  appState.fundName = dafData.fundName || 'Sullivan Family Fund';
-  appState.donorName = dafData.donorName || 'Jamie Sullivan';
-
-  // Update home screen
-  document.getElementById('homeProspectHead').style.display = 'none';
-  document.getElementById('homeDonorHead').style.display = 'block';
-  document.getElementById('homeDonorFundName').textContent = appState.fundName;
-  document.getElementById('prospectTiles').style.display = 'none';
-  document.getElementById('donorTiles').style.display = 'grid';
-  document.getElementById('donorBalanceLabel').textContent = appState.fundName;
-  document.getElementById('donorQuickActions').style.display = 'block';
-
-  // Show the "Open DAF" below-fold module differently
-  var openDafMod = document.getElementById('openDafModule');
-  if (openDafMod) {
-    openDafMod.querySelector('.mt-label').textContent = 'Open Another DAF';
-    openDafMod.querySelector('.mt-sub').textContent = 'Add a second fund for a specific cause.';
-  }
-
-  // Update fund views
-  document.getElementById('fundPageTitle').textContent = appState.fundName;
-  document.getElementById('fundCardName').textContent = appState.fundName;
-  document.getElementById('donorBalanceLabel').textContent = appState.fundName;
-  document.getElementById('fundCardMeta').textContent = 'Established ' + new Date().toLocaleDateString('en-US',{month:'long',year:'numeric'}) + ' · Primary Advisor: ' + appState.donorName;
-
-  // Show donor drawer items
-  ['drawerDonorLabel','drawerFunds','drawerGrants','drawerContrib','drawerPerf'].forEach(function(id) {
-    var el = document.getElementById(id);
-    if (el) el.style.display = id === 'drawerDonorLabel' ? 'block' : 'flex';
-  });
-
-  // Update drawer user role
-  document.getElementById('drawerRole').textContent = 'DAF Donor';
-  document.getElementById('drawerAvatar').style.background = 'var(--tcf-mid-green)';
-
-  // Update topbar subtitle
-  document.getElementById('topbarSub').textContent = 'Donor Portal';
-
-  navigate('home');
-  showToast('🎉 Welcome, ' + appState.donorName.split(' ')[0] + '! Your ' + appState.fundName + ' is active.');
-}
-
-/* ============================================================
-   SIGNING PAD
-   ============================================================ */
-var signCanvas, signCtx, signDrawing = false, signHasData = false;
-
-function startSigning() {
-  var box = document.getElementById('signBox');
-  signCanvas = document.getElementById('signCanvas');
-  signCanvas.width = box.offsetWidth;
-  signCanvas.height = box.offsetHeight;
-  signCtx = signCanvas.getContext('2d');
-  signCtx.strokeStyle = '#164430';
-  signCtx.lineWidth = 2.5;
-  signCtx.lineCap = 'round';
-  signCtx.lineJoin = 'round';
-  document.getElementById('signPlaceholder').style.display = 'none';
-
-  function getPos(e) {
-    var r = signCanvas.getBoundingClientRect();
-    var src = e.touches ? e.touches[0] : e;
-    return { x: src.clientX - r.left, y: src.clientY - r.top };
-  }
-  signCanvas.onmousedown = signCanvas.ontouchstart = function(e) { e.preventDefault(); signDrawing = true; var p = getPos(e); signCtx.beginPath(); signCtx.moveTo(p.x, p.y); };
-  signCanvas.onmousemove = signCanvas.ontouchmove = function(e) { e.preventDefault(); if (!signDrawing) return; var p = getPos(e); signCtx.lineTo(p.x, p.y); signCtx.stroke(); signHasData = true; };
-  signCanvas.onmouseup = signCanvas.ontouchend = function() {
-    signDrawing = false;
-    if (signHasData) {
-      dafData.signed = true;
-      document.getElementById('signBox').classList.add('signed');
-      document.getElementById('clearSignBtn').style.display = 'block';
-    }
-  };
-}
-
-function clearSign() {
-  if (signCtx) signCtx.clearRect(0, 0, signCanvas.width, signCanvas.height);
-  dafData.signed = false; signHasData = false;
-  document.getElementById('signBox').classList.remove('signed');
-  document.getElementById('signPlaceholder').style.display = 'flex';
-  document.getElementById('clearSignBtn').style.display = 'none';
 }
 
 /* ============================================================

@@ -16,7 +16,7 @@
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet.markercluster/1.5.3/MarkerCluster.Default.css">
 <link rel="stylesheet" href="../assets/giving/giving.css?v=514e5c6a">
 <!-- @slot head -->
-<link rel="stylesheet" href="../assets/css/tcf-v3-giving.css?v=d724b372">
+<link rel="stylesheet" href="../assets/css/tcf-v3-giving.css?v=2fc5bb71">
 <link rel="icon" href="../assets/img/favicon.svg">
 </head>
 <body class="hero-view">
@@ -88,7 +88,7 @@
     <button class="dr-item" data-view="garden" onclick="navigate('garden')"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22V12"/><path d="M12 12C12 7 8 6 5 6c0 4 2 7 7 7z"/><path d="M12 12c0-5 4-6 7-6 0 4-2 7-7 7z"/></svg>Grow Your City</button>
 
     <div class="dr-label" id="drawerJourneyLabel">Your Journey</div>
-    <button class="dr-item" data-view="openfund" onclick="navigate('openfund')" id="drawerOpenDAF"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg>Open a DAF</button>
+    <button class="dr-item" onclick="openDAF()" id="drawerOpenDAF"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg>Open a DAF</button>
     <button class="dr-item" data-view="contributions" onclick="navigate('contributions')"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12h4l3-8 4 16 3-8h4"/></svg>Give</button>
     <button class="dr-item" data-view="givinghistory" onclick="navigate('givinghistory')"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 3v18h18"/><path d="M7 14l4-4 3 3 5-6"/></svg>Your Giving History</button>
     <button class="dr-item" id="drawerLegacy" onclick="showLegacyModal()"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>Plan Your Legacy &amp; Advisor</button>
@@ -315,7 +315,7 @@
   </div>
   <div class="pgrid">
     <!-- primary conversion, full width -->
-    <button class="panel panel-wide" id="openDafModule" onclick="navigate('openfund')">
+    <button class="panel panel-wide" id="openDafModule" onclick="openDAF()">
       <svg class="guilloche" viewBox="0 0 300 300" preserveAspectRatio="xMidYMid slice" aria-hidden="true"><g fill="none" stroke="#19B9A9" stroke-width=".6" opacity=".45"><circle cx="280" cy="300" r="70"/><circle cx="280" cy="300" r="110"/><circle cx="280" cy="300" r="150"/><circle cx="280" cy="300" r="190"/><circle cx="280" cy="300" r="230"/></g></svg>
       <div class="t-icon" style="background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.2);"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg></div>
       <div class="pw-body">
@@ -425,246 +425,6 @@
       <h3 style="margin-bottom:8px;">Find your people</h3>
       <p style="color:var(--ink-2);font-size:13.5px;margin-bottom:14px;">Tell us what you care about and we'll match you with a circle already working on it.</p>
       <button class="btn btn-accent btn-block" onclick="showToast('A member coordinator will reach out within two business days.')">Match me with a circle</button>
-    </div>
-  </div>
-</section>
-
-<!-- =================== OPEN A DAF — 5-step flow =================== -->
-<section class="view" id="view-openfund">
-  <div class="page">
-    <div class="page-head">
-      <div class="eyebrow">Open a Donor Advised Fund</div>
-      <h1 id="dafFlowTitle">Name Your Fund</h1>
-    </div>
-
-    <!-- Stepper -->
-    <div class="stepper" id="dafStepper">
-      <div class="step-item active" id="step-item-1"><div class="step-circle">1</div><div class="step-label">Name</div></div>
-      <div class="step-item" id="step-item-2"><div class="step-circle">2</div><div class="step-label">Details</div></div>
-      <div class="step-item" id="step-item-3"><div class="step-circle">3</div><div class="step-label">Agreement</div></div>
-      <div class="step-item" id="step-item-4"><div class="step-circle">4</div><div class="step-label">eSign</div></div>
-      <div class="step-item" id="step-item-5"><div class="step-circle">5</div><div class="step-label">Fund It</div></div>
-    </div>
-
-    <!-- STEP 1: Name the fund -->
-    <div class="daf-step active" id="daf-step-1">
-      <div class="card">
-        <h3 style="margin-bottom:6px;">What would you like to call your fund?</h3>
-        <p style="color:var(--ink-soft);font-size:13.5px;margin-bottom:18px;">Most donors use a family name. Examples: "The Sullivan Family Fund" or "Sullivan Education Fund."</p>
-        <div class="form-row">
-          <label>Fund Name</label>
-          <input type="text" id="dafFundName" placeholder="e.g., The Sullivan Family Fund" />
-        </div>
-        <div class="form-row">
-          <label>Fund Purpose (optional)</label>
-          <select id="dafFundPurpose">
-            <option>General Giving — I'll direct it later</option>
-            <option>Education &amp; Youth</option>
-            <option>Arts &amp; Culture</option>
-            <option>Health &amp; Human Services</option>
-            <option>Economic Mobility</option>
-            <option>Environment &amp; Conservation</option>
-            <option>Community Development</option>
-          </select>
-        </div>
-        <div style="background:var(--surface-2);border-radius:10px;padding:14px;margin-bottom:18px;font-size:13px;color:var(--ink-soft);">
-          <strong style="color:var(--tcf-primary);">Your fund is permanent.</strong> Once established, it becomes a named fund at The Cleveland Foundation and can accept gifts from anyone at any time.
-        </div>
-        <button class="btn btn-accent btn-block" onclick="dafNext(1)">Continue →</button>
-      </div>
-    </div>
-
-    <!-- STEP 2: Donor details -->
-    <div class="daf-step" id="daf-step-2">
-      <div class="card">
-        <h3 style="margin-bottom:6px;">Your Information</h3>
-        <p style="color:var(--ink-soft);font-size:13.5px;margin-bottom:18px;">This information will appear on the legal instrument creating your fund.</p>
-        <div class="form-row"><label>Full Legal Name</label><input type="text" id="dafDonorName" placeholder="Jamie L. Sullivan" /></div>
-        <div class="form-row"><label>Email Address</label><input type="email" id="dafDonorEmail" placeholder="jamie@email.com" /></div>
-        <div class="form-row"><label>Phone</label><input type="tel" id="dafDonorPhone" placeholder="(216) 555-0100" /></div>
-        <div class="form-row"><label>Street Address</label><input type="text" id="dafAddr1" placeholder="123 Main Street" /></div>
-        <div style="display:grid;grid-template-columns:2fr 1fr;gap:12px;">
-          <div class="form-row"><label>City</label><input type="text" id="dafCity" placeholder="Cleveland" /></div>
-          <div class="form-row"><label>State</label><input type="text" id="dafState" placeholder="OH" /></div>
-        </div>
-        <div class="form-row"><label>ZIP Code</label><input type="text" id="dafZip" placeholder="44115" /></div>
-        <div style="display:flex;gap:10px;">
-          <button class="btn btn-ghost btn-block" onclick="dafBack(2)">← Back</button>
-          <button class="btn btn-accent btn-block" onclick="dafNext(2)">Continue →</button>
-        </div>
-      </div>
-    </div>
-
-    <!-- STEP 3: Agreement review -->
-    <div class="daf-step" id="daf-step-3">
-      <div class="card">
-        <div class="card-head">
-          <h3>Instrument of Transfer</h3>
-          <span class="ipin ipin-config" data-pin="legal-config">CMS</span>
-        </div>
-        <p style="color:var(--ink-soft);font-size:13.5px;margin-bottom:16px;">Please read the legal agreement carefully before signing. Your fund name and details have been pre-filled.</p>
-
-        <div style="background:var(--surface-2);border-radius:10px;padding:16px;max-height:340px;overflow-y:auto;font-size:13px;color:var(--ink);line-height:1.65;margin-bottom:16px;border:1px solid var(--border);">
-          <p style="text-align:center;font-weight:700;margin-bottom:6px;">THE CLEVELAND FOUNDATION</p>
-          <p style="text-align:center;font-weight:700;margin-bottom:4px;">INSTRUMENT OF TRANSFER FOR A DONOR ADVISED FUND</p>
-          <p style="text-align:center;font-style:italic;margin-bottom:16px;color:var(--ink-soft);">Creating the <strong id="agreementFundName">[Fund Name]</strong> of the Cleveland Foundation</p>
-          <p style="margin-bottom:12px;">THIS INSTRUMENT is to evidence the transfer and charitable contribution of certain property to The Cleveland Foundation, an Ohio public benefit corporation referred to as <em>the Foundation</em>, and the terms, conditions, and purposes of the transfer.</p>
-          <p style="font-weight:700;margin-bottom:6px;">1. Contribution.</p>
-          <p style="margin-bottom:12px;">The undersigned Donor, <strong id="agreementDonorName">[Donor Name]</strong>, contemporaneously with the execution of this Instrument, shall irrevocably assign and convey certain property to the Foundation for its public charitable and educational purposes and administration in accordance with and subject to its Articles of Incorporation, Code of Regulations, and policies from time to time in effect, including its variance power (the "Contribution").</p>
-          <p style="font-weight:700;margin-bottom:6px;">2. Named Fund.</p>
-          <p style="margin-bottom:12px;">The Contribution, all additions made as below provided, and all increments, proceeds, investments, and reinvestments of the same shall comprise a separate donor advised Fund of the Foundation with the name above indicated. The assets of the Fund will be assets of the Foundation and not a separate trust.</p>
-          <p style="font-weight:700;margin-bottom:6px;">3. Distributions; Advisors and Recommendations.</p>
-          <p style="margin-bottom:12px;">Distributions and expenditures may be made in accordance with the spending and other policies of the Foundation in effect from time to time. The Donor shall act as the advisor for the Fund and shall consult with Foundation staff and make recommendations concerning the amounts, timing, and purposes of grants from the Fund. The recommendations by the Donor shall be in writing and delivered or transmitted to the Foundation. The Foundation will give careful and thoughtful attention to the recommendations of the Donor, but the Donor acknowledges that the recommendations will be advisory only and not binding on the Foundation.</p>
-          <p style="font-weight:700;margin-bottom:6px;">4. Acknowledgment.</p>
-          <p style="margin-bottom:12px;">The Donor requests that distributions attributable to the Fund be made in the Fund's name.</p>
-          <p style="font-weight:700;margin-bottom:6px;">5. Termination.</p>
-          <p style="margin-bottom:12px;">The Foundation shall have the option to terminate the Fund if the annual asset value in each of two consecutive calendar years is less than Ten Thousand Dollars ($10,000). On the date of death of Donor, if the sum of the principal and undistributed income exceeds $10,000, it shall be a named fund known as the <em id="agreementFundName2">[Fund Name]</em> of The Cleveland Foundation.</p>
-          <p style="font-weight:700;margin-bottom:6px;">6. Management.</p>
-          <p style="margin-bottom:12px;">The Foundation shall have exclusive control over the investment, reinvestment, and management of assets comprising the Fund. The Fund shall be invested in the Cleveland Foundation's Index Pool.</p>
-          <p style="font-weight:700;margin-bottom:6px;">7. Fee.</p>
-          <p style="margin-bottom:12px;">The Foundation shall be entitled to an annual fee for the administration of the Fund in accordance with the Foundation's fee policy in effect from time to time.</p>
-          <p style="font-weight:700;margin-bottom:6px;">8. Counterparts.</p>
-          <p>This Instrument may be executed in separate counterparts (including by facsimile or .pdf format). The counterparts of this Instrument may be executed and delivered by electronic signature and will be effective as delivery of a manually executed counterpart to this Instrument.</p>
-        </div>
-
-        <label style="display:flex;align-items:flex-start;gap:12px;cursor:pointer;padding:14px;background:var(--surface-2);border-radius:10px;margin-bottom:16px;">
-          <input type="checkbox" id="dafAgreementCheck" style="width:20px;height:20px;margin-top:2px;accent-color:var(--tcf-mid-green);flex-shrink:0;"/>
-          <span style="font-size:14px;color:var(--ink);">I have read and understand this Instrument of Transfer and agree to its terms.</span>
-        </label>
-
-        <div style="display:flex;gap:10px;">
-          <button class="btn btn-ghost btn-block" onclick="dafBack(3)">← Back</button>
-          <button class="btn btn-accent btn-block" onclick="dafNext(3)">Continue →</button>
-        </div>
-      </div>
-    </div>
-
-    <!-- STEP 4: eSign -->
-    <div class="daf-step" id="daf-step-4">
-      <div class="card">
-        <div class="card-head">
-          <h3>Electronic Signature</h3>
-          <span class="ipin ipin-integration" data-pin="docusign">DocuSign</span>
-        </div>
-        <p style="color:var(--ink-soft);font-size:13.5px;margin-bottom:18px;">Sign below to execute the Instrument of Transfer. Your signature is legally binding.</p>
-
-        <div style="background:var(--surface-2);border-radius:10px;padding:14px;margin-bottom:18px;font-size:13px;color:var(--ink-soft);">
-          <div style="display:flex;justify-content:space-between;margin-bottom:6px;"><span>Fund Name:</span><strong id="signFundName" style="color:var(--tcf-primary);">[Fund Name]</strong></div>
-          <div style="display:flex;justify-content:space-between;margin-bottom:6px;"><span>Donor:</span><strong id="signDonorName" style="color:var(--tcf-primary);">[Name]</strong></div>
-          <div style="display:flex;justify-content:space-between;"><span>Date:</span><strong id="signDate" style="color:var(--tcf-primary);"></strong></div>
-        </div>
-
-        <label style="font-size:12px;font-weight:700;color:var(--tcf-primary);letter-spacing:.05em;text-transform:uppercase;display:block;margin-bottom:8px;">Your Signature</label>
-        <div class="sign-box" id="signBox" onclick="startSigning()">
-          <canvas id="signCanvas"></canvas>
-          <div class="placeholder" id="signPlaceholder">
-            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="var(--ink-faint)" stroke-width="1.5"><path d="M17 3a2.828 2.828 0 114 4L7.5 20.5 2 22l1.5-5.5L17 3z"/></svg>
-            <span>Tap to sign</span>
-          </div>
-        </div>
-        <button id="clearSignBtn" style="display:none;font-size:13px;color:var(--tcf-red);font-weight:600;margin-bottom:16px;" onclick="clearSign()">Clear signature</button>
-
-        <p style="font-size:11.5px;color:var(--ink-faint);margin-bottom:20px;line-height:1.5;">By signing, you acknowledge this is an electronic signature with the same legal effect as a handwritten signature, consistent with the E-SIGN Act.</p>
-
-        <div style="display:flex;gap:10px;">
-          <button class="btn btn-ghost btn-block" onclick="dafBack(4)">← Back</button>
-          <button class="btn btn-accent btn-block" id="signContinueBtn" onclick="dafNext(4)">Continue →</button>
-        </div>
-      </div>
-    </div>
-
-    <!-- STEP 5: Fund your DAF -->
-    <div class="daf-step" id="daf-step-5">
-      <div class="card">
-        <div class="card-head">
-          <h3>Open Your Fund</h3>
-          <span class="ipin ipin-integration" data-pin="psp">PSP</span>
-        </div>
-        <p style="color:var(--ink-soft);font-size:13.5px;margin-bottom:18px;">Make your initial contribution to activate your fund. A minimum of $10,000 is required to open a Donor Advised Fund.</p>
-
-        <div style="background:var(--tcf-primary);border-radius:12px;padding:16px;margin-bottom:18px;color:#fff;">
-          <div style="font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:#9DB3A6;margin-bottom:6px;">Opening</div>
-          <div style="font-family:var(--font-head);font-size:18px;font-weight:700;" id="payFundName">Sullivan Family Fund</div>
-          <div style="font-size:12px;color:#9DB3A6;margin-top:4px;">The Cleveland Foundation · Donor Advised Fund</div>
-        </div>
-
-        <div class="form-row">
-          <label>Initial Contribution</label>
-          <input type="text" id="dafPayAmount" value="$10,000" />
-          <div class="help-text">Minimum: $10,000. Deductible in the year of contribution.</div>
-        </div>
-
-        <div class="form-row">
-          <label>Payment Method</label>
-          <select id="dafPayMethod">
-            <option>Wire Transfer (instructions follow)</option>
-            <option>ACH Bank Transfer</option>
-            <option>Check (mailed to TCF)</option>
-            <option>Appreciated Securities</option>
-          </select>
-        </div>
-
-        <div id="wireInstructions" style="background:var(--surface-2);border-radius:10px;padding:14px;margin-bottom:18px;font-size:13px;line-height:1.7;">
-          <div style="font-weight:700;color:var(--tcf-primary);margin-bottom:8px;">Wire Transfer Instructions</div>
-          <div>Bank: <strong>KeyBank NA</strong></div>
-          <div>ABA Routing: <strong>041001039</strong></div>
-          <div>Account: <strong>•••• 4471</strong> (shown at confirmation)</div>
-          <div>Memo: <strong id="wireMemofundName">Sullivan Family Fund</strong></div>
-        </div>
-
-        <label style="display:flex;align-items:flex-start;gap:12px;cursor:pointer;padding:14px;background:var(--surface-2);border-radius:10px;margin-bottom:18px;">
-          <input type="checkbox" id="dafPayConfirm" style="width:20px;height:20px;margin-top:2px;accent-color:var(--tcf-mid-green);flex-shrink:0;"/>
-          <span style="font-size:14px;color:var(--ink);">I understand my initial contribution is irrevocable and becomes an asset of The Cleveland Foundation.</span>
-        </label>
-
-        <div style="display:flex;gap:10px;">
-          <button class="btn btn-ghost btn-block" onclick="dafBack(5)">← Back</button>
-          <button class="btn btn-accent btn-block" onclick="dafComplete()">Open My Fund 🎉</button>
-        </div>
-      </div>
-    </div>
-
-  </div>
-</section>
-
-<!-- =================== PENDING STATE =================== -->
-<section class="view" id="view-pending">
-  <div class="page">
-    <div class="pending-banner">
-      <div class="pb-icon">🎉</div>
-      <h2>Your Fund is Being Set Up!</h2>
-      <p>Welcome to the Cleveland Foundation family. Your Donor Advised Fund agreement has been received and your initial contribution is being processed.</p>
-      <div class="pb-meta">
-        <div class="pb-stat"><div class="val" id="pendingFundNameStat">Your Fund</div><div class="lbl">Fund Name</div></div>
-        <div class="pb-stat"><div class="val">$10,000</div><div class="lbl">Initial Gift</div></div>
-      </div>
-    </div>
-
-    <div class="card">
-      <h3 style="margin-bottom:12px;">What Happens Next</h3>
-      <div style="display:flex;flex-direction:column;gap:10px;">
-        <div style="display:flex;gap:12px;align-items:flex-start;padding:12px;background:var(--surface-2);border-radius:10px;">
-          <div style="width:28px;height:28px;border-radius:50%;background:var(--tcf-mid-green);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:12px;flex-shrink:0;">1</div>
-          <div><div style="font-weight:700;font-size:14px;color:var(--tcf-primary);">Agreement Review</div><div style="font-size:12.5px;color:var(--ink-faint);">TCF legal reviews your executed Instrument of Transfer. Usually same business day.</div></div>
-        </div>
-        <div style="display:flex;gap:12px;align-items:flex-start;padding:12px;background:var(--surface-2);border-radius:10px;">
-          <div style="width:28px;height:28px;border-radius:50%;background:var(--tcf-blue);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:12px;flex-shrink:0;">2</div>
-          <div><div style="font-weight:700;font-size:14px;color:var(--tcf-primary);">Fund Establishment</div><div style="font-size:12.5px;color:var(--ink-faint);">Your fund is created in Ren iPhi with a unique Fund ID and Transaction ID.</div></div>
-        </div>
-        <div style="display:flex;gap:12px;align-items:flex-start;padding:12px;background:var(--surface-2);border-radius:10px;">
-          <div style="width:28px;height:28px;border-radius:50%;background:var(--tcf-orange);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:12px;flex-shrink:0;">3</div>
-          <div><div style="font-weight:700;font-size:14px;color:var(--tcf-primary);">Welcome &amp; Activation</div><div style="font-size:12.5px;color:var(--ink-faint);">You'll receive a confirmation email and your portal upgrades to full donor access.</div></div>
-        </div>
-      </div>
-    </div>
-
-    <div class="card">
-      <h3 style="margin-bottom:8px;">While You Wait</h3>
-      <p style="color:var(--ink-soft);font-size:13.5px;margin-bottom:14px;">Explore what you'll be able to do once your fund is active.</p>
-      <button class="btn btn-primary btn-block" style="margin-bottom:8px;" onclick="navigate('impact')">Read Cleveland Impact Stories</button>
-      <button class="btn btn-ghost btn-block" style="margin-bottom:8px;" onclick="navigate('learning')">Continue Learning</button>
-      <!-- DEMO ONLY: activate immediately -->
-      <button class="btn btn-ghost btn-block" style="border-color:var(--tcf-mid-green);color:var(--tcf-mid-green);margin-top:8px;" onclick="activateDonorPortal()">✓ Demo: Activate Portal Now</button>
     </div>
   </div>
 </section>
@@ -1024,7 +784,7 @@
       <div class="eyebrow">Ready to Act?</div>
       <h3 style="margin-bottom:8px;">Turn inspiration into impact</h3>
       <p style="color:var(--ink-soft);font-size:13.5px;margin-bottom:14px;">Open a Donor Advised Fund and start directing your giving.</p>
-      <button class="btn btn-accent btn-block" onclick="navigate('openfund')">Open a Donor Advised Fund</button>
+      <button class="btn btn-accent btn-block" onclick="openDAF()">Open a Donor Advised Fund</button>
     </div>
   </div>
 </section>
@@ -1078,7 +838,7 @@
     <div id="calcImpactCards" class="calc-money-cards"></div>
 
     <div class="card calc-note"><p id="calcExplanation"></p></div>
-    <button class="btn btn-accent btn-block" onclick="navigate('openfund')" style="margin-top:4px;">Open a Fund to Make It Real →</button>
+    <button class="btn btn-accent btn-block" onclick="openDAF()" style="margin-top:4px;">Open a Fund to Make It Real →</button>
   </div>
 </section>
 
@@ -1108,7 +868,7 @@
       <h3 id="vBuilderType" style="font-size:22px;margin-bottom:8px;"></h3>
       <p id="vBuilderDesc" style="color:var(--ink-soft);font-size:14px;line-height:1.55;margin-bottom:12px;"></p>
       <div id="vBuilderVision" style="font-size:16px;font-weight:700;color:var(--tcf-orange);margin-bottom:20px;"></div>
-      <button class="btn btn-accent btn-block" onclick="navigate('openfund')">Channel Your Vision — Open a DAF</button>
+      <button class="btn btn-accent btn-block" onclick="openDAF()">Channel Your Vision — Open a DAF</button>
       <button class="btn btn-ghost btn-block" style="margin-top:8px;" onclick="vReset()">Start Over</button>
     </div>
   </div>
@@ -1218,7 +978,7 @@
 
     <div class="hq-give-banner">
       <p>We&rsquo;ve helped make this city thrive for the last 100 years, and we want you to help us see it thrive for the next 100.</p>
-      <button class="btn btn-accent" onclick="navigate('openfund')">Give Today</button>
+      <button class="btn btn-accent" onclick="openDAF()">Give Today</button>
     </div>
 
     <div class="hw-hero">
@@ -1573,11 +1333,11 @@
 <script src="../assets/data/grants-2025.js?v=f8da6a55"></script>
 <script src="../assets/giving/map-and-grants.js?v=20058938"></script>
 
-<script src="../assets/giving/app.js?v=28806d2d"></script>
+<script src="../assets/giving/app.js?v=64445831"></script>
 
 <script src="../assets/giving/extras.js?v=86bf2363"></script>
 <!-- @slot app-scripts -->
 <script>window.SITE_HOME = "../";</script>
-<script src="../assets/js/tcf-bridge.js?v=b5f25193"></script>
+<script src="../assets/js/tcf-bridge.js?v=8fca3c3b"></script>
 </body>
 </html>

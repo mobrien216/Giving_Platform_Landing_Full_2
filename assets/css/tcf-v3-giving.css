@@ -61,6 +61,11 @@ body.hero-view:not(.scrolled) .tb-cta-give{background:var(--white)!important;bor
 .nf-post-actions button.liked{color:var(--red);}
 :is(.hero,.tile-balance,.fund-card) :is(.h-delta,.tile-delta,.delta),.panel-dark .p-count,.tk-item .amt{color:var(--white)!important;}
 
+/* frame mode (?embed=1, set by assets/js/tcf-bridge.js): a persona tool shown inside the
+   Account Holder portal, which supplies its own header and menu */
+html.embedded{--topbar-h:0px;--dock-clear:24px;}
+html.embedded :is(.topbar,.drawer,.drawer-backdrop,.dock,.intro){display:none!important;}
+
 /* welcome animation (Giving Portal animatic v5): plays in a frame, lifts when it signals it's done */
 .intro{background:var(--green);}
 .intro.play{animation:introLift .55s cubic-bezier(.65,0,.3,1) 9s forwards;}      /* fallback if the frame never reports back */

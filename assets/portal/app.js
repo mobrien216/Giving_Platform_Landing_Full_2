@@ -112,8 +112,12 @@ function defaultState(){
     settings:{ pins:true, fyStart:{ eac:7 } },
     cart:[], grants:[], contribs:[], favorites:['Greater Cleveland Food Bank'],
     garden:{}, quiz:{}, feed:{ posts:[], likes:{}, connects:{} },
-    family:{}, rebalance:{}, scenarios:[], newFunds:[], messages:[], calls:[],
-    notifRead:0, sync:[], seenOnboard:false
+    family:{}, rebalance:{}, scenarios:[], messages:[], calls:[],
+    notifRead:0, sync:[], seenOnboard:false,
+    /* account: 'demo' = the Williams demo funds; 'new' = someone who just opened a fund online
+       (they see only their own). persona: 'community' | 'advisor' | null, from registration.
+       myFunds: funds opened through the online flow (open/). */
+    account:'demo', persona:null, myFunds:[]
   };
 }
 var S = (function(){ try{ var raw=localStorage.getItem(STORE_KEY); if(raw){ var o=JSON.parse(raw); var d=defaultState(); for(var k in d) if(!(k in o)) o[k]=d[k]; return o; } }catch(e){} return defaultState(); })();
@@ -176,6 +180,15 @@ var FUNDS = [
     people:[ {n:'Taylor Williams', r:'Board treasurer · Authorized signer', e:'taylor@williams.example', you:true}, {n:'Renée Okafor', r:'Executive director · Authorized signer', e:'renee@eastsidearts.example'}, {n:'Marcus Bell', r:'Finance manager · View only', e:'marcus@eastsidearts.example'} ],
     focus:['Arts & culture'] }
 ];
+/* Which funds this account holder sees. A new account (opened online) has only its own
+   funds; the demo account has the Williams funds plus any it opened online. */
+var DEMO_FUNDS = FUNDS.slice();
+function applyAccount(){
+  var list = (S.account==='new' ? [] : DEMO_FUNDS).concat(S.myFunds || []);
+  FUNDS.length = 0; list.forEach(function(f){ FUNDS.push(f); });
+  if(!FUNDS.some(function(f){ return f.id===S.fundId; })) S.fundId = FUNDS[0].id;
+}
+applyAccount();
 function fundById(id){ return FUNDS.filter(function(f){return f.id===id;})[0] || FUNDS[0]; }
 function F(){ return fundById(S.fundId); }
 function isOrg(){ return F().type==='org'; }
@@ -233,6 +246,9 @@ function build(f){
       if(m===11 && dd===10) contrib(5000,'Credit card','Year-end gift');
       if(i===N-4) grant(750,orgPool[2].name,'General operating support');
       if(i>30 && r()<.022){ var o2=orgPool[Math.floor(r()*orgPool.length)]; grant(250+r()*1750, o2.name, 'General operating support'); }
+    } else if(f.opening){
+      /* opened online today: just the opening gift, no invented history */
+      if(i===0) contrib(f.opening.amt, f.opening.method, 'Opening gift');
     } else {
       if(i===0) contrib(600000,'Bank transfer (wire)','Founding endowment gift');
       if(y===2019 && m===4 && dd===14) contrib(250000,'Bequest','Estate gift — Harlan family bequest');
@@ -329,19 +345,36 @@ var NAV = [
   { id:'legends',     label:'Local Legends',          icon:'star', dafOnly:true },
   { id:'quiz',        label:'History quiz',           icon:'quiz', dafOnly:true },
   { id:'garden',      label:'Grow Your City',         icon:'flower' },
-  { id:'impact',      label:'Impact calculator',      icon:'calc', dafOnly:true }
+  { id:'impact',      label:'Impact calculator',      icon:'calc', dafOnly:true },
+  /* persona tools: the engagement features from the person's registration app, shown
+     inside the portal (tool: [app folder, view]). Visible only for that persona. */
+  { id:'giftplanner', label:'Gift planner',           icon:'pen',    persona:'advisor',   tool:['advisors','giftplanner'] },
+  { id:'estate',      label:'Estate planning checklist', icon:'check', persona:'advisor', tool:['advisors','estate'] },
+  { id:'faq',         label:'Advisor FAQ',            icon:'quiz',   persona:'advisor',   tool:['advisors','faq'] },
+  { id:'learning',    label:'Learn',                  icon:'layers', persona:'community', tool:['community','learning'] },
+  { id:'members',     label:'Members',                icon:'users',  persona:'community', tool:['community','members'] },
+  { id:'vision',      label:'Vision cards',           icon:'eye',    persona:'community', tool:['community','vision'] }
 ];
 /* feature gates follow the product feature map: org fund holders do not see
-   Portfolio Modeling, the History Quiz, Local Legends or the Impact Calculator. */
+   Portfolio Modeling, the History Quiz, Local Legends or the Impact Calculator.
+   Persona tools show only for the persona the account holder registered as. */
 function allowed(id){
   var n = NAV.filter(function(x){return x.id===id;})[0];
   if(!n) return true;
   if(n.dafOnly && isOrg()) return false;
   if(n.orgOnly && !isOrg()) return false;
+  if(n.persona && n.persona!==S.persona) return false;
   return true;
 }
 var TABS = [ {id:'performance',label:'Fund',icon:'fund'}, {id:'grants',label:'Grants',icon:'grant'}, {id:'home'}, {id:'engage',label:'Impact',icon:'spark'}, {id:'profile',label:'Account',icon:'user'} ];
 var VIEWS = {};
+/* each persona tool is its own route (#/giftplanner …): the registration app's view in a frame */
+NAV.filter(function(n){ return n.tool; }).forEach(function(n){
+  VIEWS[n.id] = function(){
+    return pageHead('Engage', n.label)+
+      '<div class="plan-host"><iframe class="plan-frame" title="'+esc(n.label)+'" src="../'+n.tool[0]+'/?embed=1#/'+n.tool[1]+'"></iframe></div>';
+  };
+});
 
 function go(route, params, replace){
   /* the cart is a sheet, not a page: open it over the dashboard, never over sign-in */
@@ -383,7 +416,8 @@ function render(){
   var app=$('#app');
   document.body.classList.toggle('pins-on', !!S.settings.pins);
   document.body.classList.toggle('signin-on', ROUTE==='signin');
-  document.body.classList.toggle('plan-on', ROUTE==='plan');   /* the embedded plan needs the full width */
+  /* pages shown in a frame (the five-year plan, persona tools) need the full width */
+  document.body.classList.toggle('frame-on', ROUTE==='plan' || NAV.some(function(n){ return n.tool && n.id===ROUTE; }));
   if(ROUTE==='signin'){ app.innerHTML = VIEWS.signin(); $('#chrome').hidden=true; return; }
   $('#chrome').hidden=false;
   var v = VIEWS[ROUTE] || VIEWS.home, html;
@@ -592,7 +626,7 @@ function vaultHTML(full){
   if(PERF.range==='FYTD' && fyStart()===1) PERF.range='YTD';
   var cust = PERF.custom || { from: ymd(addDays(TODAY,-180)), to: ymd(TODAY) };
   return '<section class="vault rise" aria-label="Fund balance and performance">'+guilloche(260,320)+
-    '<div class="v-top"><div><div class="v-fund">'+esc(f.name)+'</div><div class="v-type">'+esc(f.typeLabel)+' · '+f.no+'</div></div>'+pin('ri',true)+'</div>'+
+    '<div class="v-top"><div><div class="v-fund">'+esc(f.name)+'</div><div class="v-type">'+esc(f.typeLabel)+' · '+f.no+(f.status==='agreement'?' · Agreement to sign':'')+'</div></div>'+pin('ri',true)+'</div>'+
     '<div class="v-bal" id="vBal"></div>'+
     '<div class="v-asof"><span class="v-chg" id="vChg"></span><span id="vAsof"></span></div>'+
     '<div class="range-row"><div class="ranges" role="tablist" aria-label="Date range">'+keys.map(function(k){ return '<button class="rng'+(PERF.range===k?' sel':'')+'" onclick="setRange(\''+k+'\')">'+labels[k]+'</button>'; }).join('')+'</div></div>'+
@@ -635,7 +669,7 @@ VIEWS.signin = function(){
       '<button class="btn btn-accent btn-lg btn-block" type="button" id="siBtn" onclick="doSignIn()">Sign in</button>'+
       '<div class="si-or">or</div>'+
       '<button type="button" class="btn btn-quiet btn-lg btn-block" onclick="doSignIn(true)">'+ic('face',20)+'Sign in with a passkey</button>'+
-      '<p class="tiny center" style="margin-top:18px">Secured with Microsoft Entra External ID and multi-factor authentication.<br>New to the Foundation? <button type="button" class="link" style="color:var(--mid);padding:0" onclick="leavePortal()">Open a fund</button></p>'+
+      '<p class="tiny center" style="margin-top:18px">Secured with Microsoft Entra External ID and multi-factor authentication.<br>New to the Foundation? <a class="link" style="color:var(--mid);padding:0" href="'+OPEN_FLOW+'?from=signin">Open a Donor Advised Fund</a></p>'+
       '<div class="wire" style="margin-top:16px"><div class="fr"><span class="fk">Demo email</span><span class="fv">taylor@williams.example</span></div><div class="fr"><span class="fk">Demo password</span><span class="fv">Cleveland1914</span></div><p class="tiny" style="margin-top:6px">Already filled in — just tap Sign in. Any email and password will work. All names and balances are fictional.</p></div>'+
     '</div></div>';
 };
@@ -651,9 +685,6 @@ function doSignIn(passkey){
   go(dest,null,true);
   toast('Signed in. Welcome back, '+S.profile.first+'.');
 }
-/* OPEN ITEM: the landing page has no dedicated "Open a fund" window yet,
-   so this goes to "Join the Community" (index.html#join). */
-function leavePortal(){ if(window.SITE_HOME){ location.href=window.SITE_HOME+'#join'; return; } toast('This opens the Foundation\u2019s "Open a fund" flow on the public site.'); }
 
 /* ============ DASHBOARD ============ */
 function curFYEnd(f){ var fm=fyStart(f)-1; return (fm>0 && TODAY.getMonth()>=fm) ? TODAY.getFullYear()+1 : TODAY.getFullYear(); }
@@ -664,7 +695,7 @@ VIEWS.home = function(){
   var cartN=S.cart.filter(function(c){return c.fund===f.id;}).length;
   var html = '<div class="fundbar rise"><div class="fb-hi"><div class="fb-greet">'+greeting()+'</div><div class="fb-name">'+esc(S.profile.first)+'.</div></div>'+
       '<button class="btn btn-quiet btn-sm" onclick="go(\'advisor\')" aria-label="Message your advisor">'+ic('chat',16)+'Advisor</button></div>'+
-    fundSwitch()+ vaultHTML(false) + '<div class="gap-m"></div>';
+    fundSwitch()+ agreementCard(f) + vaultHTML(false) + '<div class="gap-m"></div>';
   // quick panels — connected grid
   html += '<div class="pgrid g4">'+
     panel('statements','Reporting', org?'Statements':'Statements & tax', org?'Monthly, quarterly and fiscal-year reports.':'Quarterly statements and tax receipts.', 'doc', 'var(--gray2)','var(--blue)', org?'FY starts '+MONTHS[fyStart()-1]:'Next: Q'+(Math.floor(TODAY.getMonth()/3)+1)+' on '+fdate(quarterEnd(TODAY),'short'))+
@@ -1030,17 +1061,78 @@ function taxYearTable(n){
   var keys=Object.keys(rows).sort().reverse().slice(0,n||99);
   return '<div class="facts">'+keys.map(function(k){ return '<div class="fr"><span class="fk">'+k+' · '+rows[k].n+' gift'+(rows[k].n>1?'s':'')+'</span><span class="fv row" style="gap:10px;justify-content:flex-end">'+money(rows[k].amt)+(org?'':'<button class="link" style="padding:0" onclick="printTaxLetter(\''+k+'\')">'+ic('download',14)+'</button>')+'</span></div>'; }).join('')+'</div>';
 }
-function openNewFund(){
-  openSheet({ kick:'Another account', title:'Open a new fund', body:
-    '<p class="lede">Many families keep more than one fund — for a child, a cause, or a legacy gift. Tell us what you have in mind and your advisor will follow up with the fund agreement.</p><div class="gap-m"></div>'+
-    '<div class="f-row"><label for="nfType">Fund type</label><select id="nfType"><option>Donor advised fund</option><option>Designated fund</option><option>Field-of-interest fund</option><option>Scholarship fund</option><option>Legacy / planned gift fund</option></select></div>'+
-    '<div class="f-row"><label for="nfName">Fund name</label><input id="nfName" placeholder="e.g. The Williams Scholarship Fund"></div>'+
-    '<div class="f-row"><label for="nfAmt">Planned opening gift</label><input id="nfAmt" inputmode="decimal" placeholder="$"></div>'+
-    '<div class="f-row"><label for="nfNote">What\u2019s it for?</label><textarea id="nfNote" placeholder="A sentence or two is plenty."></textarea></div>',
-    foot:'<button class="btn btn-quiet" onclick="closeSheet()">Cancel</button><button class="btn btn-accent" onclick="submitNewFund()">Send to my advisor</button>' });
+/* ============ OPEN A DONOR ADVISED FUND (online flow: open/index.html) ============
+   Every way in uses the same flow: "Open a DAF" in the community/advisor apps, the link
+   on this portal's sign-in page, and "Open another account" inside the portal.
+   When the donor finishes, open/ saves a small hand-off (NEW_FUND_KEY): name, email,
+   fund name, gift, payment type, allocation and persona. Never card, bank or password
+   data. Then it sends them to portal/?newfund=1, where init.js calls acceptNewFund(). */
+var OPEN_FLOW = '../open/', NEW_FUND_KEY = 'tcf_new_fund';
+function openNewFund(){ location.href = OPEN_FLOW + '?from=portal'; }
+
+/* the flow's investment pools → this prototype's pool set (unlisted pools count as Balanced) */
+var FLOW_POOLS = { growth:'growth', balanced:'balanced', sri:'sri', mm:'cash' };
+/* registration interests (landing page) → this portal's causes (INTERESTS) */
+var REG_INTERESTS = [['arts','Arts & culture'],['public education','Education'],['youth','Youth'],['economic mobility','Workforce'],
+  ['workforce','Workforce'],['health','Health'],['basic needs','Food access'],['neighborhood','Neighborhoods'],['environment','Environment']];
+function causesFromRegistration(){
+  var reg=null; try{ reg=JSON.parse(localStorage.getItem('tcf_registration')||'null'); }catch(e){}
+  var out=[]; ((reg && reg.interests) || []).forEach(function(label){
+    var l=String(label).toLowerCase(), hit=REG_INTERESTS.filter(function(m){ return l.indexOf(m[0])===0; })[0];
+    if(hit && out.indexOf(hit[1])<0) out.push(hit[1]);
+  });
+  return out;
 }
-function submitNewFund(){ var n=$('#nfName').value.trim()||'New fund'; S.newFunds.push({t:Date.now(), type:$('#nfType').value, name:n, amt:$('#nfAmt').value, note:$('#nfNote').value}); save(); logSync('sf','Opportunity','New fund request: '+n+' ('+$('#nfType').value+')');
-  openSheet({ kick:'Request sent', title:'We\u2019ll be in touch', body:'<div class="center"><div class="done-mark">'+ic('check',30,2.4)+'</div><p class="lede" style="margin:0 auto">Jordan Reyes will reach out within two business days to talk through <b>'+esc(n)+'</b> and send the fund agreement.</p></div>', foot:'<button class="btn btn-primary" onclick="closeSheet()">Done</button>' }); }
+
+/* Returns the new fund, or null when there's no valid hand-off. */
+function acceptNewFund(){
+  var h=null; try{ h=JSON.parse(localStorage.getItem(NEW_FUND_KEY)||'null'); localStorage.removeItem(NEW_FUND_KEY); }catch(e){}
+  if(!h || h.v!==1 || !h.fundName || !(h.gift>0)) return null;
+  var addingToMine = h.from==='portal' && S.signedIn;   /* an existing holder opening another fund */
+  if(!addingToMine){
+    var parts=String(h.name||'').trim().split(/\s+/), keep=S.keep;
+    S = defaultState(); S.keep = keep; S.account = 'new'; S.persona = h.persona || null;
+    S.profile.first = parts[0] || 'Friend'; S.profile.last = parts.slice(1).join(' ');
+    S.profile.email = h.email || ''; S.profile.phone = ''; S.profile.street = ''; S.profile.city = ''; S.profile.zip = '';
+    S.profile.interests = causesFromRegistration(); S.favorites = [];
+  }
+  var t=Date.now(), pools={};
+  Object.keys(h.alloc || {flagship:100}).forEach(function(k){ var p=FLOW_POOLS[k]||'balanced'; pools[p]=(pools[p]||0)+(+h.alloc[k]||0); });
+  var me=(S.profile.first+' '+S.profile.last).trim();
+  var f={ id:'n'+t.toString(36), name:h.fundName, type:'daf', typeLabel:'Donor advised fund', no:'DAF-'+(60000+t%30000),
+    inception:ymd(TODAY), seed:t%89+3, color:'#1A8DA9', pools:pools, focus:S.profile.interests.slice(0,2),
+    people:[{n:me, r:'Primary advisor', e:S.profile.email, you:true}],
+    opening:{ amt:Math.round(h.gift), method:h.method==='ach'?'Bank transfer (ACH)':'Credit card' },
+    status:'agreement' };
+  S.myFunds = (S.myFunds||[]).concat([f]); S.fundId = f.id; S.signedIn = true;
+  FUND_CACHE = {}; applyAccount(); save();
+  logSync('sf','Fund','Opened '+f.name+' online, fund agreement to sign');
+  logSync('ri','Contribution','Opening gift of '+money(f.opening.amt)+' by '+f.opening.method.toLowerCase());
+  return f;
+}
+
+/* Dashboard card until the fund agreement is signed (DocuSign in the live portal). */
+function agreementCard(f){
+  if(f.status!=='agreement') return '';
+  return '<div class="pad"><div class="card agree-card"><div class="card-k">One last step</div>'+
+    '<h3>Sign your fund agreement</h3><p>'+esc(f.name)+' opens as soon as your fund agreement is signed. Your opening gift of '+money(f.opening.amt)+' is already recorded.</p>'+
+    '<button class="btn btn-accent" onclick="signAgreement()">'+ic('pen',16)+'Review and sign</button></div></div><div class="gap-s"></div>';
+}
+function signAgreement(){
+  var f=F();
+  openSheet({ kick:'DocuSign · simulated', title:'Sign your fund agreement', body:
+    '<p class="lede">In the live portal, this opens your fund agreement in DocuSign. Here you can review the essentials and sign to see the next step.</p><div class="gap-m"></div>'+
+    '<div class="facts"><div class="fr"><span class="fk">Fund</span><span class="fv">'+esc(f.name)+'</span></div>'+
+    '<div class="fr"><span class="fk">Type</span><span class="fv">Donor advised fund</span></div>'+
+    '<div class="fr"><span class="fk">Primary advisor</span><span class="fv">'+esc(f.people[0].n)+'</span></div>'+
+    '<div class="fr"><span class="fk">Opening gift</span><span class="fv">'+money(f.opening.amt)+'</span></div></div>',
+    foot:'<button class="btn btn-quiet" onclick="closeSheet()">Not now</button><button class="btn btn-accent" onclick="completeAgreement()">'+ic('pen',16)+'Sign agreement</button>' });
+}
+function completeAgreement(){
+  var f=F(); f.status='open'; save(); closeSheet();
+  logSync('sf','Fund Agreement','Signed in DocuSign: '+f.name);
+  toast('Signed. '+f.name+' is now open.'); render();
+}
 
 /* ============ QR CODE (org funds) ============ */
 VIEWS.qr = function(){

@@ -137,6 +137,21 @@ The maps (Leaflet + OpenStreetMap tiles) and the portal's QR code library load f
 
 **Prototype safeguards:** the payment and password steps show a prototype notice, and obvious test values are filled in. Card, bank, password, date of birth, address and phone are never saved or handed on; the flow clears them on submit. Everything joining the flow to the site is in the **SITE INTEGRATION** block at the end of `open/index.html`; the flow itself is unchanged apart from brand styling (self-hosted fonts, the `tcf-v3-site.css` bridge, brand corners, flat green, light only).
 
+### Future state: no separate signing step
+
+**Today (what the prototype shows):** after submitting, the donor logs in to the portal and signs a fund agreement in DocuSign before the fund opens. This mirrors the current process, so it stays as is for now.
+
+**Where we want to go:** no log-in-and-sign step at all. Checking the three boxes on **Secure & agree** (Terms and Conditions, irrevocable gift, accurate information) should be everything needed to open the account, and the donor goes straight from submitting to an open fund. The confirmation page becomes "Congratulations, welcome, you've opened your fund. Log in and start granting" instead of "log in and sign your agreement".
+
+**What has to change to get there:**
+- **Terms and agreement language** (legal/compliance): rewrite the Terms and Conditions, and the agreement terminology throughout, so that accepting them in the flow is the fund agreement. Legal and compliance confirm this is sufficient before launch.
+- **`open/index.html`:**
+  - drop the intro's third phase ("Sign your fund agreement");
+  - update the Secure & agree checkbox wording;
+  - turn the confirmation screen into a welcome / start-granting page;
+  - update the Ren build notes and spec (the record's status is "Pending agreement signature" today).
+- **Portal** (`assets/portal/app.js`): new funds open immediately. Remove `agreementCard`, `signAgreement`, `completeAgreement` and the "Agreement to sign" status.
+
 ## My profile and the giving profile
 
 **My profile** (`portal/#/profile`) is a hub with five parts, top to bottom:

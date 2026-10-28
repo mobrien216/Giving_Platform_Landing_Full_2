@@ -140,7 +140,7 @@ function logSync(sys, obj, text){
    init.js removes ?fresh= from the address bar and shows the "Demo reset" message. */
 var FRESH_KEY = 'tcf_portal_fresh';   /* this tab's fresh token; also used for the plan frame (VIEWS.plan) */
 function resetDemo(){
-  try{ localStorage.removeItem(STORE_KEY); localStorage.removeItem(PLAN_STATE_KEY); localStorage.removeItem(PLAN_SUMMARY_KEY); }catch(e){}
+  try{ localStorage.removeItem(STORE_KEY); localStorage.removeItem(PLAN_STATE_KEY); localStorage.removeItem(PLAN_SUMMARY_KEY); localStorage.removeItem(PLAN_CONTEXT_KEY); }catch(e){}
   LAST_PLAN = null;
   S = defaultState(); S.signedIn = true; save();
   FUND_CACHE = {}; closeSheet();
@@ -1431,7 +1431,8 @@ VIEWS.profile = function(p){
         '<span class="j-body"><span class="j-top"><span class="j-name">'+esc(j.n)+'</span><span class="status '+cls+'">'+esc(st.label)+'</span></span>'+
         '<span class="j-desc">'+esc(j.d)+'</span><span class="j-know">'+esc(st.detail)+'</span>'+
         (st.p>0&&st.p<1?'<span class="j-prog"><span style="width:'+Math.round(st.p*100)+'%"></span></span>':'')+'</span>'+
-        '<span class="j-cta">'+cta+ic('chev',16,2.2)+'</span></button>';
+        '<span class="j-cta">'+cta+ic('chev',16,2.2)+'</span></button>'+
+        (j.k==='values' ? missionPanel(s) : '');   /* mission, legacy and fund purposes sit under Your values */
     }).join('')+'</div></div>';
 
   /* the capstone: the five-year plan */
@@ -1511,6 +1512,65 @@ function settingsBody(tab){
   return html;
 }
 
+/* ============ MISSION, LEGACY & FUND PURPOSE (under Your values) ============
+   Free-form statements kept on the profile: a personal mission statement, a legacy
+   statement, and a purpose statement for each fund this person can access
+   (S.profile.mission, .legacy, .fundPurpose[fundId]). The mission statement and the
+   purpose of the plan's fund open the five-year giving plan, on screen and in its PDF:
+   they're handed over in PLAN_CONTEXT_KEY, read by portal/plan/index.html. */
+var PLAN_CONTEXT_KEY = 'tcf-plan-context';
+function statementOf(kind, fundId){ var P=S.profile; return kind==='purpose' ? ((P.fundPurpose||{})[fundId]||'') : (P[kind]||''); }
+function statementCount(){
+  var written = ['mission','legacy'].filter(function(k){ return statementOf(k).trim(); }).length +
+    FUNDS.filter(function(f){ return statementOf('purpose', f.id).trim(); }).length;
+  return { written:written, total:2+FUNDS.length };
+}
+function missionPanel(s){
+  var P=S.profile, c=statementCount();
+  var vals=(s && s.values && s.values.topAreas && s.values.topAreas.length) ? s.values.topAreas : P.interests;
+  var area=function(id, label, prompt, val, handler, hint){
+    return '<div class="f-row ms-row"><label for="'+id+'">'+esc(label)+'</label>'+(hint?'<div class="ms-hint">'+hint+'</div>':'')+
+      '<textarea id="'+id+'" rows="3" placeholder="'+esc(prompt)+'" oninput="'+handler+'" onchange="statementDone(this)">'+esc(val)+'</textarea></div>';
+  };
+  return '<div class="ms-panel" id="missionPanel"><div class="ms-head"><div><div class="card-k">Under your values</div><h3>Mission, legacy &amp; purpose</h3>'+
+      '<p class="tiny">In your own words. Your mission statement and your fund’s purpose open your five-year giving plan, on screen and in the PDF.</p></div>'+
+      '<span class="status '+(c.written===c.total?'st-posted':c.written?'st-approved':'st-queued')+'" id="msCount">'+c.written+' of '+c.total+' written</span></div>'+
+    area('msMission', 'Your personal mission statement', 'Craft your personal mission statement based on your values.',
+      statementOf('mission'), "setStatement('mission','',this.value)", vals.length ? 'Your values: '+esc(vals.join(' · ')) : '')+
+    area('msLegacy', 'Tell us about your legacy', 'What is it most important that you’re remembered for in your life and work?',
+      statementOf('legacy'), "setStatement('legacy','',this.value)")+
+    FUNDS.map(function(f){
+      return area('msPurpose_'+f.id, 'Create a purpose statement for the '+f.name, 'What is this fund for, and what do you hope it achieves?',
+        statementOf('purpose', f.id), "setStatement('purpose','"+jsq(f.id)+"',this.value)");
+    }).join('')+
+  '</div>';
+}
+var STATEMENT_TIMER;
+function setStatement(kind, fundId, value){
+  var P=S.profile;
+  if(kind==='purpose'){ P.fundPurpose = P.fundPurpose || {}; if(value.trim()) P.fundPurpose[fundId]=value; else delete P.fundPurpose[fundId]; }
+  else P[kind]=value;
+  clearTimeout(STATEMENT_TIMER);
+  STATEMENT_TIMER = setTimeout(function(){
+    save(); writePlanContext();
+    var el=$('#msCount'), c=statementCount(); if(!el) return;
+    el.textContent = c.written+' of '+c.total+' written';
+    el.className = 'status '+(c.written===c.total?'st-posted':c.written?'st-approved':'st-queued');
+  }, 300);
+}
+/* one Salesforce update per finished edit (on leaving the field), not per keystroke */
+function statementDone(el){
+  var what = el.id==='msMission' ? 'Personal mission statement' : el.id==='msLegacy' ? 'Legacy statement'
+    : 'Fund purpose: '+fundById(el.id.replace('msPurpose_','')).name;
+  logSync('sf', 'Contact', (el.value.trim() ? 'Updated ' : 'Cleared ')+what);
+}
+/* what the embedded plan shows at the top: the mission statement and the purpose of the fund it's for */
+function writePlanContext(){
+  var f=F();
+  try{ localStorage.setItem(PLAN_CONTEXT_KEY, JSON.stringify({ v:1, mission:statementOf('mission'),
+    fund:{ id:f.id, name:f.name, purpose:statementOf('purpose', f.id) } })); }catch(e){}
+}
+
 /* ---- the five-year giving plan, embedded (portal/plan/index.html) ---- */
 VIEWS.plan = function(p){
   p=p||{};
@@ -1521,6 +1581,7 @@ VIEWS.plan = function(p){
   try{ var fresh=sessionStorage.getItem(FRESH_KEY); if(fresh) q.push('fresh='+fresh); }catch(e){}   // after Reset demo: newest plan page too
   var keys=S.profile.interests.map(function(i){ return INTEREST_AREAS[i]; }).filter(Boolean);
   if(keys.length) q.push('interests='+keys.join(','));
+  writePlanContext();
   return pageHead('My profile','Five-year giving plan')+
     '<div class="plan-host"><iframe class="plan-frame" title="Five-year giving plan" src="plan/?'+q.join('&')+'"></iframe></div>';
 };

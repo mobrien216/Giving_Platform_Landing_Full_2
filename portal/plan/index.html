@@ -2308,7 +2308,7 @@ go(S.step);
   publish();
 
   /* ---- personal mission statement + fund purpose, at the top of the plan summary ----
-     Written in the portal (My profile → under Your values) and handed over in
+     Written in the portal (My profile → Mission, legacy & purpose) and handed over in
      localStorage['tcf-plan-context'] = {v:1, mission, fund:{id, name, purpose}}.
      On screen both always show (with a pointer when one isn't written yet);
      the PDF (buildPdf) includes only the ones that are written. */
@@ -2330,7 +2330,7 @@ go(S.step);
     if (!list.length){ if (box) box.remove(); return; }
     if (!box){ box = document.createElement('div'); box.id = 'planStatements'; box.className = 'plan-statements'; sec.insertBefore(box, sec.firstElementChild); }
     box.innerHTML = list.map(s => `<div class="ps-item"><p class="ps-label">${esc(s.label)}</p>` +
-      (s.text ? `<p class="ps-text">${esc(s.text)}</p>` : `<p class="ps-empty">Not written yet. Add it in My profile, under Your values.</p>`) + '</div>').join('');
+      (s.text ? `<p class="ps-text">${esc(s.text)}</p>` : `<p class="ps-empty">Not written yet. Add it in My profile, under Mission, legacy &amp; purpose.</p>`) + '</div>').join('');
   }
   // go() shows a section; refresh the statements whenever the summary opens
   const baseGo = go;

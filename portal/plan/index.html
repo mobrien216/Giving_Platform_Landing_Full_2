@@ -434,6 +434,12 @@ html.embedded{--top-h:0px}
 html.embedded .top{display:none}
 /* Site button corners: the same --r-btn token (assets/css/tcf-v3.css) as every other page */
 .btn,.chip,.opt,.seg,.theme-btn{border-radius:var(--r-btn,6px)}
+/* Personal mission statement + fund purpose, at the top of the plan summary (see PORTAL INTEGRATION) */
+.plan-statements{display:grid;gap:12px;margin:0 0 18px}
+.plan-statements .ps-item{background:var(--surface);border:1px solid var(--rule);border-left:4px solid var(--mid-green);border-radius:var(--r,4px);padding:16px 20px}
+.plan-statements .ps-label{font-size:13px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--mid-green);margin:0 0 6px}
+.plan-statements .ps-text{font-family:var(--f-display);font-weight:600;font-size:clamp(18px,17px + .4vw,22px);line-height:1.35;color:var(--text);margin:0;white-space:pre-wrap}
+.plan-statements .ps-empty{font-size:15px;color:var(--text-soft);margin:0}
 </style>
 </head>
 <body>
@@ -2021,8 +2027,23 @@ function buildPdf(){
   doc.setFont('helvetica', 'normal'); doc.setFontSize(11);
   doc.text(`Cleveland Foundation  |  Prepared ${new Date().toLocaleDateString('en-US', {month: 'long', day: 'numeric', year: 'numeric'})}`, M, 90);
 
-  // Headline figures
   y = 160;
+  // Personal mission statement and fund purpose, from the portal profile (PORTAL INTEGRATION
+  // block → planStatements). They open the plan so it's clear what it serves.
+  const statements = typeof planStatements === 'function' ? planStatements() : [];
+  statements.forEach(({label, text}) => {
+    const lines = doc.splitTextToSize(text, W - 2 * M - 14);
+    newPageIfNeeded(34 + lines.length * 16);
+    doc.setFont('helvetica', 'bold'); doc.setFontSize(9); doc.setTextColor(SOFT);
+    doc.text(label.toUpperCase(), M, y);
+    doc.setFillColor('#086C43'); doc.rect(M, y + 8, 3, lines.length * 16 + 2, 'F');
+    doc.setFont('helvetica', 'normal'); doc.setFontSize(12); doc.setTextColor(INK);
+    doc.text(lines, M + 14, y + 22, {lineHeightFactor: 1.33});
+    y += 22 + lines.length * 16 + 18;
+  });
+  if (statements.length){ doc.setDrawColor(RULE); doc.line(M, y - 6, W - M, y - 6); y += 26; }
+
+  // Headline figures
   doc.setTextColor(INK);
   [['Total funds out (grants)', t.grants], ['Total fund additions', t.added], ['Estimated growth', t.growth], [`Balance, end of ${last}`, t.end]].forEach(([k, v], i) => {
     const x = M + i * 129;
@@ -2285,6 +2306,36 @@ go(S.step);
     go(step);
   }
   publish();
+
+  /* ---- personal mission statement + fund purpose, at the top of the plan summary ----
+     Written in the portal (My profile → under Your values) and handed over in
+     localStorage['tcf-plan-context'] = {v:1, mission, fund:{id, name, purpose}}.
+     On screen both always show (with a pointer when one isn't written yet);
+     the PDF (buildPdf) includes only the ones that are written. */
+  function planContext(){
+    try { const c = JSON.parse(localStorage.getItem('tcf-plan-context') || 'null'); return c && c.v === 1 ? c : null; }
+    catch { return null; }
+  }
+  function statementsList(){
+    const c = planContext(); if (!c) return [];
+    const list = [{label: 'Your personal mission statement', text: String(c.mission || '').trim()}];
+    if (c.fund && c.fund.name) list.push({label: 'Purpose of the ' + c.fund.name, text: String(c.fund.purpose || '').trim()});
+    return list;
+  }
+  window.planStatements = () => statementsList().filter(s => s.text);
+  function renderStatements(){
+    const sec = $('s5'); if (!sec) return;
+    let box = $('planStatements');
+    const list = statementsList();
+    if (!list.length){ if (box) box.remove(); return; }
+    if (!box){ box = document.createElement('div'); box.id = 'planStatements'; box.className = 'plan-statements'; sec.insertBefore(box, sec.firstElementChild); }
+    box.innerHTML = list.map(s => `<div class="ps-item"><p class="ps-label">${esc(s.label)}</p>` +
+      (s.text ? `<p class="ps-text">${esc(s.text)}</p>` : `<p class="ps-empty">Not written yet. Add it in My profile, under Your values.</p>`) + '</div>').join('');
+  }
+  // go() shows a section; refresh the statements whenever the summary opens
+  const baseGo = go;
+  go = function(n){ baseGo(n); if (S.step === SECTIONS.length) renderStatements(); };
+  if (S.step === SECTIONS.length) renderStatements();
 })();
 </script>
 </body>

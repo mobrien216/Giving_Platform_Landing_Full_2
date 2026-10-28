@@ -70,7 +70,7 @@ Portal links ask the person to sign in once per browser session, then open the m
 | Sign out (any app) → landing | Returns to `index.html`. |
 | Portal profile | Saved as `tcf-donor-portal-profile-v1`; **Profile → Sync & data → Reset demo** clears it. |
 | Portal session | `tcf_portal_session` in sessionStorage, or localStorage when **Keep me signed in** is ticked. |
-| Five-year giving plan | The plan saves itself as `tcf-five-year-plan-v2` and, after every change, a small summary as `tcf-five-year-plan-summary`, which **My profile** reads. **Reset demo** clears both. |
+| Five-year giving plan | The plan saves itself as `tcf-five-year-plan-v2` and, after every change, a small summary as `tcf-five-year-plan-summary`, which **My profile** reads. The portal hands the plan the mission and fund purpose statements as `tcf-plan-context`. **Reset demo** clears all three. |
 | Impact map interest | `impact-map-my-interests` / `impact-map-aggregate-v1` in localStorage (this browser only on a static host). |
 
 ## Speed
@@ -120,7 +120,7 @@ The maps (Leaflet + OpenStreetMap tiles) and the portal's QR code library load f
 **My profile** (`portal/#/profile`) is a hub with five parts, top to bottom:
 
 1. **Who you are + profile strength.** Contact basics count 10%, registration causes 10%, and each of the five steps below 16%.
-2. **Your giving profile:** five optional steps, each showing what we already know: **Your values · Contribution plan · Matched organizations · Investments · Granting plan**.
+2. **Your giving profile:** five optional steps, each showing what we already know: **Your values · Contribution plan · Matched organizations · Investments · Granting plan**. Directly under **Your values** sits **Mission, legacy & purpose**: free-text boxes for a personal mission statement, a legacy statement, and a purpose statement for each fund the donor can see. They save as you type (in the portal profile) and log a Salesforce update when a box loses focus.
 3. **Your five-year giving plan:** the optional capstone, with contributions and grants by year once the steps are filled in, and a PDF.
 4. **Tell us what you care about:** the causes tagged at registration (editable), plus three ways to go deeper: a quick pick list, a values quiz and a values card game.
 5. **Settings:** Profile details, Preferences, Security and Sync & data, each on its own page (`#/profile` with `{tab}`), unchanged in what they do.
@@ -132,6 +132,8 @@ The steps, the activities and the capstone all open the five-year giving plan in
 - publishes the summary the hub reads, and tells the portal when values change or the plan is saved (shown as Salesforce updates under Sync & data).
 
 The hub never reads the plan's internals, only the summary, so either side can change as long as the summary keeps its shape (`v: 1`).
+
+Information flows the other way through `tcf-plan-context` (`v: 1`): the portal writes the personal mission statement and the selected fund's name and purpose statement, and the plan shows them first on its finished summary and at the top of the PDF. The legacy statement stays in the profile and is not printed on the plan.
 
 **Tony**, the AI portfolio-allocation assistant, is linked from the Investments section. Set `TONY_URL` near the top of `portal/plan/index.html`; while it's `null`, the button explains that Tony isn't connected yet.
 

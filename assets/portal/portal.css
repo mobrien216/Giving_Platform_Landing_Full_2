@@ -646,6 +646,16 @@ input[type=range]::-moz-range-thumb{width:22px;height:22px;border-radius:50%;bac
 .set-n{display:block;font-weight:700;color:var(--forest);font-size:15px;}
 .set-s{display:block;font-size:12.5px;color:var(--ink-2);margin-top:2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
 
+/* Mission, legacy & purpose: attached under the "Your values" step (app.js → missionPanel) */
+.ms-panel{background:var(--paper);border:1px solid var(--line);border-left:4px solid var(--moss);border-radius:var(--r);padding:16px 16px 6px;margin:-4px 0 4px 22px;}
+.ms-head{display:flex;flex-wrap:wrap;align-items:flex-start;justify-content:space-between;gap:8px 12px;margin-bottom:12px;}
+.ms-head h3{font-size:17px;margin:2px 0 4px;}
+.ms-head .tiny{max-width:56ch;}
+.ms-row label{text-transform:none;letter-spacing:0;font-size:14px;}
+.ms-hint{font-size:12.5px;color:var(--ink-2);margin:-3px 0 7px;}
+.ms-row textarea{min-height:84px;}
+@media(max-width:559px){ .ms-panel{margin-left:0;} }
+
 /* the embedded five-year plan (app.js → VIEWS.plan) */
 body.plan-on .main{max-width:1240px;}
 .plan-host{padding:0 var(--gut);}

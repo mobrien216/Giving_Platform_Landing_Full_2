@@ -60,6 +60,7 @@
   /* Shape, elevation, focus (F4) */
   --r:4px;
   --r-btn:6px;   /* buttons, chips and controls: a touch softer than cards and panels (--r) */
+  --label:#4F7A63;   /* small all-caps labels above titles: a softer green, 4.9:1 on white */
   --focus:0 0 0 2px var(--white),0 0 0 4px var(--orange);
   --shadow-o:0 2px 6px rgba(22,68,48,.08),0 22px 48px -16px rgba(22,68,48,.34);
   --scrim:rgba(22,68,48,.62);

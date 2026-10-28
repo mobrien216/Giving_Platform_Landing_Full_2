@@ -4,7 +4,7 @@
 <title>Cleveland Foundation — welcome</title>
 <!-- Giving Portal animatic v5 (10-21-2026), adapted: shared font files, portrait layout, hand-off message -->
 <!-- Fonts + brand tokens come from the shared stylesheet (already cached by the parent page) -->
-<link rel="stylesheet" href="../css/tcf-v3.css?v=0471be0f">
+<link rel="stylesheet" href="../css/tcf-v3.css?v=3fa62056">
 <style>
 :root{--green:#164430;--red:#CB1E4B;--orange:#EE7331;--mid:#086C43;--blue:#1A8DA9;--pink:#C0629A;--aqua:#19B9A9;--gray1:#F3F2F0;--gray2:#E8EAE5;--white:#FFFFFF;
   --head:'Paralucent','Aptos',system-ui,sans-serif;--body:'Source Sans Pro','Aptos',system-ui,sans-serif;--camp:'Paralucent Condensed','Paralucent',sans-serif;--ease:cubic-bezier(.2,.8,.2,1)}
@@ -19,7 +19,7 @@ html,body{width:100%;height:100%;background:var(--green);overflow:hidden}
 .f2{--tin:1.52s;--tout:2.85s}.f3{--tin:2.92s;--tout:7s}
 @keyframes fIn{from{opacity:0}to{opacity:1}}@keyframes fOut{to{opacity:0}}
 .kick{position:absolute;display:flex;align-items:center;gap:14px;font:700 24px/1 var(--body);letter-spacing:.08em;text-transform:uppercase;color:var(--gray2);opacity:0}
-.kick::before{content:'';width:14px;height:14px;background:var(--orange)}
+.kick::before{content:none}   /* labels carry no square marker (tcf-v3-site.css → Labels) */
 .kick.c{left:0;right:0;justify-content:center}
 .kick.g{color:var(--mid)}
 .play .kick{animation:up .45s ease calc(var(--tin) + .08s) both}

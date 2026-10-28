@@ -1331,10 +1331,11 @@ function openSchedule(){
 function bookCall(){ var sl=$('#slotRow .chip.sel').textContent, tp=$('#callTopic').value; S.calls.push({t:Date.now(), slot:sl, topic:tp}); save(); logSync('sf','Event','Call booked: '+sl+' — '+tp); closeSheet(); toast('Booked for '+sl+'. A calendar invite is on its way.'); if(ROUTE==='advisor') render(); }
 
 /* ============ MY PROFILE: hub · giving profile · settings ============
-   #/profile                  the hub: who you are, profile strength, five optional
+   #/profile                  the hub: who you are, profile strength, six optional
                               "giving profile" steps, the five-year plan, ways to tell
                               us what you care about, and account settings
    #/profile {tab:…}          one settings page (profile · prefs · security · sync)
+   #/profile {tab:'mission'}  the mission, legacy & purpose step (missionPage)
    #/plan {step | values}     the five-year giving plan (portal/plan/), embedded
    The plan keeps its own state in this browser and publishes a small summary
    (PLAN_SUMMARY_KEY) after every change. The hub only reads that summary, so
@@ -1350,11 +1351,14 @@ var SETTINGS = [
   { id:'security', label:'Security',        icon:'shield' },
   { id:'sync',     label:'Sync & data',     icon:'sync' }
 ];
-/* The five optional steps, in the order we suggest them. `open` is where each lands in the plan
-   (plan sections: 1 giving goal & funding · 2 values · 3 investments · 4 gifts · 5 summary). */
+/* The six optional steps, in the order we suggest them. `open` is where each lands in the plan
+   (plan sections: 1 giving goal & funding · 2 values · 3 investments · 4 gifts · 5 summary);
+   `page` is a My profile page instead (#/profile {tab:page}). */
 var JOURNEY = [
   { k:'values',  n:'Your values',           open:{ step:2 },
     d:'What matters most to you. Start from your registration causes, then go deeper with a pick list, a quiz or the card game.' },
+  { k:'mission', n:'Mission, legacy & purpose', page:'mission',
+    d:'In your own words: your personal mission, the legacy you hope to leave, and a purpose for each fund.' },
   { k:'contrib', n:'Contribution plan',     open:{ step:1 },
     d:'How much you plan to give over five years, and how you’ll add it to your fund.' },
   { k:'orgs',    n:'Matched organizations', open:{ step:4 },
@@ -1383,6 +1387,11 @@ function journeyStatus(k, s){
     if(s && s.values) return done('Top: '+s.values.topAreas.join(' · '));
     return P.interests.length ? part(.25,'Started',P.interests.length+' cause'+(P.interests.length===1?'':'s')+' from your registration') : none('Any activity below fills this in');
   }
+  if(k==='mission'){
+    var c=statementCount(), of=c.written+' of '+c.total+' written';
+    if(c.written===c.total) return done(of+' · they open your five-year plan');
+    return c.written ? part(c.written/c.total, of, 'Your mission and fund purpose open your five-year plan') : none('Free-form, in your own words');
+  }
   if(k==='contrib'){
     var c=sec(0);
     if(c.seen && c.progress>=1) return done(money(sumArr(s.additions))+' over '+s.years[0]+'–'+s.years[s.years.length-1]);
@@ -1401,16 +1410,17 @@ function journeyStatus(k, s){
   if(g.progress>=1) return done(money(sumArr(s.grants))+' planned · meets your goal');
   return g.progress>0 ? part(g.progress, Math.round(g.progress*100)+'% planned', money(sumArr(s.grants))+' of '+money(sumArr(s.goals))+' goal') : none('Spread your goal across organizations');
 }
-/* Whole-profile meter: account basics 10 · causes 10 · each of the five steps 16 */
+/* Whole-profile meter: account basics 10 · causes 10 · the steps share the other 80 equally */
 function profileStrength(s){
   var P=S.profile, basics=['first','last','email','phone','street','city','zip'].filter(function(k){ return P[k]; }).length/7;
   var steps=JOURNEY.map(function(j){ return journeyStatus(j.k, s).p; });
-  return Math.round(basics*10 + (P.interests.length?10:0) + sumArr(steps)*16);
+  return Math.round(basics*10 + (P.interests.length?10:0) + sumArr(steps)*80/JOURNEY.length);
 }
 
 VIEWS.profile = function(p){
   var tab = p && p.tab;
   if(tab && SETTINGS.some(function(t){ return t.id===tab; })) return settingsPage(tab);
+  if(tab==='mission') return missionPage();
   var P=S.profile, s=planSummary(), pct=profileStrength(s);
 
   /* identity + profile strength */
@@ -1421,18 +1431,18 @@ VIEWS.profile = function(p){
       '<div class="pm-bar" role="progressbar" aria-label="Profile strength" aria-valuemin="0" aria-valuemax="100" aria-valuenow="'+pct+'"><span style="width:'+pct+'%"></span></div>'+
       '<div class="tiny">Everything below is optional. Each step helps us match you to organizations and options that fit.</div></div></div></div>';
 
-  /* the five steps */
-  html += '<div class="gap-m"></div>'+rail('Your giving profile','Five steps, at your own pace')+
+  /* the steps */
+  html += '<div class="gap-m"></div>'+rail('Your giving profile','Six steps, at your own pace')+
     '<div class="pad" style="padding-top:14px"><div class="journey">'+JOURNEY.map(function(j, i){
       var st=journeyStatus(j.k, s), cls=st.p>=1?'st-posted':st.p>0?'st-approved':'st-queued';
       var cta=st.p>=1?'Review':st.p>0?'Continue':'Start';
-      return '<button class="j-card'+(st.p>=1?' done':'')+'" onclick="openPlan('+esc(JSON.stringify(j.open))+')">'+
+      var act=j.page ? "go('profile',{tab:'"+j.page+"'})" : 'openPlan('+esc(JSON.stringify(j.open))+')';
+      return '<button class="j-card'+(st.p>=1?' done':'')+'" onclick="'+act+'">'+
         '<span class="j-num" aria-hidden="true">'+(st.p>=1?ic('check',16,2.4):(i+1))+'</span>'+
         '<span class="j-body"><span class="j-top"><span class="j-name">'+esc(j.n)+'</span><span class="status '+cls+'">'+esc(st.label)+'</span></span>'+
         '<span class="j-desc">'+esc(j.d)+'</span><span class="j-know">'+esc(st.detail)+'</span>'+
         (st.p>0&&st.p<1?'<span class="j-prog"><span style="width:'+Math.round(st.p*100)+'%"></span></span>':'')+'</span>'+
-        '<span class="j-cta">'+cta+ic('chev',16,2.2)+'</span></button>'+
-        (j.k==='values' ? missionPanel(s) : '');   /* mission, legacy and fund purposes sit under Your values */
+        '<span class="j-cta">'+cta+ic('chev',16,2.2)+'</span></button>';
     }).join('')+'</div></div>';
 
   /* the capstone: the five-year plan */
@@ -1512,7 +1522,8 @@ function settingsBody(tab){
   return html;
 }
 
-/* ============ MISSION, LEGACY & FUND PURPOSE (under Your values) ============
+/* ============ MISSION, LEGACY & FUND PURPOSE (#/profile {tab:'mission'}) ============
+   A giving-profile step with its own page, opened from its card on My profile.
    Free-form statements kept on the profile: a personal mission statement, a legacy
    statement, and a purpose statement for each fund this person can access
    (S.profile.mission, .legacy, .fundPurpose[fundId]). The mission statement and the
@@ -1525,15 +1536,16 @@ function statementCount(){
     FUNDS.filter(function(f){ return statementOf('purpose', f.id).trim(); }).length;
   return { written:written, total:2+FUNDS.length };
 }
-function missionPanel(s){
-  var P=S.profile, c=statementCount();
+function missionPage(){
+  var P=S.profile, s=planSummary(), c=statementCount();
   var vals=(s && s.values && s.values.topAreas && s.values.topAreas.length) ? s.values.topAreas : P.interests;
   var area=function(id, label, prompt, val, handler, hint){
     return '<div class="f-row ms-row"><label for="'+id+'">'+esc(label)+'</label>'+(hint?'<div class="ms-hint">'+hint+'</div>':'')+
       '<textarea id="'+id+'" rows="3" placeholder="'+esc(prompt)+'" oninput="'+handler+'" onchange="statementDone(this)">'+esc(val)+'</textarea></div>';
   };
-  return '<div class="ms-panel" id="missionPanel"><div class="ms-head"><div><div class="card-k">Under your values</div><h3>Mission, legacy &amp; purpose</h3>'+
-      '<p class="tiny">In your own words. Your mission statement and your fund’s purpose open your five-year giving plan, on screen and in the PDF.</p></div>'+
+  return pageHead('My profile','Mission, legacy & purpose')+
+    '<div class="pad"><div class="ms-panel" id="missionPanel"><div class="ms-head">'+
+      '<p class="tiny">In your own words. Your mission statement and your fund’s purpose open your five-year giving plan, on screen and in the PDF.</p>'+
       '<span class="status '+(c.written===c.total?'st-posted':c.written?'st-approved':'st-queued')+'" id="msCount">'+c.written+' of '+c.total+' written</span></div>'+
     area('msMission', 'Your personal mission statement', 'Craft your personal mission statement based on your values.',
       statementOf('mission'), "setStatement('mission','',this.value)", vals.length ? 'Your values: '+esc(vals.join(' · ')) : '')+
@@ -1543,7 +1555,8 @@ function missionPanel(s){
       return area('msPurpose_'+f.id, 'Create a purpose statement for the '+f.name, 'What is this fund for, and what do you hope it achieves?',
         statementOf('purpose', f.id), "setStatement('purpose','"+jsq(f.id)+"',this.value)");
     }).join('')+
-  '</div>';
+    '<p class="tiny ms-saved">Saved as you type.</p></div>'+
+    '<div class="gap-m"></div><button class="btn btn-accent btn-block" onclick="back()">Done</button></div>';
 }
 var STATEMENT_TIMER;
 function setStatement(kind, fundId, value){

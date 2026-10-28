@@ -156,8 +156,8 @@ The maps (Leaflet + OpenStreetMap tiles) and the portal's QR code library load f
 
 **My profile** (`portal/#/profile`) is a hub with five parts, top to bottom:
 
-1. **Who you are + profile strength.** Contact basics count 10%, registration causes 10%, and each of the five steps below 16%.
-2. **Your giving profile:** five optional steps, each showing what we already know: **Your values · Contribution plan · Matched organizations · Investments · Granting plan**. Directly under **Your values** sits **Mission, legacy & purpose**: free-text boxes for a personal mission statement, a legacy statement, and a purpose statement for each fund the donor can see. They save as you type (in the portal profile) and log a Salesforce update when a box loses focus.
+1. **Who you are + profile strength.** Contact basics count 10%, registration causes 10%, and the six steps below share the remaining 80% equally.
+2. **Your giving profile:** six optional steps, each showing what we already know: **Your values · Mission, legacy & purpose · Contribution plan · Matched organizations · Investments · Granting plan**. **Mission, legacy & purpose** opens its own page (`#/profile` with `{tab:'mission'}`) of free-text boxes for a personal mission statement, a legacy statement, and a purpose statement for each fund the donor can see. They save as you type (in the portal profile) and log a Salesforce update when a box loses focus.
 3. **Your five-year giving plan:** the optional capstone, with contributions and grants by year once the steps are filled in, and a PDF.
 4. **Tell us what you care about:** the causes tagged at registration (editable), plus three ways to go deeper: a quick pick list, a values quiz and a values card game.
 5. **Settings:** Profile details, Preferences, Security and Sync & data, each on its own page (`#/profile` with `{tab}`), unchanged in what they do.

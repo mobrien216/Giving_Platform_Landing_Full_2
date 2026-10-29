@@ -81,3 +81,6 @@ html.embedded :is(.topbar,.drawer,.drawer-backdrop,.dock,.intro){display:none!im
 /* ---------- Labels: no square markers (style A, type only; see tcf-v3-site.css → Labels) ---------- */
 .sr-kick{font-family:var(--body);font-size:13px;font-weight:600;letter-spacing:.12em;color:var(--label);}
 .sr-kick::before{content:none;}
+
+/* ---------- Text on colored backgrounds is white (no green on green) ---------- */
+#view-impactmap .im-hero h1{color:#fff;}

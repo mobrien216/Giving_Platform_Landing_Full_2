@@ -527,16 +527,16 @@ body.pins-hidden .ipin{display:none!important;}
    use the same "own-class.card-class" compound pattern, or you'll hit
    this exact bug again. */
 .card.calc-panel{background:linear-gradient(150deg,var(--green) 0%,var(--green) 100%);border:1px solid rgba(8,108,67,.35);border-radius:var(--radius-lg);padding:20px;color:var(--gray2);margin-bottom:14px;}
-.calc-step-label{font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:rgba(255,255,255,.5);margin-bottom:14px;}
+.calc-step-label{font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:rgba(255,255,255,.88);margin-bottom:14px;}
 .calc-mode-toggle{display:flex;gap:8px;margin-bottom:18px;}
 .calc-mode-btn{flex:1;padding:9px;border-radius:var(--r);font-family:inherit;font-size:13px;font-weight:700;cursor:pointer;border:1.5px solid rgba(255,255,255,.22);background:transparent;color:rgba(255,255,255,.85);}
 .calc-mode-btn.active{background:var(--tcf-mid-green);color:#fff;border-color:transparent;}
 .calc-field{margin-bottom:16px;}
 .calc-field:last-child{margin-bottom:0;}
 .calc-field-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;}
-.calc-field-label{font-size:13px;font-weight:600;color:rgba(255,255,255,.7);}
-.calc-field-value{font-size:16px;font-weight:700;color:var(--tcf-mid-green);}
-.calc-field-range{display:flex;justify-content:space-between;font-size:10px;color:rgba(255,255,255,.3);margin-top:4px;}
+.calc-field-label{font-size:13px;font-weight:600;color:rgba(255,255,255,.92);}
+.calc-field-value{font-size:16px;font-weight:700;color:#fff;}
+.calc-field-range{display:flex;justify-content:space-between;font-size:10px;color:rgba(255,255,255,.8);margin-top:4px;}
 .calc-slider{-webkit-appearance:none;appearance:none;width:100%;height:4px;border-radius:2px;background:rgba(255,255,255,.3);outline:none;cursor:pointer;}
 .calc-slider::-webkit-slider-runnable-track{-webkit-appearance:none;appearance:none;width:100%;height:4px;border-radius:2px;background:rgba(255,255,255,.3);}
 .calc-slider::-moz-range-track{width:100%;height:4px;border-radius:2px;background:rgba(255,255,255,.3);border:none;}
@@ -550,12 +550,12 @@ body.pins-hidden .ipin{display:none!important;}
 .cmc-units-n{font-family:var(--font-head);font-size:28px;font-weight:700;}
 .cmc-units-label{font-size:11px;color:var(--ink-faint);line-height:1.3;}
 .calc-chart-label{font-size:13px;font-weight:700;color:rgba(255,255,255,.8);margin-bottom:14px;}
-.calc-area-label{font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:rgba(255,255,255,.45);margin-bottom:10px;}
+.calc-area-label{font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:rgba(255,255,255,.88);margin-bottom:10px;}
 .calc-area-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:7px;}
 .calc-area-btn{background:rgba(255,255,255,.04);border:1.5px solid rgba(255,255,255,.1);border-radius:var(--r);padding:12px 6px;cursor:pointer;text-align:center;font-family:inherit;}
 .calc-area-icon{width:22px;height:22px;margin:0 auto 6px;color:rgba(255,255,255,.55);}
 .calc-area-icon svg{width:100%;height:100%;display:block;}
-.calc-area-name{font-size:11px;font-weight:700;color:rgba(255,255,255,.7);line-height:1.2;}
+.calc-area-name{font-size:11px;font-weight:700;color:rgba(255,255,255,.92);line-height:1.2;}
 .card.calc-note{background:rgba(238,115,49,.06);border-color:rgba(238,115,49,.2);}
 .calc-note p{font-size:14px;color:var(--ink-soft);line-height:1.6;}
 .calc-step2-head{margin-top:24px;margin-bottom:14px;}

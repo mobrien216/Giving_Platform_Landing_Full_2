@@ -67,10 +67,25 @@ body.at-hero:not(.scrolled) .nav .btn-accent:hover{background:var(--gray2)!impor
 .btn,.btn-sm,.btn-lg,.chip,.rng,.amt-grid button,.ps-exit,.fund-pill,.top .ic-btn,.qz-opt{border-radius:var(--r-btn);}
 .seg,.method-grid{border-radius:var(--r-btn);}   /* both already clip their contents (overflow) */
 
-/* ---------- 4. Labels: ledger mono is retired; labels use the sub-header style ---------- */
-.sr-kick,.ph-kick{font-family:var(--body);font-size:var(--fs-sub);font-weight:700;letter-spacing:.08em;color:var(--mid);}
-.p-kick,.card-k,.fb-greet,.k-label{font-family:var(--body);font-size:13px;font-weight:700;letter-spacing:.08em;color:var(--mid);}
-.sr-kick::before,.ph-kick::before,.p-kick::before,.card-k::before,.fb-greet::before{width:8px;height:8px;border-radius:0;}
+/* ---------- 4. Labels: ledger mono is retired; no square markers ----------
+   Three label styles (approved 10-28-2026):
+   A · type only     headings, greetings, heroes, page, card and menu labels: the type alone,
+                     small, widely spaced and in a softer green (--label)
+   B · hairline      navigation tiles (.panel): a thin rule runs from the label to the tile's edge
+   D · color edge    data tiles, the tiles in a .pgrid.data row: a 3px bar along the top in the
+                     tile's own color (--pk, set on each .panel), and a plain label */
+.sr-kick,.ph-kick,.p-kick,.card-k,.fb-greet,.k-label,.pop-head .ph-kick{font-family:var(--body);font-size:13px;font-weight:600;letter-spacing:.12em;color:var(--label);}
+.sr-kick::before,.ph-kick::before,.p-kick::before,.card-k::before,.fb-greet::before,.dr-sec::before,
+.h-kick::before,.g-kick::before,.jt-k::before,.pc-kick::before,.v-fund::before,
+.panel .p-kick::before,.pop-head .ph-kick::before,.pop-cell .pc-kick::before,.j-top .jt-k::before{content:none;}
+.h-kick,.dr-sec{letter-spacing:.12em;}
+/* B */
+.panel .p-kick{align-self:stretch;gap:14px;margin-right:28px;}   /* stops short of the corner arrow */
+.panel .p-kick::after{content:'';flex:1;min-width:24px;height:1px;background:var(--gray3);}
+.panel-gate .p-kick::after{background:rgba(255,255,255,.22);}
+/* D */
+.pgrid.data .panel{box-shadow:inset 0 3px 0 var(--pk,var(--orange));}
+.pgrid.data .p-kick::after{content:none;}
 .sect-rail h2{font-size:clamp(24px,3vw,30px);font-weight:700;letter-spacing:-.01em;}
 .page-head h1{font-size:clamp(28px,4vw,34px);font-weight:700;letter-spacing:-.015em;}
 .p-label{font-weight:700;}

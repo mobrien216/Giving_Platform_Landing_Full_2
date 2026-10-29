@@ -77,3 +77,10 @@ html.embedded :is(.topbar,.drawer,.drawer-backdrop,.dock,.intro){display:none!im
 /* icon tiles (G2): on an Orange or Aqua tile the icon is Green; nothing White sits on Orange */
 .panel .t-icon svg,.tile .t-icon svg{stroke:currentColor;}
 .nf-composer .nf-comp-icon{background:var(--green)!important;color:var(--white);}
+
+/* ---------- Labels: no square markers (style A, type only; see tcf-v3-site.css → Labels) ---------- */
+.sr-kick{font-family:var(--body);font-size:13px;font-weight:600;letter-spacing:.12em;color:var(--label);}
+.sr-kick::before{content:none;}
+
+/* ---------- Text on colored backgrounds is white (no green on green) ---------- */
+#view-impactmap .im-hero h1{color:#fff;}

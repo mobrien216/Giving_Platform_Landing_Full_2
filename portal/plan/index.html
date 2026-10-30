@@ -432,6 +432,9 @@ td.neg{color:var(--red)}
    The portal supplies the header, menu and back button, so the plan's own masthead hides. */
 html.embedded{--top-h:0px}
 html.embedded .top{display:none}
+/* In the portal each card opens on its own (My giving plan shows the overall progress),
+   so the section rail and its progress meter hide */
+html.embedded .steps{display:none}
 /* Site button corners: the same --r-btn token (assets/css/tcf-v3.css) as every other page */
 .btn,.chip,.opt,.seg,.theme-btn{border-radius:var(--r-btn,6px)}
 /* Personal mission statement + fund purpose, at the top of the plan summary (see PORTAL INTEGRATION) */
@@ -2288,6 +2291,17 @@ go(S.step);
   if (embedded){
     document.documentElement.classList.add('embedded');
     document.documentElement.dataset.theme = 'light';   // the portal is light-only
+    /* One card at a time: the footer's "Next: <section>" becomes Done, back to My giving plan */
+    const old = $('nextBtn'), done = old.cloneNode(true);   // clone drops the section-to-section handler
+    old.replaceWith(done);
+    done.addEventListener('click', () => { publish(); toParent({type: 'plan-done'}); });
+    const baseFoot = renderFoot;
+    renderFoot = function(){
+      baseFoot();
+      const b = $('nextBtn'); b.hidden = false; b.textContent = 'Done'; b.dataset.go = '';
+      if (S.step === SECTIONS.length) $('footHint').textContent = 'Your plan saves as you go.';
+    };
+    renderFoot();
   }
 
   /* ---- deep links ---- */

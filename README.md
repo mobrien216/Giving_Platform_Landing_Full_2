@@ -25,7 +25,7 @@ Only **four pages** make up the whole system. Inside each app, moving between mo
 /
 ├── index.html                    Landing page
 ├── portal/index.html             Account Holder Portal
-├── portal/plan/index.html        Five-year giving plan (values, contributions, investments, gifts) — opened from My profile
+├── portal/plan/index.html        Five-year giving plan (values, contributions, investments, gifts) — opened from My giving plan
 ├── open/index.html               Open a Donor Advised Fund (online flow) — from "Open a DAF" in the apps and the portal sign-in
 ├── community/index.html          Community Member experience   ┐ GENERATED from src/giving/
 ├── advisors/index.html           Advisor experience            ┘ (do not edit — see below)
@@ -71,7 +71,7 @@ Portal links ask the person to sign in once per browser session, then open the m
 | Sign out (any app) → landing | Returns to `index.html`. |
 | Portal profile | Saved as `tcf-donor-portal-profile-v1`; **Profile → Sync & data → Reset demo** clears it. |
 | Portal session | `tcf_portal_session` in sessionStorage, or localStorage when **Keep me signed in** is ticked. |
-| Five-year giving plan | The plan saves itself as `tcf-five-year-plan-v2` and, after every change, a small summary as `tcf-five-year-plan-summary`, which **My profile** reads. The portal hands the plan the mission and fund purpose statements as `tcf-plan-context`. **Reset demo** clears all three. |
+| Five-year giving plan | The plan saves itself as `tcf-five-year-plan-v2` and, after every change, a small summary as `tcf-five-year-plan-summary`, which **My giving plan** reads. The portal hands the plan the mission and fund purpose statements as `tcf-plan-context`. **Reset demo** clears all three. |
 | Impact map interest | `impact-map-my-interests` / `impact-map-aggregate-v1` in localStorage (this browser only on a static host). |
 
 ## Speed
@@ -156,23 +156,26 @@ The maps (Leaflet + OpenStreetMap tiles) and the portal's QR code library load f
   - update the Ren build notes and spec (the record's status is "Pending agreement signature" today).
 - **Portal** (`assets/portal/app.js`): new funds open immediately. Remove `agreementCard`, `signAgreement`, `completeAgreement` and the "Agreement to sign" status.
 
-## My profile and the giving profile
+## My giving plan and My profile
 
-**My profile** (`portal/#/profile`) is a hub with five parts, top to bottom:
+**My giving plan** (`portal/#/givingplan`, in the left menu just above My profile) is where a donor builds their plan, ideally with their advisor. Top to bottom:
 
-1. **Who you are + profile strength.** Contact basics count 10%, registration causes 10%, and the six steps below share the remaining 80% equally.
-2. **Your giving profile:** six optional steps, each showing what we already know: **Your values · Mission, legacy & purpose · Contribution plan · Matched organizations · Investments · Granting plan**. **Mission, legacy & purpose** opens its own page (`#/profile` with `{tab:'mission'}`) of free-text boxes for a personal mission statement, a legacy statement, and a purpose statement for each fund the donor can see. They save as you type (in the portal profile) and log a Salesforce update when a box loses focus.
-3. **Your five-year giving plan:** the optional capstone, with contributions and grants by year once the steps are filled in, and a PDF.
+1. **How complete it is:** "You're 80% complete", with the six cards counting equally, and buttons to message or book a call with the advisor.
+2. **Six cards, in any order:** **Mission, legacy & purpose · Your values · Contribution plan · Matched organizations · Investments · Granting plan**. No numbers and no required order; each card shows its status and what we already know. **Mission, legacy & purpose** opens its own page (`#/givingplan` with `{page:'mission'}`) of free-text boxes for a personal mission statement, a legacy statement, and a purpose statement for each fund the donor can see. They save as you type (in the portal profile) and log a Salesforce update when a box loses focus.
+3. **Your five-year giving plan:** the optional finished plan, with contributions and grants by year once the cards are filled in, and a PDF.
 4. **Tell us what you care about:** the causes tagged at registration (editable), plus three ways to go deeper: a quick pick list, a values quiz and a values card game.
-5. **Settings:** Profile details, Preferences, Security and Sync & data, each on its own page (`#/profile` with `{tab}`), unchanged in what they do.
 
-The steps, the activities and the capstone all open the five-year giving plan inside the portal (`#/plan`), which runs `portal/plan/index.html` in a frame. That page is the standalone giving-plan prototype with one marked **PORTAL INTEGRATION** block at the end, which:
+**My profile** (`portal/#/profile`) is account settings only: who you are, then Profile details, Preferences, Security and Sync & data, each on its own page (`#/profile` with `{tab}`).
+
+The other cards, the activities and the finished plan open the five-year giving plan inside the portal (`#/plan`), which runs `portal/plan/index.html` in a frame. That page is the standalone giving-plan prototype with one marked **PORTAL INTEGRATION** block at the end, which:
 
 - hides its own header when embedded (`?embed=1`) and opens the requested section (`step=1-5`) or activity (`values=picks|quiz|cards`);
+- shows one card at a time: no section rail or progress meter, and the footer button is **Done**, which returns to My giving plan;
+- loads from an address stamped with the plan page's fingerprint (`<meta name="tcf-plan">` in `portal/index.html`, kept current by `scripts/stamp-assets.js`), so a new deploy never shows a cached plan;
 - starts a **new** plan from the fund's real balance (`balance=`) and pre-selects the donor's registration causes in the pick list (`interests=`, mapped in `INTEREST_AREAS` in `assets/portal/app.js`);
 - publishes the summary the hub reads, and tells the portal when values change or the plan is saved (shown as Salesforce updates under Sync & data).
 
-The hub never reads the plan's internals, only the summary, so either side can change as long as the summary keeps its shape (`v: 1`).
+My giving plan never reads the plan's internals, only the summary, so either side can change as long as the summary keeps its shape (`v: 1`).
 
 Information flows the other way through `tcf-plan-context` (`v: 1`): the portal writes the personal mission statement and the selected fund's name and purpose statement, and the plan shows them first on its finished summary and at the top of the PDF. The legacy statement stays in the profile and is not printed on the plan.
 

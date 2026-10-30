@@ -337,6 +337,7 @@ var NAV = [
   { id:'endow',       label:'Endowment calculator',   icon:'calc' },
   { id:'family',      label:'Family access',          orgLabel:'Authorized users', icon:'users' },
   { id:'advisor',     label:'My advisor',             icon:'chat' },
+  { id:'givingplan',  label:'My giving plan',         icon:'layers' },
   { id:'profile',     label:'My profile & settings',  icon:'user' },
   { sec:'Engage', engage:true },
   { id:'engage',      label:'Engagement home',        icon:'spark' },
@@ -385,8 +386,9 @@ function go(route, params, replace){
   }
   if(!S.signedIn && route!=='signin') route='signin';
   if(!allowed(route)) route='home';
-  /* a settings page is a step inside My profile: Back returns to the hub */
-  var subPage = route==='profile' && ROUTE==='profile' && ((PARAMS&&PARAMS.tab)||'')!==((params&&params.tab)||'');
+  /* a settings page is a step inside My profile, and a card page one inside My giving plan: Back returns to the hub */
+  var sub = function(p){ return (p && (p.tab||p.page)) || ''; };
+  var subPage = route===ROUTE && (route==='profile' || route==='givingplan') && sub(PARAMS)!==sub(params);
   if(!replace && ROUTE && (ROUTE!==route || subPage) && ROUTE!=='signin') HIST.push([ROUTE,PARAMS]);
   if(HIST.length>30) HIST.shift();
   ROUTE=route; PARAMS=params||null;
@@ -410,8 +412,12 @@ window.addEventListener('popstate', function(){
   if(!allowed(r)) r='home';
   ROUTE=r; PARAMS=null; closeDrawer(); closeSheet(); render(); window.scrollTo(0,0);
 });
-/* With no history (arrived by a direct link), the plan and settings pages go up to My profile, everything else to the dashboard */
-function back(){ var h=HIST.pop(); if(h){ ROUTE=h[0]; PARAMS=h[1]; render(); syncHash(true); window.scrollTo(0,0); } else go(ROUTE==='plan'||(ROUTE==='profile'&&PARAMS&&PARAMS.tab)?'profile':'home',null,true); }
+/* With no history (arrived by a direct link), a giving-plan card goes up to My giving plan, a settings page to My profile, everything else to the dashboard */
+function back(){
+  var h=HIST.pop(); if(h){ ROUTE=h[0]; PARAMS=h[1]; render(); syncHash(true); window.scrollTo(0,0); return; }
+  var sub=PARAMS && (PARAMS.tab||PARAMS.page);
+  go(ROUTE==='plan'||(ROUTE==='givingplan'&&sub) ? 'givingplan' : ROUTE==='profile'&&sub ? 'profile' : 'home', null, true);
+}
 function render(){
   var app=$('#app');
   document.body.classList.toggle('pins-on', !!S.settings.pins);
@@ -443,7 +449,7 @@ function renderChrome(){
     if(n.sec) return '<div class="dr-sec'+(n.engage?' engage':'')+'">'+n.sec+'</div>';
     if(!allowed(n.id)) return '';
     var c = n.count ? n.count() : 0;
-    return '<button class="dr-item'+(ROUTE===n.id||(n.id==='profile'&&ROUTE==='plan')?' sel':'')+'" onclick="go(\''+n.id+'\')">'+ic(n.icon,19)+'<span>'+esc(isOrg()&&n.orgLabel?n.orgLabel:n.label)+'</span>'+(c?'<span class="dc">'+c+'</span>':'')+'</button>';
+    return '<button class="dr-item'+(ROUTE===n.id||(n.id==='givingplan'&&ROUTE==='plan')?' sel':'')+'" onclick="go(\''+n.id+'\')">'+ic(n.icon,19)+'<span>'+esc(isOrg()&&n.orgLabel?n.orgLabel:n.label)+'</span>'+(c?'<span class="dc">'+c+'</span>':'')+'</button>';
   }).join('');
 }
 function toggleDrawer(){ $('#drawer').classList.toggle('open'); $('#drawerScrim').classList.toggle('open'); }
@@ -1330,16 +1336,14 @@ function openSchedule(){
 }
 function bookCall(){ var sl=$('#slotRow .chip.sel').textContent, tp=$('#callTopic').value; S.calls.push({t:Date.now(), slot:sl, topic:tp}); save(); logSync('sf','Event','Call booked: '+sl+' — '+tp); closeSheet(); toast('Booked for '+sl+'. A calendar invite is on its way.'); if(ROUTE==='advisor') render(); }
 
-/* ============ MY PROFILE: hub · giving profile · settings ============
-   #/profile                  the hub: who you are, profile strength, six optional
-                              "giving profile" steps, the five-year plan, ways to tell
-                              us what you care about, and account settings
+/* ============ MY PROFILE (settings) and MY GIVING PLAN ============
+   #/profile                  who you are, and account settings
    #/profile {tab:…}          one settings page (profile · prefs · security · sync)
-   #/profile {tab:'mission'}  the mission, legacy & purpose step (missionPage)
+   #/givingplan               the giving plan: six cards, the finished plan, interests (below)
    #/plan {step | values}     the five-year giving plan (portal/plan/), embedded
    The plan keeps its own state in this browser and publishes a small summary
-   (PLAN_SUMMARY_KEY) after every change. The hub only reads that summary, so
-   the two can evolve separately. */
+   (PLAN_SUMMARY_KEY) after every change. My giving plan only reads that summary,
+   so the two can evolve separately. */
 var INTERESTS = ['Arts & culture','Education','Environment','Food access','Health','Housing','Youth','Workforce','Neighborhoods','Racial equity'];
 /* profile causes → the plan's focus-area keys (portal/plan/, QUIZ.areas) */
 var INTEREST_AREAS = { 'Arts & culture':'arts', 'Education':'education', 'Environment':'environment', 'Food access':'food', 'Health':'healthaccess',
@@ -1351,21 +1355,22 @@ var SETTINGS = [
   { id:'security', label:'Security',        icon:'shield' },
   { id:'sync',     label:'Sync & data',     icon:'sync' }
 ];
-/* The six optional steps, in the order we suggest them. `open` is where each lands in the plan
-   (plan sections: 1 giving goal & funding · 2 values · 3 investments · 4 gifts · 5 summary);
-   `page` is a My profile page instead (#/profile {tab:page}). */
+/* The six giving-plan cards. Any order works; this is the order they're shown in.
+   `open` is where a card lands in the plan (plan sections: 1 giving goal & funding · 2 values ·
+   3 investments · 4 gifts · 5 summary); `page` is a My giving plan page instead
+   (#/givingplan {page}). `kick` labels the card, `pk` colors its top edge. */
 var JOURNEY = [
-  { k:'values',  n:'Your values',           open:{ step:2 },
-    d:'What matters most to you. Start from your registration causes, then go deeper with a pick list, a quiz or the card game.' },
-  { k:'mission', n:'Mission, legacy & purpose', page:'mission',
-    d:'In your own words: your personal mission, the legacy you hope to leave, and a purpose for each fund.' },
-  { k:'contrib', n:'Contribution plan',     open:{ step:1 },
+  { k:'mission', n:'Mission, legacy & purpose', page:'mission', kick:'In your own words', icon:'pen', pk:'var(--orange)',
+    d:'Your personal mission, the legacy you hope to leave, and a purpose for each fund.' },
+  { k:'values',  n:'Your values',           open:{ step:2 }, kick:'What matters', icon:'heart', pk:'var(--pink)',
+    d:'Start from your registration causes, then go deeper with a pick list, a quiz or the card game.' },
+  { k:'contrib', n:'Contribution plan',     open:{ step:1 }, kick:'Money in', icon:'plus', pk:'var(--mid)',
     d:'How much you plan to give over five years, and how you’ll add it to your fund.' },
-  { k:'orgs',    n:'Matched organizations', open:{ step:4 },
+  { k:'orgs',    n:'Matched organizations', open:{ step:4 }, kick:'Who you’ll fund', icon:'users', pk:'var(--blue)',
     d:'Nonprofits and Foundation projects ranked by how closely they fit your values.' },
-  { k:'invest',  n:'Investments',           open:{ step:3 },
+  { k:'invest',  n:'Investments',           open:{ step:3 }, kick:'How it grows', icon:'pie', pk:'var(--aqua)',
     d:'Keep the TCF Index Pool or build your own mix of pools. Tony, the portfolio assistant, can suggest one.' },
-  { k:'grants',  n:'Granting plan',         open:{ step:4 },
+  { k:'grants',  n:'Granting plan',         open:{ step:4 }, kick:'Money out', icon:'share', pk:'var(--forest)',
     d:'How much goes to each organization, year by year, against your giving goal.' }
 ];
 var ACTIVITIES = [
@@ -1410,67 +1415,20 @@ function journeyStatus(k, s){
   if(g.progress>=1) return done(money(sumArr(s.grants))+' planned · meets your goal');
   return g.progress>0 ? part(g.progress, Math.round(g.progress*100)+'% planned', money(sumArr(s.grants))+' of '+money(sumArr(s.goals))+' goal') : none('Spread your goal across organizations');
 }
-/* Whole-profile meter: account basics 10 · causes 10 · the steps share the other 80 equally */
-function profileStrength(s){
-  var P=S.profile, basics=['first','last','email','phone','street','city','zip'].filter(function(k){ return P[k]; }).length/7;
-  var steps=JOURNEY.map(function(j){ return journeyStatus(j.k, s).p; });
-  return Math.round(basics*10 + (P.interests.length?10:0) + sumArr(steps)*80/JOURNEY.length);
+/* How complete the giving plan is: the six cards count equally */
+function givingPlanPercent(s){
+  return Math.round(sumArr(JOURNEY.map(function(j){ return journeyStatus(j.k, s).p; }))*100/JOURNEY.length);
 }
 
 VIEWS.profile = function(p){
   var tab = p && p.tab;
   if(tab && SETTINGS.some(function(t){ return t.id===tab; })) return settingsPage(tab);
-  if(tab==='mission') return missionPage();
-  var P=S.profile, s=planSummary(), pct=profileStrength(s);
+  var P=S.profile;
 
-  /* identity + profile strength */
+  /* who you are */
   var html = pageHead('Account','My profile')+
     '<div class="pad"><div class="card prof-id"><span class="avatar round prof-av">'+initials(P.first+' '+P.last)+'</span>'+
-      '<div class="prof-who"><div class="prof-name">'+esc(P.first+' '+P.last)+'</div><div class="tiny">'+esc(P.email)+'</div><div style="margin-top:6px">'+pin('sf')+'</div></div>'+
-      '<div class="prof-meter"><div class="pm-top"><span>Profile strength</span><b>'+pct+'%</b></div>'+
-      '<div class="pm-bar" role="progressbar" aria-label="Profile strength" aria-valuemin="0" aria-valuemax="100" aria-valuenow="'+pct+'"><span style="width:'+pct+'%"></span></div>'+
-      '<div class="tiny">Everything below is optional. Each step helps us match you to organizations and options that fit.</div></div></div></div>';
-
-  /* the steps */
-  html += '<div class="gap-m"></div>'+rail('Your giving profile','Six steps, at your own pace')+
-    '<div class="pad" style="padding-top:14px"><div class="journey">'+JOURNEY.map(function(j, i){
-      var st=journeyStatus(j.k, s), cls=st.p>=1?'st-posted':st.p>0?'st-approved':'st-queued';
-      var cta=st.p>=1?'Review':st.p>0?'Continue':'Start';
-      var act=j.page ? "go('profile',{tab:'"+j.page+"'})" : 'openPlan('+esc(JSON.stringify(j.open))+')';
-      return '<button class="j-card'+(st.p>=1?' done':'')+'" onclick="'+act+'">'+
-        '<span class="j-num" aria-hidden="true">'+(st.p>=1?ic('check',16,2.4):(i+1))+'</span>'+
-        '<span class="j-body"><span class="j-top"><span class="j-name">'+esc(j.n)+'</span><span class="status '+cls+'">'+esc(st.label)+'</span></span>'+
-        '<span class="j-desc">'+esc(j.d)+'</span><span class="j-know">'+esc(st.detail)+'</span>'+
-        (st.p>0&&st.p<1?'<span class="j-prog"><span style="width:'+Math.round(st.p*100)+'%"></span></span>':'')+'</span>'+
-        '<span class="j-cta">'+cta+ic('chev',16,2.2)+'</span></button>';
-    }).join('')+'</div></div>';
-
-  /* the capstone: the five-year plan */
-  var years=(s&&s.years)||[], add=(s&&s.additions)||[], gr=(s&&s.grants)||[];
-  var built=!!(s && (s.sections[0].seen || s.orgsChosen) && sumArr(add)+sumArr(gr)>0);
-  var max=Math.max.apply(null,[1].concat(add,gr));
-  html += '<div class="gap-m"></div><div class="pad"><div class="capstone">'+guilloche(270,40)+
-    '<div class="cap-kick">The finished plan · optional</div><h2>Your five-year giving plan</h2>'+
-    (built
-      ? '<p>What you’ll add to your fund and what you’ll grant from it, '+years[0]+'–'+years[years.length-1]+'. The plan is '+s.percent+'% complete.</p>'+
-        '<div class="cap-tot"><div><span>Contributions</span><b>'+money(sumArr(add))+'</b></div><div><span>Grants</span><b>'+money(sumArr(gr))+'</b></div><div><span>Invested in</span><b>'+esc(s.investments.label)+'</b></div></div>'+
-        '<div class="cap-bars" role="img" aria-label="Contributions and grants by year">'+years.map(function(y,i){
-          return '<div class="cb-y"><div class="cb-pair"><i class="cb-in" style="height:'+Math.round((add[i]||0)/max*100)+'%" title="'+y+' contributions '+money(add[i])+'"></i><i class="cb-out" style="height:'+Math.round((gr[i]||0)/max*100)+'%" title="'+y+' grants '+money(gr[i])+'"></i></div><span>'+y+'</span></div>';
-        }).join('')+'</div><div class="cap-key"><span><i class="cb-in"></i>Contributions</span><span><i class="cb-out"></i>Grants</span></div>'+
-        '<div class="cap-act"><button class="btn btn-accent" onclick="openPlan({step:5})">Open my plan</button><button class="btn btn-onhero" onclick="openPlan({step:5})">'+ic('download',16)+'Download PDF</button></div>'
-      : '<p>The steps above build it for you: a year-by-year plan of what you’ll add to your fund and what you’ll grant, matched to your values. Not everyone needs one, but it makes long-range giving much easier to talk through with your advisor.</p>'+
-        '<div class="cap-act"><button class="btn btn-accent" onclick="openPlan({step:'+(s&&s.values?1:2)+'})">Start building</button><button class="btn btn-onhero" onclick="openPlan({step:5})">See what it looks like</button></div>')+
-    '</div></div>';
-
-  /* ways to tell us what you care about */
-  var src = s && s.values && s.values.source;
-  html += '<div class="gap-m"></div>'+rail('Personalization','Tell us what you care about', pin('sf'))+
-    '<div class="pad" style="padding-top:14px"><div class="card-k">From your registration</div><p class="tiny" style="margin-bottom:10px">Tap to change. We use these to recommend nonprofits and stories, and to pre-fill the pick list below.</p>'+
-    '<div class="chip-row">'+INTERESTS.map(function(i){ var on=P.interests.indexOf(i)>-1; return '<button class="chip'+(on?' sel':'')+'" aria-pressed="'+on+'" onclick="toggleInterest(\''+jsq(i)+'\')">'+esc(i)+'</button>'; }).join('')+'</div>'+
-    '<div class="gap-m"></div><div class="card-k">Go deeper · each one updates your values</div><div class="acts">'+ACTIVITIES.map(function(a){
-      var did=src===a.src;
-      return '<button class="act'+(did?' done':'')+'" onclick="openPlan({values:\''+a.k+'\'})"><span class="act-t">'+esc(a.n)+(did?'<span class="status st-posted">Current values</span>':'')+'</span><span class="act-d">'+esc(a.d)+'</span><span class="act-m">'+esc(a.t)+ic('arrowUR',14,2.2)+'</span></button>';
-    }).join('')+'</div></div>';
+      '<div class="prof-who"><div class="prof-name">'+esc(P.first+' '+P.last)+'</div><div class="tiny">'+esc(P.email)+'</div><div style="margin-top:6px">'+pin('sf')+'</div></div></div></div>';
 
   /* account & settings */
   var C=P.comms, on=Object.keys(C).filter(function(k){ return C[k]; }).length, syncN=S.sync.length;
@@ -1481,6 +1439,68 @@ VIEWS.profile = function(p){
   html += '<div class="gap-m"></div>'+rail('Account','Settings')+
     '<div class="pad" style="padding-top:14px"><div class="card flush set-list">'+SETTINGS.map(function(t){
       return '<button class="set-row" onclick="go(\'profile\',{tab:\''+t.id+'\'})"><span class="set-ic">'+ic(t.icon,18)+'</span><span class="set-main"><span class="set-n">'+t.label+'</span><span class="set-s">'+sub[t.id]+'</span></span>'+ic('chev',16,2.2)+'</button>';
+    }).join('')+'</div></div>';
+  return html;
+};
+
+/* ============ MY GIVING PLAN ============
+   #/givingplan                   six cards to work through in any order, ideally with your
+                                  advisor; how complete the plan is; the finished five-year
+                                  plan; and ways to tell us what you care about
+   #/givingplan {page:'mission'}  the mission, legacy & purpose card (missionPage)
+   #/plan {step | values}         the other cards, inside the five-year plan (portal/plan/) */
+VIEWS.givingplan = function(p){
+  if(p && p.page==='mission') return missionPage();
+  var P=S.profile, s=planSummary(), pct=givingPlanPercent(s);
+  var done=JOURNEY.filter(function(j){ return journeyStatus(j.k, s).p>=1; }).length;
+
+  /* how complete it is, and who to do it with */
+  var html = pageHead('Account','My giving plan',{lede:'Six cards that help us, and your advisor, get to know you. Fill them out in any order, at your own pace. Most people work through them with their advisor.'})+
+    '<div class="pad"><div class="card gp-top">'+
+      '<div class="gp-meter"><div class="pm-top"><span>Your giving plan</span><b>'+pct+'%</b></div>'+
+        '<div class="pm-bar" role="progressbar" aria-label="Giving plan complete" aria-valuemin="0" aria-valuemax="100" aria-valuenow="'+pct+'"><span style="width:'+pct+'%"></span></div>'+
+        '<div class="tiny">You’re '+pct+'% complete: '+done+' of '+JOURNEY.length+' cards done. Every card is optional.</div></div>'+
+      '<div class="gp-advisor"><span class="avatar round" style="background:var(--moss)">JR</span>'+
+        '<div class="gp-adv-who"><div class="gp-adv-n">Work on it with Jordan Reyes</div><div class="tiny">Senior philanthropic advisor</div></div>'+
+        '<div class="gp-adv-act"><button class="btn btn-quiet btn-sm" onclick="openMessage()">'+ic('chat',16)+'Message</button><button class="btn btn-accent btn-sm" onclick="openSchedule()">'+ic('cal',16)+'Book a call</button></div></div>'+
+    '</div></div>';
+
+  /* the six cards: no numbers, any order */
+  html += '<div class="gap-m"></div><div class="pgrid g3 data gp-cards">'+JOURNEY.map(function(j){
+    var st=journeyStatus(j.k, s), cls=st.p>=1?'st-posted':st.p>0?'st-approved':'st-queued';
+    var act=j.page ? "go('givingplan',{page:'"+j.page+"'})" : 'openPlan('+esc(JSON.stringify(Object.assign({card:j.k}, j.open)))+')';
+    return '<button class="panel gp-card" style="--pk:'+j.pk+'" onclick="'+act+'"><div class="p-kick">'+esc(j.kick)+'</div>'+
+      '<span class="p-arrow">'+ic('arrowUR',18,2.2)+'</span>'+
+      '<div class="t-icon" style="background:var(--gray2);color:var(--forest)">'+ic(j.icon,22)+'</div>'+
+      '<div class="p-label">'+esc(j.n)+'</div><div class="p-sub">'+esc(j.d)+'</div>'+
+      '<div class="gp-status"><span class="status '+cls+'">'+esc(st.label)+'</span><span class="gp-know">'+esc(st.detail)+'</span></div></button>';
+  }).join('')+'</div>';
+
+  /* the finished plan */
+  var years=(s&&s.years)||[], add=(s&&s.additions)||[], gr=(s&&s.grants)||[];
+  var built=!!(s && (s.sections[0].seen || s.orgsChosen) && sumArr(add)+sumArr(gr)>0);
+  var max=Math.max.apply(null,[1].concat(add,gr));
+  html += '<div class="gap-m"></div><div class="pad"><div class="capstone">'+guilloche(270,40)+
+    '<div class="cap-kick">The finished plan · optional</div><h2>Your five-year giving plan</h2>'+
+    (built
+      ? '<p>What you’ll add to your fund and what you’ll grant from it, '+years[0]+'–'+years[years.length-1]+'.</p>'+
+        '<div class="cap-tot"><div><span>Contributions</span><b>'+money(sumArr(add))+'</b></div><div><span>Grants</span><b>'+money(sumArr(gr))+'</b></div><div><span>Invested in</span><b>'+esc(s.investments.label)+'</b></div></div>'+
+        '<div class="cap-bars" role="img" aria-label="Contributions and grants by year">'+years.map(function(y,i){
+          return '<div class="cb-y"><div class="cb-pair"><i class="cb-in" style="height:'+Math.round((add[i]||0)/max*100)+'%" title="'+y+' contributions '+money(add[i])+'"></i><i class="cb-out" style="height:'+Math.round((gr[i]||0)/max*100)+'%" title="'+y+' grants '+money(gr[i])+'"></i></div><span>'+y+'</span></div>';
+        }).join('')+'</div><div class="cap-key"><span><i class="cb-in"></i>Contributions</span><span><i class="cb-out"></i>Grants</span></div>'+
+        '<div class="cap-act"><button class="btn btn-accent" onclick="openPlan({step:5})">Open my plan</button><button class="btn btn-onhero" onclick="openPlan({step:5})">'+ic('download',16)+'Download PDF</button></div>'
+      : '<p>The cards above build it for you: a year-by-year plan of what you’ll add to your fund and what you’ll grant, matched to your values. Not everyone needs one, but it makes long-range giving much easier to talk through with your advisor.</p>'+
+        '<div class="cap-act"><button class="btn btn-onhero" onclick="openPlan({step:5})">See what it looks like</button></div>')+
+    '</div></div>';
+
+  /* ways to tell us what you care about */
+  var src = s && s.values && s.values.source;
+  html += '<div class="gap-m"></div>'+rail('Personalization','Tell us what you care about', pin('sf'))+
+    '<div class="pad" style="padding-top:14px"><div class="card-k">From your registration</div><p class="tiny" style="margin-bottom:10px">Tap to change. We use these to recommend nonprofits and stories, and to pre-fill the pick list below.</p>'+
+    '<div class="chip-row">'+INTERESTS.map(function(i){ var on=P.interests.indexOf(i)>-1; return '<button class="chip'+(on?' sel':'')+'" aria-pressed="'+on+'" onclick="toggleInterest(\''+jsq(i)+'\')">'+esc(i)+'</button>'; }).join('')+'</div>'+
+    '<div class="gap-m"></div><div class="card-k">Go deeper · each one updates your values</div><div class="acts">'+ACTIVITIES.map(function(a){
+      var did=src===a.src;
+      return '<button class="act'+(did?' done':'')+'" onclick="openPlan({card:\'values\',values:\''+a.k+'\'})"><span class="act-t">'+esc(a.n)+(did?'<span class="status st-posted">Current values</span>':'')+'</span><span class="act-d">'+esc(a.d)+'</span><span class="act-m">'+esc(a.t)+ic('arrowUR',14,2.2)+'</span></button>';
     }).join('')+'</div></div>';
   return html;
 };
@@ -1522,8 +1542,8 @@ function settingsBody(tab){
   return html;
 }
 
-/* ============ MISSION, LEGACY & FUND PURPOSE (#/profile {tab:'mission'}) ============
-   A giving-profile step with its own page, opened from its card on My profile.
+/* ============ MISSION, LEGACY & FUND PURPOSE (#/givingplan {page:'mission'}) ============
+   A giving-plan card with its own page, opened from My giving plan.
    Free-form statements kept on the profile: a personal mission statement, a legacy
    statement, and a purpose statement for each fund this person can access
    (S.profile.mission, .legacy, .fundPurpose[fundId]). The mission statement and the
@@ -1543,7 +1563,7 @@ function missionPage(){
     return '<div class="f-row ms-row"><label for="'+id+'">'+esc(label)+'</label>'+(hint?'<div class="ms-hint">'+hint+'</div>':'')+
       '<textarea id="'+id+'" rows="3" placeholder="'+esc(prompt)+'" oninput="'+handler+'" onchange="statementDone(this)">'+esc(val)+'</textarea></div>';
   };
-  return pageHead('My profile','Mission, legacy & purpose')+
+  return pageHead('My giving plan','Mission, legacy & purpose')+
     '<div class="pad"><div class="ms-panel" id="missionPanel"><div class="ms-head">'+
       '<p class="tiny">In your own words. Your mission statement and your fund’s purpose open your five-year giving plan, on screen and in the PDF.</p>'+
       '<span class="status '+(c.written===c.total?'st-posted':c.written?'st-approved':'st-queued')+'" id="msCount">'+c.written+' of '+c.total+' written</span></div>'+
@@ -1595,9 +1615,14 @@ VIEWS.plan = function(p){
   var keys=S.profile.interests.map(function(i){ return INTEREST_AREAS[i]; }).filter(Boolean);
   if(keys.length) q.push('interests='+keys.join(','));
   writePlanContext();
-  return pageHead('My profile','Five-year giving plan')+
-    '<div class="plan-host"><iframe class="plan-frame" title="Five-year giving plan" src="plan/?'+q.join('&')+'"></iframe></div>';
+  /* opened from a card: that card's name; otherwise the whole plan */
+  var card=JOURNEY.filter(function(j){ return j.k===p.card; })[0];
+  return pageHead('My giving plan', card ? card.n : 'Five-year giving plan')+
+    '<div class="plan-host"><iframe class="plan-frame" title="Five-year giving plan" src="'+planSrc()+'&'+q.join('&')+'"></iframe></div>';
 };
+/* The plan page's address carries a fingerprint of its contents (portal/index.html → meta tcf-plan),
+   so a new deploy loads the new plan instead of a cached copy */
+function planSrc(){ var m=document.querySelector('meta[name="tcf-plan"]'), v=m && m.getAttribute('data-v-src'); return v && v.indexOf('?')>-1 ? v : 'plan/index.html?v=0'; }
 /* Messages from the embedded plan (same origin only) */
 var LAST_PLAN = planSummary();
 window.addEventListener('message', function(e){
@@ -1609,6 +1634,7 @@ window.addEventListener('message', function(e){
     LAST_PLAN=s;
   }
   if(e.data.type==='plan-saved') logSync('sf','Giving Plan','Saved five-year giving plan');
+  if(e.data.type==='plan-done' && ROUTE==='plan') back();   // Done inside a card: back to My giving plan
 });
 
 function saveProfile(){ var P=S.profile; ['First','Last','Email','Phone','Street','City','Zip'].forEach(function(k){ var el=$('#p'+k); if(el) P[k.toLowerCase()]=el.value.trim(); }); save(); logSync('sf','Contact','Updated contact details'); toast('Profile saved.'); render(); }

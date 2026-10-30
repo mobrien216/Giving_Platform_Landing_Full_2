@@ -13,6 +13,30 @@
                  hand-off, sign the donor in and show their new fund
      #/<module>  open that module once signed in
    ============================================================ */
+
+/* Newer version check. GitHub Pages lets a browser reuse its copy of this page for up to
+   ten minutes, so right after a deploy someone can open (or Reset into) the previous portal.
+   Ask the server for the current page; if any of its stamped files (scripts, stylesheets,
+   the plan frame; see scripts/stamp-assets.js) differ from the ones running, reload once onto
+   the new version. It remembers the version it reloaded for, so a server still catching up
+   after a deploy can't cause a loop. */
+function checkForNewerVersion(forced){
+  /* every stamped address on a page, in order: "../assets/portal/app.js?v=03c44182 …" */
+  var stamps = function(list){ return list.filter(function(u){ return /\?v=[0-9a-f]+$/.test(u || ''); }).join(' '); };
+  var running = stamps(Array.prototype.map.call(document.querySelectorAll('script[src],link[href],meta[data-v-src]'), function(el){
+    return el.getAttribute('src') || el.getAttribute('href') || el.getAttribute('data-v-src');
+  }));
+  if (!running || !window.fetch) return;
+  fetch(location.pathname, { cache: 'no-store' }).then(function(r){ return r.ok ? r.text() : ''; }).then(function(html){
+    var found = [], re = /\b(?:src|href|data-v-src)="([^"]+)"/g, m;
+    while ((m = re.exec(html))) found.push(m[1]);
+    var latest = stamps(found);
+    if (!latest || latest === running) return;
+    try{ if (sessionStorage.getItem('tcf_portal_reloaded_for') === latest) return; sessionStorage.setItem('tcf_portal_reloaded_for', latest); }catch(e){ return; }
+    location.replace(location.pathname + '?fresh=' + Date.now() + (forced ? '&signin=1' : '') + location.hash);
+  }).catch(function(){});
+}
+
 window.addEventListener('DOMContentLoaded', function(){
   applyLogo();
   $('#topLogo').innerHTML = logo('t-logo');
@@ -30,6 +54,8 @@ window.addEventListener('DOMContentLoaded', function(){
   var forced = q.has('signin');
   /* drop the one-time query params so a reload doesn't force sign-in again */
   if (forced || fund || q.has('fresh') || q.has('newfund')){ try{ history.replaceState(null, '', location.pathname + location.hash); }catch(e){} }
+
+  checkForNewerVersion(forced);
 
   var session = false;
   try{ session = !forced && (sessionStorage.getItem(SESSION_KEY) === '1' || localStorage.getItem(SESSION_KEY) === '1'); }catch(e){}

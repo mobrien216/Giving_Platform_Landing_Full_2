@@ -140,7 +140,7 @@ function logSync(sys, obj, text){
    init.js removes ?fresh= from the address bar and shows the "Demo reset" message. */
 var FRESH_KEY = 'tcf_portal_fresh';   /* this tab's fresh token; also used for the plan frame (VIEWS.plan) */
 function resetDemo(){
-  try{ localStorage.removeItem(STORE_KEY); localStorage.removeItem(PLAN_STATE_KEY); localStorage.removeItem(PLAN_SUMMARY_KEY); localStorage.removeItem(PLAN_CONTEXT_KEY); }catch(e){}
+  try{ localStorage.removeItem(STORE_KEY); localStorage.removeItem(PLAN_STATE_KEY); localStorage.removeItem(PLAN_SUMMARY_KEY); localStorage.removeItem(PLAN_CONTEXT_KEY); localStorage.removeItem('tcf-images-inspire-v1'); }catch(e){}   // last key: Images that Inspire's in-progress picks
   LAST_PLAN = null;
   S = defaultState(); S.signedIn = true; save();
   FUND_CACHE = {}; closeSheet();

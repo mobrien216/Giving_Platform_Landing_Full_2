@@ -392,8 +392,9 @@ td.neg{color:var(--red)}
 .steps .sst{display:block;font-size:12.5px;font-weight:600;color:var(--text-soft);line-height:1.2}
 .steps button.done .sst{color:var(--link)}
 
-/* values: three ways in, card game frame */
-.choose{max-width:980px}
+/* values: four ways in (two by two), card and photo game frames */
+.choose{max-width:980px;grid-template-columns:repeat(2,minmax(0,1fr))}
+@media (max-width:680px){.choose{grid-template-columns:1fr}}
 .card-frame{display:block;width:100%;height:min(820px,calc(100vh - 260px));min-height:620px;border:1px solid var(--rule);border-radius:var(--radius);background:var(--bg)}
 #cardBar .hint{display:block;white-space:normal}
 @media (min-width:821px){
@@ -415,6 +416,10 @@ td.neg{color:var(--red)}
 .cardmap .cm-t{font-weight:700}
 .cardmap .cm-a{font-size:15px;color:var(--text-soft)}
 @media (max-width:560px){.cardmap li{grid-template-columns:24px minmax(0,1fr)}.cardmap .cm-a{grid-column:2}}
+.cardmap.photos li{grid-template-columns:28px 72px minmax(0,1fr);align-items:center}
+.cardmap .cm-img{width:72px;height:54px;object-fit:cover;border-radius:4px;display:block}
+.cardmap .cm-why{display:block;font-size:15px;color:var(--text);margin-bottom:2px}
+@media (max-width:560px){.cardmap.photos li{grid-template-columns:24px 64px minmax(0,1fr)}.cardmap.photos .cm-a{grid-column:auto}.cardmap .cm-img{width:64px;height:48px}}
 .values-switch{display:flex;flex-wrap:wrap;gap:16px;align-items:center;justify-content:space-between;max-width:880px;margin-top:36px;padding:18px 22px;border-radius:var(--radius);background:var(--well-2);border-left:var(--bar) solid var(--orange)}
 .values-switch>div{flex:1 1 320px}
 .values-switch .nm{font-weight:700;font-size:18px}
@@ -543,6 +548,11 @@ html.embedded .steps{display:none}
         <span class="oc-d">Look over a deck of values cards, pick the five that resonate most and tell us why. You’ll get a short reflection on what drives you.</span>
         <span class="oc-m">About 10 minutes</span>
       </button>
+      <button class="opt-card" id="photoStart" type="button" style="--oc:var(--blue)">
+        <span class="oc-t">Images that Inspire</span>
+        <span class="oc-d">Look over a table of photos, pick the five that inspire you most and tell us what each one means to you. We’ll show you the causes they point to.</span>
+        <span class="oc-m">About 8 minutes</span>
+      </button>
     </div>
     <p class="proto">Prototype shortcut: <button class="btn btn-link" id="quizSample" type="button" style="font-size:14px">use sample results</button> to stand in for a donor who already has values on file.</p>
   </div>
@@ -563,6 +573,15 @@ html.embedded .steps{display:none}
       <p class="lede">Choose your top five cards and tell us why each one matters. Then reveal the areas of interest they point to.</p>
     </div>
     <iframe class="card-frame" id="cardFrame" title="Values card game"></iframe>
+  </div>
+
+  <div id="vPhotos" hidden>
+    <div class="head">
+      <p class="kicker">Your giving profile · Your values</p>
+      <h1>Images that Inspire</h1>
+      <p class="lede">Choose the five photos that inspire you most and tell us what each one means to you. Then reveal the areas of interest they point to.</p>
+    </div>
+    <iframe class="card-frame" id="photoFrame" title="Images that Inspire photo game" data-v-src="images-that-inspire.html?v=82a243d7"></iframe>
   </div>
 
   <div id="vQuiz" class="quiz" hidden>
@@ -605,7 +624,7 @@ html.embedded .steps{display:none}
     <div class="values-switch">
       <div>
         <p class="nm">Want to try another way?</p>
-        <p class="ds">Take the quiz, pick your values or play the card game. Your newest results replace these.</p>
+        <p class="ds">Take the quiz, pick your values, play the card game or choose images that inspire you. Your newest results replace these.</p>
       </div>
       <button class="btn btn-secondary" id="valuesOptions" type="button">Go back to the values options</button>
     </div>
@@ -716,9 +735,16 @@ html.embedded .steps{display:none}
     <button class="btn btn-secondary" id="cardBack" type="button">Back</button>
   </div>
 </div>
+<div class="foot" id="photoBar" hidden>
+  <div class="foot-in">
+    <span class="hint">Rank your five photos and say what each one means to you, then reveal your areas of interest.</span>
+    <button class="btn btn-secondary" id="photoBack" type="button">Back</button>
+  </div>
+</div>
 <div class="toast" id="toast" role="status"></div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="../../assets/value-photos/photos.js?v=84952cdf"></script>
 <script>
 /* Content: values-quiz scenarios (QUIZ) and giving opportunities (OPPS). */
 const QUIZ = {"areas": {"advocacy": {"n": "Advocacy & Public Policy", "p": ["region"]}, "leadership": {"n": "Leadership Development", "p": ["region"]}, "corporate": {"n": "Corporate Responsibility", "p": ["region"]}, "peace": {"n": "Peace & Conflict Resolution", "p": ["region"]}, "census": {"n": "Census Engagement", "p": ["region"]}, "voting": {"n": "Voting & Election Reform", "p": ["region"]}, "media": {"n": "Media & Journalism", "p": ["region"]}, "medres": {"n": "Medical Research", "p": ["region"]}, "immigration": {"n": "Immigration", "p": ["region"]}, "environment": {"n": "Environmental Protection", "p": ["region"]}, "racial": {"n": "Racism & Racial Equity", "p": ["region"]}, "civil": {"n": "Civil Rights", "p": ["region"]}, "arts": {"n": "Arts & Culture", "p": ["region", "well"]}, "econdev": {"n": "Economic Development", "p": ["region"]}, "parks": {"n": "Parks & Greenspaces", "p": ["neigh", "cap"]}, "housing": {"n": "Housing", "p": ["neigh"]}, "homeless": {"n": "Homelessness Services & Prevention", "p": ["neigh", "well"]}, "disaster": {"n": "Disaster Relief", "p": ["neigh"]}, "religion": {"n": "Religion", "p": ["neigh"]}, "recreation": {"n": "Recreation", "p": ["neigh"]}, "commdev": {"n": "Community Development", "p": ["neigh"]}, "land": {"n": "Land Conservation", "p": ["neigh"]}, "education": {"n": "Education", "p": ["pros"]}, "youth": {"n": "Youth Empowerment", "p": ["pros", "well"]}, "seniors": {"n": "Seniors", "p": ["pros", "well"]}, "vocrehab": {"n": "Vocational Rehab", "p": ["pros"]}, "legal": {"n": "Legal Services", "p": ["pros", "well"]}, "literacy": {"n": "Literacy", "p": ["pros"]}, "unemployment": {"n": "Unemployment", "p": ["pros"]}, "poverty": {"n": "Poverty", "p": ["pros"]}, "childcare": {"n": "Childcare", "p": ["pros"]}, "finlit": {"n": "Financial Literacy", "p": ["pros"]}, "food": {"n": "Food Security", "p": ["pros", "well"]}, "workforce": {"n": "Workforce Development", "p": ["pros"]}, "selfsuff": {"n": "Economic Self-Sufficiency", "p": ["pros"]}, "econjustice": {"n": "Economic Justice", "p": ["pros"]}, "healthaccess": {"n": "Healthcare Access", "p": ["well"]}, "civic": {"n": "Civic Activation", "p": ["well"]}, "repro": {"n": "Reproductive Health", "p": ["well"]}, "hhs": {"n": "Health & Human Services", "p": ["well"]}, "childabuse": {"n": "Child Abuse Prevention", "p": ["well"]}, "dv": {"n": "Domestic Violence Prevention", "p": ["well"]}, "trafficking": {"n": "Human Trafficking Prevention", "p": ["well"]}, "women": {"n": "Women’s Rights", "p": ["well"]}, "lgbtq": {"n": "LGBTQ+ Rights", "p": ["well"]}, "disabilities": {"n": "Individuals with Disabilities", "p": ["well"]}, "prison": {"n": "Prison Reform", "p": ["well"]}, "mental": {"n": "Mental Health", "p": ["well"]}, "athletics": {"n": "Athletics & Out-of-School Time", "p": ["well"]}, "substance": {"n": "Substance Use & Addiction", "p": ["well"]}, "volunteering": {"n": "Volunteering", "p": ["org"]}, "bizplan": {"n": "Business Planning", "p": ["org"]}, "socent": {"n": "Social Enterprise", "p": ["org"]}, "philanthropy": {"n": "Philanthropy", "p": ["org"]}, "strategic": {"n": "Strategic Planning", "p": ["org"]}, "orgdev": {"n": "Organizational Development", "p": ["org"]}, "entrepreneur": {"n": "Entrepreneurship", "p": ["new"]}, "innovation": {"n": "Innovation", "p": ["new"]}, "pilot": {"n": "Pilot Programs", "p": ["new"]}, "seed": {"n": "Seed Money", "p": ["new"]}, "emerging": {"n": "Emerging Needs", "p": ["new"]}, "newbuild": {"n": "New Buildings", "p": ["cap"]}, "market": {"n": "Public Market & Food Access", "p": ["cap"]}, "renovations": {"n": "Renovations", "p": ["cap"]}}, "questions": [{"k": "money", "t": "An unexpected $5,000 lands in your giving budget. Where does it go?", "o": [{"t": "A food pantry that runs out of fresh produce before the end of each month", "a": ["food", "poverty"], "h": 0}, {"t": "A loan fund that backs first-time founders on the east side", "a": ["entrepreneur", "seed"], "h": 1}, {"t": "Lighting and new play equipment for a run-down neighborhood park", "a": ["parks", "recreation"], "h": 0.5}, {"t": "A nonpartisan drive registering first-time voters", "a": ["voting", "civic"], "h": 1}]}, {"k": "time", "t": "You have a free Saturday to volunteer. Where do you spend it?", "o": [{"t": "Reading with third graders who are behind grade level", "a": ["literacy", "education"], "h": 1}, {"t": "Helping a small nonprofit’s board rework its three-year plan", "a": ["strategic", "volunteering"], "h": 1}, {"t": "Planting trees at a creek restoration site", "a": ["land", "environment"], "h": 1}, {"t": "Stocking a shelter for families leaving abusive homes", "a": ["dv", "homeless"], "h": 0}]}, {"k": "first", "t": "A winter storm knocks out power across the county. Who do you help first?", "o": [{"t": "Older adults living alone with no heat", "a": ["seniors", "hhs"], "h": 0}, {"t": "Families whose homes were damaged and need emergency repairs", "a": ["disaster", "housing"], "h": 0}, {"t": "People sleeping outside who need a warm bed tonight", "a": ["homeless", "substance"], "h": 0}, {"t": "Residents who rely on powered medical equipment", "a": ["disabilities", "healthaccess"], "h": 0}]}, {"k": "vision", "t": "Which headline about Cleveland would make you proudest ten years from now?", "o": [{"t": "Every working family can find affordable, quality childcare", "a": ["childcare", "workforce"], "h": 1}, {"t": "Northeast Ohio leads the Midwest in new business starts", "a": ["econdev", "innovation"], "h": 1}, {"t": "The racial gap in home ownership is cut in half", "a": ["racial", "econjustice"], "h": 1}, {"t": "Overdose deaths fall for the fifth year in a row", "a": ["substance", "mental"], "h": 0.5}]}, {"k": "money", "t": "A nonprofit you love asks how they should use your gift. What do you tell them?", "o": [{"t": "Cover everyday operating costs so the team can plan ahead", "a": ["orgdev", "philanthropy"], "h": 1}, {"t": "Try a new program no one in the region has tested yet", "a": ["pilot", "innovation"], "h": 1}, {"t": "Fix up the aging building they serve people from", "a": ["renovations", "newbuild"], "h": 0.5}, {"t": "Serve more people with the program that already works", "a": ["hhs", "selfsuff"], "h": 0}]}, {"k": "time", "t": "Where are you most likely to spend a weeknight?", "o": [{"t": "A gallery opening or a night at the theater", "a": ["arts", "civic"], "h": 0.5}, {"t": "A council meeting on a zoning change near your home", "a": ["advocacy", "commdev"], "h": 1}, {"t": "A public forum on the future of local news", "a": ["media", "civic"], "h": 1}, {"t": "Coaching a youth basketball team", "a": ["athletics", "youth"], "h": 0.5}]}, {"k": "first", "t": "Four people ask you for help this week. Who do you help first?", "o": [{"t": "A laid-off machinist who needs training for a new trade", "a": ["workforce", "unemployment"], "h": 0.5}, {"t": "A grandmother raising two grandkids who can’t afford childcare", "a": ["childcare", "seniors"], "h": 0}, {"t": "A refugee family learning English and sorting out paperwork", "a": ["immigration", "literacy"], "h": 0.5}, {"t": "A man home from prison who needs a job", "a": ["prison", "vocrehab"], "h": 0.5}]}, {"k": "voice", "t": "Which cause would you speak up for in public?", "o": [{"t": "Women’s equality, including access to reproductive health care", "a": ["women", "repro"], "h": 1}, {"t": "Protection from discrimination for LGBTQ+ neighbors", "a": ["lgbtq", "civil"], "h": 1}, {"t": "Clean air and water in every neighborhood", "a": ["environment", "land"], "h": 1}, {"t": "Making sure every resident can vote and is counted", "a": ["voting", "census"], "h": 1}]}, {"k": "fix", "t": "You can fix one thing about how help reaches people. What do you fix?", "o": [{"t": "Free legal help for anyone facing eviction or debt collection", "a": ["legal", "housing"], "h": 0}, {"t": "Mental health care offered in schools and workplaces", "a": ["mental", "healthaccess"], "h": 0.5}, {"t": "A full grocery store within walking distance of every home", "a": ["market", "food"], "h": 0.5}, {"t": "A complete census count, so funding follows real need", "a": ["census", "advocacy"], "h": 1}]}, {"k": "work", "t": "Your employer offers one new community benefit. Which do you push for?", "o": [{"t": "Free financial coaching for workers and their families", "a": ["finlit", "corporate"], "h": 0.5}, {"t": "Paid internships for students from city high schools", "a": ["youth", "workforce"], "h": 1}, {"t": "Pro bono coaching for minority-owned startups", "a": ["bizplan", "entrepreneur"], "h": 1}, {"t": "Buying from local and social-enterprise suppliers", "a": ["socent", "corporate"], "h": 0.5}]}, {"k": "protect", "t": "Which kind of protection matters most to you?", "o": [{"t": "Training teachers and coaches to spot and report child abuse", "a": ["childabuse", "education"], "h": 0.5}, {"t": "Safe housing and advocates for survivors of domestic violence", "a": ["dv", "housing"], "h": 0}, {"t": "Helping hotels and truck stops recognize human trafficking", "a": ["trafficking", "corporate"], "h": 0.5}, {"t": "Mediation that settles disputes before they turn violent", "a": ["peace", "legal"], "h": 0.5}]}, {"k": "legacy", "t": "You’re creating a fund that will last forever. What should it always support?", "o": [{"t": "Whatever the community’s most urgent need is that year", "a": ["emerging", "disaster"], "h": 0}, {"t": "Scholarships and learning at every age", "a": ["education", "literacy"], "h": 1}, {"t": "Faith communities and the services they run for neighbors", "a": ["religion", "commdev"], "h": 0.5}, {"t": "Training the next generation of civic and nonprofit leaders", "a": ["leadership", "orgdev"], "h": 1}]}, {"k": "worry", "t": "Which problem weighs on you most?", "o": [{"t": "Kids growing up in poverty with no clear way out", "a": ["poverty", "selfsuff"], "h": 0.5}, {"t": "Families one car repair away from missing rent", "a": ["finlit", "selfsuff"], "h": 0.5}, {"t": "Neighborhoods losing their grocery stores, banks and pharmacies", "a": ["commdev", "market"], "h": 0.5}, {"t": "Promising treatments stalled for lack of research funding", "a": ["medres", "innovation"], "h": 1}]}, {"k": "money", "t": "You’re directing a $1 million gift. Where does it go?", "o": [{"t": "A new community center in a neighborhood that’s never had one", "a": ["newbuild", "recreation"], "h": 1}, {"t": "Ten years of steady funding for a proven job-training program", "a": ["vocrehab", "unemployment"], "h": 1}, {"t": "A research partnership with a local hospital", "a": ["medres", "healthaccess"], "h": 1}, {"t": "Small seed grants for twenty untested ideas from residents", "a": ["seed", "pilot"], "h": 1}]}, {"k": "first", "t": "Who do you help first?", "o": [{"t": "A teenager in recovery who needs a sober after-school program", "a": ["substance", "athletics"], "h": 0.5}, {"t": "A wheelchair user who can’t get into the neighborhood library", "a": ["disabilities", "renovations"], "h": 0.5}, {"t": "A veteran with PTSD stuck on a months-long waitlist", "a": ["mental", "hhs"], "h": 0}, {"t": "A single mom whose paycheck is drained by a predatory loan", "a": ["econjustice", "legal"], "h": 0}]}, {"k": "time", "t": "Which group are you most likely to join?", "o": [{"t": "A congregation’s weekly hot-meal program", "a": ["religion", "food"], "h": 0}, {"t": "A block club turning vacant lots into gardens", "a": ["parks", "commdev"], "h": 0.5}, {"t": "A giving circle that pools money and picks grants together", "a": ["philanthropy", "leadership"], "h": 1}, {"t": "A citizen-reporter workshop covering city hall", "a": ["media", "advocacy"], "h": 1}]}, {"k": "long", "t": "Which long-term change would you invest in?", "o": [{"t": "Closing racial gaps in health outcomes", "a": ["racial", "healthaccess"], "h": 1}, {"t": "Welcoming immigrants to grow the regional workforce", "a": ["immigration", "econdev"], "h": 1}, {"t": "Protecting farmland and forests from sprawl", "a": ["land", "environment"], "h": 1}, {"t": "Sentencing and reentry reform that offers a real second chance", "a": ["prison", "civil"], "h": 1}]}, {"k": "board", "t": "You sit on a nonprofit board. What should it prioritize next year?", "o": [{"t": "A plan to earn its own revenue and rely less on grants", "a": ["socent", "bizplan"], "h": 1}, {"t": "A strategic plan with clear goals and ways to measure them", "a": ["strategic", "orgdev"], "h": 1}, {"t": "A bold pilot that responds to a need just starting to surface", "a": ["pilot", "emerging"], "h": 0.5}, {"t": "Recruiting and training many more volunteers", "a": ["volunteering", "leadership"], "h": 0.5}]}, {"k": "voice", "t": "At a community forum, which proposal do you stand up to support?", "o": [{"t": "Clinics that offer reproductive and maternal health care", "a": ["repro", "women"], "h": 0.5}, {"t": "Safe spaces and support services for LGBTQ+ youth", "a": ["lgbtq", "youth"], "h": 0.5}, {"t": "Public art and festivals that bring the whole region together", "a": ["arts", "econdev"], "h": 0.5}, {"t": "Recovery services for survivors of human trafficking", "a": ["trafficking", "childabuse"], "h": 0}]}, {"k": "first", "t": "A neighbor’s teenager keeps getting into fights. What would help most?", "o": [{"t": "Conflict-resolution training at school", "a": ["peace", "education"], "h": 1}, {"t": "Free counseling for the teen and the family", "a": ["mental", "hhs"], "h": 0.5}, {"t": "Late-night rec center hours and sports leagues", "a": ["recreation", "athletics"], "h": 0.5}, {"t": "A summer job that pays and teaches real skills", "a": ["workforce", "unemployment"], "h": 0.5}]}]};
@@ -1138,27 +1164,50 @@ function valuesFromPicks(picks){
    shared across its focus areas; area scores are relative to the strongest area. The cards,
    the donor's reasons and the reflection are kept for the summary. */
 function valuesFromCards(record){
+  return {
+    ...rankedValues(record.picks, p => CARD_AREAS[p.cardId]),
+    date: record.completedAt || new Date().toISOString(), source: 'cards', horizon: null,
+    cards: record.picks.map(({rank, cardId, title, reason}) => ({rank, cardId, title, reason})),
+    reflection: record.summary || null
+  };
+}
+const cardTitles = V => V.cards.map(c => c.title).join(', ');
+
+/* The impact-area mix and area scores for a ranked top five (cards or photos). areasOf(pick)
+   gives the focus areas a pick selects; its points are shared across them. */
+function rankedValues(picks, areasOf){
   const points = {};
-  for (const p of record.picks){
-    const areas = (CARD_AREAS[p.cardId] || []).filter(a => QUIZ.areas[a]);
+  for (const p of picks){
+    const areas = (areasOf(p) || []).filter(a => QUIZ.areas[a]);
     for (const a of areas) points[a] = (points[a] || 0) + (CARD_POINTS[p.rank - 1] || 0) / areas.length;
   }
   const top = Math.max(0, ...Object.values(points)) || 1;
   const w = Object.fromEntries(PILLARS.map(p => [p.k, 0]));
   for (const [a, pts] of Object.entries(points)) for (const [p, x] of Object.entries(areaPillars(a))) w[p] += pts * x;
   const pcts = apportion(PILLARS.map(p => w[p.k]), 100);
-  const areas = Object.keys(QUIZ.areas)
-    .map(k => ({k, n: QUIZ.areas[k].n, s: Math.round((points[k] || 0) / top * 100)}))
-    .sort((a, b) => b.s - a.s || a.n.localeCompare(b.n));
   return {
-    date: record.completedAt || new Date().toISOString(), source: 'cards',
     mix: PILLARS.map((p, i) => ({k: p.k, pct: pcts[i]})).sort((a, b) => b.pct - a.pct),
-    areas, horizon: null,
-    cards: record.picks.map(({rank, cardId, title, reason}) => ({rank, cardId, title, reason})),
+    areas: Object.keys(QUIZ.areas)
+      .map(k => ({k, n: QUIZ.areas[k].n, s: Math.round((points[k] || 0) / top * 100)}))
+      .sort((a, b) => b.s - a.s || a.n.localeCompare(b.n))
+  };
+}
+
+/* Images that Inspire: the photo deck (assets/value-photos/photos.js) tags each photo, by its
+   permanent id, with the focus areas it reflects. Scored exactly like the card game. */
+const PHOTOS = Object.fromEntries((window.TCF_PHOTOS || []).map(p => [p.id, p]));
+const PHOTO_BASE = '../../assets/value-photos/';
+const photoAreas = id => (PHOTOS[id]?.areas || []).filter(a => QUIZ.areas[a]);
+const photoFocusAreas = ids => [...new Set(ids.flatMap(photoAreas))];
+function valuesFromPhotos(record){
+  return {
+    ...rankedValues(record.picks, p => PHOTOS[p.photoId]?.areas),
+    date: record.completedAt || new Date().toISOString(), source: 'photos', horizon: null,
+    photos: record.picks.map(({rank, photoId, reason}) => ({rank, photoId, title: PHOTOS[photoId]?.title || photoId, reason})),
     reflection: record.summary || null
   };
 }
-const cardTitles = V => V.cards.map(c => c.title).join(', ');
+const photoTitles = V => V.photos.map(p => p.title.toLowerCase()).join(', ');
 
 /* The impact areas a donor's values actually touch (picked values can leave some at 0%). */
 const activeMix = values => values.mix.filter(m => m.pct > 0);
@@ -1249,7 +1298,7 @@ function go(n){
 function footHint(){
   switch (S.step){
     case 1: return `Five-year goal: ${fmt(sum(goals(S)))}`;
-    case 2: return S.values ? 'Values ready' : 'Take the quiz, pick your values or play the card game';
+    case 2: return S.values ? 'Values ready' : 'Take the quiz, pick your values or play one of the games';
     case 3: return S.poolMode === 'custom' && !mixValid(S)
       ? `Your mix: ${pctText(mixTotal(S))} allocated`
       : `${usesMix(S) ? 'Your mix' : INDEX_POOL.n}: ${rateText(returnRate(S))} estimated`;
@@ -1360,12 +1409,13 @@ function shuffle(a){
 
 /* Step 2 has four views; the quiz and the picker replace the main footer with their own controls. */
 function showValuesView(id){
-  ['vIntro', 'vQuiz', 'vPick', 'vCards', 'vResult'].forEach(v => $(v).hidden = v !== id);
+  ['vIntro', 'vQuiz', 'vPick', 'vCards', 'vPhotos', 'vResult'].forEach(v => $(v).hidden = v !== id);
   $('valuesBack').hidden = !(id === 'vIntro' && S.values);
-  document.body.classList.toggle('wide-game', id === 'vCards');   // the card game uses the full desktop width
-  $('foot').hidden = ['vQuiz', 'vPick', 'vCards'].includes(id);
+  document.body.classList.toggle('wide-game', id === 'vCards' || id === 'vPhotos');   // the games use the full desktop width
+  $('foot').hidden = ['vQuiz', 'vPick', 'vCards', 'vPhotos'].includes(id);
   $('pickBar').hidden = id !== 'vPick';
   $('cardBar').hidden = id !== 'vCards';
+  $('photoBar').hidden = id !== 'vPhotos';
 }
 
 const focusHeading = id => { const h = document.querySelector(`#${id} h1`); h.tabIndex = -1; h.focus({preventScroll: true}); };
@@ -1536,21 +1586,59 @@ function revealCardAreas(picks){
   toast('Here are your areas of interest');
 }
 
-/* The reflection arrives after the reveal; attach it only if it's for the cards now on file. */
+/* The reflection arrives after the reveal; attach it only if it's for the cards (or photos) now on file. */
 function attachReflection(record){
-  const V = S.values, ids = picks => picks.map(p => p.cardId).join();
-  if (!record.summary || V?.source !== 'cards' || ids(V.cards) !== ids(record.picks)) return;
+  const V = S.values, photos = record.activity === 'photo-card-sort';
+  const ids = picks => picks.map(p => photos ? p.photoId : p.cardId).join();
+  const onFile = photos ? (V?.source === 'photos' && V.photos) : (V?.source === 'cards' && V.cards);
+  if (!record.summary || !onFile || ids(onFile) !== ids(record.picks)) return;
   V.reflection = record.summary;
   persist();
   if (S.step === 2 && !$('vResult').hidden) renderS2();
 }
 
+/* ---- Images that Inspire: the photo game is its own page (images-that-inspire.html) in a frame.
+   It reads TCF_PHOTO_SORT_CONFIG, TCF_AREAS and TCF_PILLARS from this page, hands the top five
+   to onReveal and the AI reflection (when there is one) to onComplete. ---- */
+window.TCF_AREAS = QUIZ.areas;
+window.TCF_PILLARS = PILLARS;
+window.TCF_PHOTO_SORT_CONFIG = {
+  photoBase: PHOTO_BASE,
+  minWords: CARD_MIN_WORDS,          // any reason unlocks the reveal, as in the card game
+  points: CARD_POINTS,
+  onReveal: picks => revealPhotoAreas(picks),
+  onComplete: record => attachReflection(record)
+};
+function loadPhotoGame(){
+  const frame = $('photoFrame');
+  if (!frame.getAttribute('src')) frame.src = frame.dataset.vSrc;   // data-v-src carries the deploy stamp
+}
+function openPhotoGame(){
+  loadPhotoGame();
+  showValuesView('vPhotos');
+  window.scrollTo(0, 0);
+  focusHeading('vPhotos');
+}
+function revealPhotoAreas(picks){
+  if (!Array.isArray(picks) || !picks.length) return;
+  S.values = valuesFromPhotos({picks, summary: null, completedAt: new Date().toISOString()});
+  S.areasOn = photoFocusAreas(picks.map(p => p.photoId));   // every area the five photos select
+  showAllAreas = false;
+  persist();
+  renderS2();
+  window.scrollTo(0, 0);
+  focusHeading('vResult');
+  toast('Here are your areas of interest');
+}
+
 function initCardGame(){
   $('cardStart').addEventListener('click', openCardGame);
-  // Move freely between saved values and the three ways of finding them.
+  $('photoStart').addEventListener('click', openPhotoGame);
+  // Move freely between saved values and the four ways of finding them.
   $('valuesOptions').addEventListener('click', () => { showValuesView('vIntro'); window.scrollTo(0, 0); focusHeading('vIntro'); });
   $('valuesBack').addEventListener('click', () => { renderS2(); window.scrollTo(0, 0); focusHeading('vResult'); });
   $('cardBack').addEventListener('click', () => { if (S.values) renderS2(); else showValuesView('vIntro'); window.scrollTo(0, 0); });
+  $('photoBack').addEventListener('click', () => { if (S.values) renderS2(); else showValuesView('vIntro'); window.scrollTo(0, 0); });
   window.addEventListener('message', e => {
     if (e.source !== $('cardFrame').contentWindow) return;
     const {type, picks, record} = e.data || {};
@@ -1564,6 +1652,9 @@ function valuesSummary(V){
   if (V.source === 'cards') return V.reflection
     ? `${V.reflection} Your top five (${cardTitles(V)}) point most strongly to ${pa.n}.`
     : `Your top five cards, ${cardTitles(V)}, point most strongly to ${pa.n}${b ? `, followed by ${PILLAR[b.k].n} (${b.pct}%)` : ''}.`;
+  if (V.source === 'photos') return V.reflection
+    ? `${V.reflection} Your five photos point most strongly to ${pa.n}.`
+    : `Your five photos (${photoTitles(V)}) point most strongly to ${pa.n}${b ? `, followed by ${PILLAR[b.k].n} (${b.pct}%)` : ''}.`;
   if (V.source !== 'pick') return `Your choices point most strongly to ${pa.n}, the work of ${pa.d}.${b ? ` ${PILLAR[b.k].n} follows at ${b.pct}%.` : ''}`;
   const n = S.areasOn.length, chose = `You chose ${n} focus area${n === 1 ? '' : 's'}.`;
   if (b && a.pct === b.pct) return `${chose} They’re split evenly between ${pa.n} and ${PILLAR[b.k].n} (${a.pct}% each).`;
@@ -1573,11 +1664,14 @@ function valuesSummary(V){
 function renderS2(){
   if (!S.values){ showValuesView($('vQuiz').hidden ? 'vIntro' : 'vQuiz'); renderFoot(); return; }
   showValuesView('vResult');
-  const V = S.values, picked = V.source === 'pick', cards = V.source === 'cards';
-  $('cardMap').hidden = !V.cards;
+  const V = S.values, picked = V.source === 'pick', cards = V.source === 'cards' || V.source === 'photos';
+  $('cardMap').hidden = !V.cards && !V.photos;
   if (V.cards) $('cardMap').innerHTML = `<h2>How your cards map to focus areas</h2>
     <p class="soft">Each card you chose selects the focus areas below. Change any of them under Your focus areas.</p>
     <ol class="cardmap">${V.cards.map(c => `<li><span class="cm-r">${c.rank}</span><span class="cm-t">${esc(c.title)}</span><span class="cm-a">${(CARD_AREAS[c.cardId] || []).filter(a => QUIZ.areas[a]).map(a => esc(QUIZ.areas[a].n)).join(', ') || '–'}</span></li>`).join('')}</ol>`;
+  else if (V.photos) $('cardMap').innerHTML = `<h2>How your photos map to focus areas</h2>
+    <p class="soft">Each photo you chose selects the focus areas below. Change any of them under Your focus areas.</p>
+    <ol class="cardmap photos">${V.photos.map(p => `<li><span class="cm-r">${p.rank}</span><img class="cm-img" src="${PHOTO_BASE}thumb/${encodeURIComponent(p.photoId)}.jpg" alt="${esc(PHOTOS[p.photoId]?.alt || '')}"><span class="cm-a">${p.reason ? `<span class="cm-why">“${esc(p.reason)}”</span>` : ''}${photoAreas(p.photoId).map(a => esc(QUIZ.areas[a].n)).join(', ') || '–'}</span></li>`).join('')}</ol>`;
   const hz = horizonCopy(V.horizon) || {title: 'Want a deeper read?', body: 'The quiz also shows whether you lean toward urgent relief or long-term change, which helps sharpen your matches. It takes about eight minutes.'};
   $('resTitle').textContent = V.sample ? 'Sample giving values' : picked ? 'Your chosen values' : cards ? 'Your areas of interest' : 'Your giving values';
   $('resSummary').textContent = valuesSummary(V);
@@ -1669,6 +1763,7 @@ function renderRecall(){
   const [lead, ...rest] = activeMix(V).slice(0, 3).map(m => `${PILLAR[m.k].n} (${m.pct}%)`), hz = horizonCopy(V.horizon);
   const opener = V.source === 'pick' ? `You chose ${S.areasOn.length} focus areas, most of them in <b>${lead}</b>`
     : V.source === 'cards' ? `Your top five cards (${esc(cardTitles(V))}) point most strongly to <b>${lead}</b>`
+    : V.source === 'photos' ? `Your five photos (${esc(photoTitles(V))}) point most strongly to <b>${lead}</b>`
     : `Your quiz pointed most strongly to <b>${lead}</b>`;
   $('valuesRecall').innerHTML = `<div class="recall"><div><h2>You told us what matters to you</h2>
     <p>${opener}${rest.length ? `, then ${rest.join(' and ')}` : ''}.${hz ? ` ${hz.title}.` : ''} Here are organizations that line up with that, best matches first.</p>
@@ -1954,7 +2049,7 @@ function renderS5(){
     ? `<p style="font-size:16px;margin-top:8px">Your own mix, <b>${rateText(mixRate(S))}</b> estimated a year:</p><div class="mixbar" aria-hidden="true" style="margin:10px 0">${mixedPools().map(p => `<i style="flex:${S.mix[p.k]};background:${p.c}"></i>`).join('')}</div><p class="cap">${mixedPools().map(p => `${p.n} ${pctText(S.mix[p.k])}`).join(', ')}</p>`
     : `<p style="font-size:16px;margin-top:8px">${INDEX_POOL.n}, <b>${INDEX_POOL.r}%</b> estimated a year. A weighted blend across TCF’s pools, managed for you.</p>`;
   $('guided').innerHTML = `<div class="panel"><h3>Your values</h3>${V
-      ? `<div class="mixbar" aria-hidden="true">${valuesBar(V)}</div><p style="font-size:16px">${activeMix(V).slice(0, 2).map(m => `${PILLAR[m.k].n} (${m.pct}%)`).join(' and ')} ${activeMix(V).length > 1 ? 'lead' : 'leads'}.${V.cards ? ` Top five values: ${esc(cardTitles(V))}.` : ''}</p>${V.reflection ? `<p class="cap" style="margin-top:8px">“${esc(V.reflection)}”</p>` : ''}<div class="chips" style="margin-top:10px">${S.areasOn.map(k => `<span class="vtag" style="--pc:${PILLAR[QUIZ.areas[k].p[0]].c}">${esc(QUIZ.areas[k].n)}</span>`).join('')}</div>`
+      ? `<div class="mixbar" aria-hidden="true">${valuesBar(V)}</div><p style="font-size:16px">${activeMix(V).slice(0, 2).map(m => `${PILLAR[m.k].n} (${m.pct}%)`).join(' and ')} ${activeMix(V).length > 1 ? 'lead' : 'leads'}.${V.cards ? ` Top five values: ${esc(cardTitles(V))}.` : ''}${V.photos ? ` Five photos that inspire you: ${esc(photoTitles(V))}.` : ''}</p>${V.reflection ? `<p class="cap" style="margin-top:8px">“${esc(V.reflection)}”</p>` : ''}<div class="chips" style="margin-top:10px">${S.areasOn.map(k => `<span class="vtag" style="--pc:${PILLAR[QUIZ.areas[k].p[0]].c}">${esc(QUIZ.areas[k].n)}</span>`).join('')}</div>`
       : '<p class="soft" style="margin-top:8px">No values on file. Take the quiz in step 2 to see matched causes.</p>'}</div>
     <div class="panel"><h3>Your investment pool</h3>${poolHtml}</div>`;
   renderFoot();
@@ -2082,6 +2177,7 @@ function buildPdf(){
     `Values: ${activeMix(S.values).slice(0, 3).map(m => `${PILLAR[m.k].n} ${m.pct}%`).join(', ')}.`,
     `Focus areas: ${S.areasOn.map(k => QUIZ.areas[k].n).join(', ')}.`);
   if (S.values?.cards) lines.push(`Top five values: ${cardTitles(S.values)}.`);
+  if (S.values?.photos) lines.push(`Five photos that inspire you: ${photoTitles(S.values)}.`);
   if (S.values?.reflection) lines.push(`Reflection: ${S.values.reflection}`);
   lines.push(usesMix(S)
     ? `Investment pools: ${mixedPools().map(p => `${p.n} ${pctText(S.mix[p.k])}`).join(', ')}. Weighted estimated return ${rateText(mixRate(S))} a year.`
@@ -2316,6 +2412,7 @@ go(S.step);
     if (mode === 'picks'){ openPicker(); seedPicks(); }
     else if (mode === 'quiz') startQuiz();
     else if (mode === 'cards') openCardGame();
+    else if (mode === 'photos') openPhotoGame();
   } else if (step >= 1 && step <= SECTIONS.length){
     go(step);
   }

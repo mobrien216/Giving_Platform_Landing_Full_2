@@ -16,7 +16,7 @@
   --display:"Paralucent","Source Sans 3","Helvetica Neue",Arial,sans-serif;
   --body:"Source Sans 3","Helvetica Neue",Arial,sans-serif;
   --bg:#F6F2EA; --panel:#FFFDF8; --ink:#1E2B24; --muted:#58635C; --line:#DDD5C5;
-  --slot-empty:#EFE9DD; --btn-bg:#2F4537; --btn-ink:#FFFFFF; --btn-off-bg:#D9D2C3; --btn-off-ink:#5E625C;
+  --slot-empty:#EFE9DD; --btn-bg:#164430; --btn-hover:#086C43; --btn-ink:#FFFFFF; --btn-off-bg:#D9D2C3; --btn-off-ink:#5E625C;
   --focus:#1F6FB2; --over:#84C9C1; --track:#E7E0D2;
   --wood:#C89B66; --grain-a:rgba(255,240,215,.10); --grain-b:rgba(92,56,22,.10);
   --print:#FFFFFF;   /* photo border: a physical print, so it stays white in dark mode */
@@ -25,14 +25,14 @@
 @media (prefers-color-scheme: dark){
   :root:not([data-theme="light"]){
     --bg:#141D18; --panel:#1B2720; --ink:#ECE7DC; --muted:#A8B2AB; --line:#33433A;
-    --slot-empty:#22302A; --btn-bg:#E9E2D2; --btn-ink:#16201A; --btn-off-bg:#2C3A32; --btn-off-ink:#8E9A92;
+    --slot-empty:#22302A; --btn-bg:#E9E2D2; --btn-hover:#FFFFFF; --btn-ink:#16201A; --btn-off-bg:#2C3A32; --btn-off-ink:#8E9A92;
     --focus:#7DB8EA; --over:#5FA79F; --track:#2A3830; --wood:#6E4D2D; --grain-a:rgba(255,230,200,.05); --grain-b:rgba(0,0,0,.18);
     color-scheme:dark;
   }
 }
 :root[data-theme="dark"]{
   --bg:#141D18; --panel:#1B2720; --ink:#ECE7DC; --muted:#A8B2AB; --line:#33433A;
-  --slot-empty:#22302A; --btn-bg:#E9E2D2; --btn-ink:#16201A; --btn-off-bg:#2C3A32; --btn-off-ink:#8E9A92;
+  --slot-empty:#22302A; --btn-bg:#E9E2D2; --btn-hover:#FFFFFF; --btn-ink:#16201A; --btn-off-bg:#2C3A32; --btn-off-ink:#8E9A92;
   --focus:#7DB8EA; --over:#5FA79F; --track:#2A3830; --wood:#6E4D2D; --grain-a:rgba(255,230,200,.05); --grain-b:rgba(0,0,0,.18);
   color-scheme:dark;
 }
@@ -66,7 +66,7 @@ h1{font-family:var(--display);font-weight:700;font-size:34px;line-height:1.08;le
 }
 .photo img,.slot-photo img,.tray-slot img{display:block;width:100%;height:100%;object-fit:cover;pointer-events:none;-webkit-user-drag:none}
 .photo img{border-radius:1px;background:#d8d0c2}
-.photo:hover,.photo:focus-visible{z-index:9999 !important;box-shadow:0 2px 2px rgba(30,20,10,.25),0 16px 30px rgba(45,28,10,.34)}
+.photo:focus-visible{z-index:9999 !important;box-shadow:0 2px 2px rgba(30,20,10,.25),0 16px 30px rgba(45,28,10,.34)}   /* keyboard: bring the focused photo forward */
 
 .table{
   position:relative;overflow:hidden;min-height:560px;
@@ -108,6 +108,18 @@ h1{font-family:var(--display);font-weight:700;font-size:34px;line-height:1.08;le
 .primary{background:var(--btn-bg);color:var(--btn-ink);border:0;border-radius:10px;padding:13px 22px;font-weight:700;font-size:17px;white-space:nowrap}
 .primary:disabled{background:var(--btn-off-bg);color:var(--btn-off-ink);cursor:not-allowed}
 .secondary{background:transparent;color:var(--ink);border:1px solid var(--line);border-radius:10px;padding:12px 20px;font-weight:600}
+/* Hover and press, matching the site: primary darkens to mid-green, secondary fills, links get the orange underline.
+   Photos lift with a deeper shadow but keep their place in the pile; only dropping one brings it to the front. */
+.primary,.secondary,.chip-btn,.tool,.linkbtn,.tray-slot,.slot-photo{transition:background-color .15s,border-color .15s,box-shadow .15s,color .15s}
+.primary:not(:disabled):active,.secondary:active,.chip-btn:active{transform:translateY(1px)}
+@media (hover:hover){
+  .photo:hover{box-shadow:0 2px 2px rgba(30,20,10,.25),0 16px 30px rgba(45,28,10,.34)}
+  .primary:not(:disabled):hover{background:var(--btn-hover)}
+  .secondary:hover{background:var(--slot-empty);border-color:var(--ink)}
+  .chip-btn:hover{background:#FFFFFF;text-decoration:underline;text-decoration-color:#EE7331;text-decoration-thickness:2px;text-underline-offset:.3em}
+  .linkbtn:hover{text-decoration-color:#EE7331;text-decoration-thickness:2px}
+  .tray-slot.filled:hover,.slot-drop .slot-photo:hover{box-shadow:0 2px 4px rgba(0,0,0,.25),0 8px 18px rgba(45,28,10,.28)}
+}
 
 .drag-clone{position:fixed;z-index:100000;pointer-events:none;margin:0;cursor:grabbing;box-shadow:0 4px 4px rgba(30,20,10,.2),0 22px 40px rgba(45,28,10,.4)}
 body.is-dragging,body.is-dragging *{cursor:grabbing !important}
@@ -300,7 +312,7 @@ dialog::backdrop{background:rgba(20,29,24,.7)}
 
 <div class="toast" id="toast" role="status"></div>
 
-<script src="../../assets/value-photos/photos.js?v=84952cdf"></script>
+<script src="../../assets/value-photos/photos.js?v=2d102a98"></script>
 <script>
 (function(){
 "use strict";
